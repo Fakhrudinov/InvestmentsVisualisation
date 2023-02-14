@@ -1,7 +1,15 @@
+using DataAbstraction.Interfaces;
+using DataAbstraction.Models;
+using DataBaseRepository;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<IDataBaseRepository, MySqlRepository>();
+
+builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 
 var app = builder.Build();
 
