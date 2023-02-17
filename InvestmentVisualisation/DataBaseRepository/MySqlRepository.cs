@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
+
 namespace DataBaseRepository
 {
     public class MySqlRepository : IDataBaseRepository
@@ -30,6 +31,47 @@ namespace DataBaseRepository
             if(StaticData.SecBoards.Count == 0)
             {
                 FillStaticSecBoards();
+            }
+
+            if (StaticData.SecCodes.Count == 0)
+            {
+                FillStaticSecCodes();
+            }
+        }
+
+        private void FillStaticSecCodes()
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetActualSecCodeAndSecBoard.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} Error! File with SQL script not found at " + filePath);
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} FillStaticSecCodes execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+                        con.Open();
+                        using (MySqlDataReader sdr = cmd.ExecuteReader())
+                        {
+                            while (sdr.Read())
+                            {
+                                StaticSecCode newSecBoard = new StaticSecCode();
+
+                                newSecBoard.SecBoard = sdr.GetInt32("secboard");
+                                newSecBoard.SecCode = sdr.GetString("seccode");
+
+                                StaticData.SecCodes.Add(newSecBoard);
+                            }
+                        }
+                        con.Close();
+                    }
+                }
             }
         }
 
@@ -104,69 +146,6 @@ namespace DataBaseRepository
                 }
             }
         }
-
-        //public async Task<List<IncomingModel>> GetLastRecordsFromIncoming()
-        //{
-        //    List<IncomingModel> result = new List<IncomingModel>();
-
-        //    string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetLastRecordsFromIncoming.sql");
-        //    if (!File.Exists(filePath))
-        //    {
-        //        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} Error! File with SQL script not found at " + filePath);
-        //        return result;
-        //    }
-        //    else
-        //    {
-        //        string query = File.ReadAllText(filePath);
-        //        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} GetLastRecordsFromIncoming execute query \r\n{query}");
-
-        //        using (MySqlConnection con = new MySqlConnection(_connectionString))
-        //        {
-        //            using (MySqlCommand cmd = new MySqlCommand(query))
-        //            {
-        //                cmd.Connection = con;
-
-        //                try
-        //                {
-        //                    await con.OpenAsync();
-
-        //                    using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
-        //                    {
-        //                        while (await sdr.ReadAsync())
-        //                        {
-        //                            IncomingModel newIncoming = new IncomingModel();
-
-        //                            newIncoming.Id = sdr.GetInt32("id");
-        //                            newIncoming.Date = sdr.GetDateTime("date");
-        //                            newIncoming.SecCode = sdr.GetString("seccode");
-        //                            newIncoming.SecBoard = StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == sdr.GetInt32("secboard"))];
-        //                            newIncoming.Category = StaticData.Categories[StaticData.Categories.FindIndex(sb => sb.Id == sdr.GetInt32("category"))];
-        //                            newIncoming.Value = sdr.GetDecimal("value");
-
-        //                            int checkForNull = sdr.GetOrdinal("comission");
-        //                            if (!sdr.IsDBNull(checkForNull))
-        //                            {
-        //                                newIncoming.Comission = sdr.GetDecimal("comission");
-        //                            }
-
-        //                            result.Add(newIncoming);
-        //                        }
-        //                    }
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} GetLastRecordsFromIncoming Exception!\r\n{ex.Message}");
-        //                }
-        //                finally
-        //                {
-        //                    await con.CloseAsync();
-        //                }                        
-        //            }
-        //        }
-
-        //        return result;
-        //    }
-        //}
 
         public async Task<int> GetIncomingCount()
         {
@@ -253,8 +232,10 @@ namespace DataBaseRepository
                                     newIncoming.Id = sdr.GetInt32("id");
                                     newIncoming.Date = sdr.GetDateTime("date");
                                     newIncoming.SecCode = sdr.GetString("seccode");
-                                    newIncoming.SecBoard = StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == sdr.GetInt32("secboard"))];
-                                    newIncoming.Category = StaticData.Categories[StaticData.Categories.FindIndex(sb => sb.Id == sdr.GetInt32("category"))];
+                                    //newIncoming.SecBoard = StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == sdr.GetInt32("secboard"))];
+                                    //newIncoming.Category = StaticData.Categories[StaticData.Categories.FindIndex(sb => sb.Id == sdr.GetInt32("category"))];
+                                    newIncoming.SecBoard = sdr.GetInt32("secboard");
+                                    newIncoming.Category= sdr.GetInt32("category");
                                     newIncoming.Value = sdr.GetDecimal("value");
 
                                     int checkForNull = sdr.GetOrdinal("comission");

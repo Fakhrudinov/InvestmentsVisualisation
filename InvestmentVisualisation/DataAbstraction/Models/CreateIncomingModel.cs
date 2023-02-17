@@ -2,20 +2,10 @@
 
 namespace DataAbstraction.Models
 {
-    public class IncomingModel
+    public class CreateIncomingModel
     {
-
-        public int Id { get; set; }
-
-        [Display (Name = "Дата")]
-        public DateTime Date { get; set; }
-
-        [Display(Name = "Тикер")]
         public string SecCode { get; set; }
-
-        [Display(Name = "SecBoard")]
-        public int SecBoard { get; set; }
-
+        public DateTime Date { get; set; }
         [Display(Name = "Category")]
         public int Category { get; set; }
 
@@ -23,6 +13,7 @@ namespace DataAbstraction.Models
         public decimal Value { get; set; }
 
         [Display(Name = "Комиссия")]
-        public decimal ? Comission { get; set; }
+        public decimal? Comission { get; set; }
     }
 }
+

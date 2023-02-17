@@ -1,0 +1,100 @@
+﻿@using DataAbstraction.Models
+@model DataAbstraction.Models.CreateIncomingModel
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>CreateIncoming</title>
+</head>
+<body>
+
+<h4>IncomingModel</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreateIncoming">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Date" class="control-label"></label>
+                    <!--<input asp-for="Date" class="form-control" />-->
+                    @Html.TextBoxFor(model => model.Date, "{0:yyyy-MM-ddTHH:mm:ss}", new
+                        {
+                        @class = "form-control",
+                        required = "required",
+                        @type = "datetime-local"
+                        })
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+
+            <!--
+            <div class="form-group">
+                <label asp-for="SecCode" class="control-label"></label>
+                <input asp-for="SecCode" class="form-control" />
+                <span asp-validation-for="SecCode" class="text-danger"></span>
+            </div>
+            -->
+
+
+
+
+            <!--
+            <div class="form-group">
+                <label asp-for="SecBoard" class="control-label"></label>
+                <input asp-for="SecBoard" class="form-control" />
+                <span asp-validation-for="SecBoard" class="text-danger"></span>
+            </div>
+               
+
+                <div class="form-group" class="text-danger">
+                <label asp-for="SecBoard" class="control-label"></label>
+                    @Html.DropDownList("SecBoard", new SelectList(StaticData.SecBoards, "Id", "Name"))
+            </div>
+            -->
+
+            <div class="form-group">
+                <label asp-for="SecCode" class="control-label"></label>
+                @Html.DropDownListFor(model => model.SecCode, new SelectList(StaticData.SecCodes, "SecCode", "SecCode"), 
+                    new {
+                            @class = "form-control"
+                    })
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Category" class="control-label"></label>
+                @Html.DropDownListFor(model => model.Category, new SelectList(StaticData.Categories, "Id", "Name"),
+                    new {
+                        @class = "form-control"
+                    })
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="Value" class="control-label"></label>
+                <input asp-for="Value" class="form-control" />
+                <span asp-validation-for="Value" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Comission" class="control-label"></label>
+                <input asp-for="Comission" class="form-control" />
+                <span asp-validation-for="Comission" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+        <a asp-action="Incoming">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+</body>
+</html>
