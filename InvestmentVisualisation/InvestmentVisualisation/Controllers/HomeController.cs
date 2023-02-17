@@ -1,6 +1,8 @@
 ﻿using DataAbstraction.Interfaces;
+using DataAbstraction.Models;
 using InvestmentVisualisation.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
 namespace InvestmentVisualisation.Controllers
@@ -9,17 +11,31 @@ namespace InvestmentVisualisation.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private IDataBaseRepository _repository;
+        private int _itemsAtPage;
 
-        public HomeController(ILogger<HomeController> logger, IDataBaseRepository repository)
+        public HomeController(ILogger<HomeController> logger, IDataBaseRepository repository, IOptions<PaginationSettings> paginationSettings)
         {
             _logger = logger;
             _repository = repository;
+            _itemsAtPage = paginationSettings.Value.PageItemsCount;
         }
 
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> Incoming(int page = 1)
         {
-            await _repository.GetTest();
-            return View();
+            //https://localhost:7226/Home/Index?page=3
+
+            int count = await _repository.GetIncomingCount();
+
+            IncomingWithPaginations incomingWithPaginations = new IncomingWithPaginations();
+
+            incomingWithPaginations.PageViewModel = new PaginationPageViewModel(
+                count, 
+                page,
+                _itemsAtPage);
+            
+            incomingWithPaginations.Incomings = await _repository.GetPageFromIncoming(_itemsAtPage, page - 1);
+            
+            return View(incomingWithPaginations);
         }
 
         public IActionResult Privacy()

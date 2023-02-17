@@ -1,0 +1,102 @@
+﻿@using DataAbstraction.Models
+@model IncomingWithPaginations
+
+@{
+    ViewData["Title"] = "Incoming";
+}
+
+<h1>Incoming</h1>
+
+<p>
+    <a asp-action="Create">Добавить</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Date)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).SecCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).SecBoard)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Category)
+            </th>
+            <th style="text-align:right;">
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Value)
+            </th>
+            <th style="text-align:right;">
+                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Comission)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Incomings) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
+            </td>
+            <td>
+                @if (item.SecCode.Equals("0"))
+                {
+                    <span>Деньги</span>
+                }
+                else
+                {
+                    @Html.DisplayFor(modelItem => item.SecCode)
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SecBoard.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.Name)
+            </td>
+            <td style="text-align:right;">
+                @Html.DisplayFor(modelItem => item.Value)
+            </td>
+                <td style="text-align:right;">
+                @Html.DisplayFor(modelItem => item.Comission)
+            </td>
+                <td style="text-align:right;">
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div style="border:1px solid black; display:inline; padding:5px">
+    @if (Model.PageViewModel.HasPreviousPage)
+{
+        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)"> Назад </a>
+}
+else
+{
+    <span>Назад </span>
+}
+</div>
+<span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+
+<div style="border:1px solid black; display:inline; padding:5px">
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)"> Вперед </a>
+    }
+    else
+    {
+        <span> Вперед </span>
+    }
+</div>

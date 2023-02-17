@@ -2,7 +2,6 @@ using DataAbstraction.Interfaces;
 using DataAbstraction.Models;
 using DataBaseRepository;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,6 +9,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IDataBaseRepository, MySqlRepository>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
+builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
 
 var app = builder.Build();
 
@@ -30,6 +30,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Incoming}/{id?}");
 
 app.Run();
