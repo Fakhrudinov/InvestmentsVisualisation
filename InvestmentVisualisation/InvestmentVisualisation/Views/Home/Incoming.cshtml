@@ -5,10 +5,10 @@
     ViewData["Title"] = "Incoming";
 }
 
-<h1>Incoming</h1>
+<h2>Зачисление и списание денег</h2>
 
 <p>
-    <a asp-area="" asp-controller="Home" asp-action="CreateIncoming" class="btn btn-primary">Добавить</a>
+    <a asp-area="" asp-controller="Home" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
 </p>
 <table class="table">
     <thead>
@@ -69,34 +69,37 @@
                 @Html.DisplayFor(modelItem => item.Comission)
             </td>
                 <td style="text-align:right;">
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
+                    @Html.ActionLink("Edit", "Edit", new 
+                        { 
+                            id = item.Id,
+                            date = item.Date,
+                            seccode = item.SecCode,
+                            secboard = item.SecBoard,
+                            category = item.Category,
+                            value = item.Value,
+                            comission = item.Comission
+                        }, new { @class = "btn btn-secondary"  })
+                    &nbsp;&nbsp;&nbsp;
+                    <!--@Html.ActionLink("Details", "Details", new { id = item.Id }) |-->
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-secondary"  })
+                </td>
         </tr>
 }
     </tbody>
 </table>
 
-<div style="border:1px solid black; display:inline; padding:5px">
+
     @if (Model.PageViewModel.HasPreviousPage)
 {
-        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)"> Вперед</a>
+    <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
 }
-else
-{
-        <span> Вперед</span>
-}
-</div>
+
+
 <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
 
-<div style="border:1px solid black; display:inline; padding:5px">
+
     @if (Model.PageViewModel.HasNextPage)
     {
-        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)"> Назад </a>
+        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
     }
-    else
-    {
-        <span> Назад </span>
-    }
-</div>
+

@@ -1,3 +1,3 @@
-﻿SELECT * FROM incoming 
-	ORDER BY id desc
+﻿SELECT *, UNIX_TIMESTAMP(date) AS DATETOSORT FROM incoming 
+	ORDER BY DATETOSORT desc
 	LIMIT @lines_count OFFSET @page_number   ;
