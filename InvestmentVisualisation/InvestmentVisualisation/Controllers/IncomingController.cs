@@ -157,7 +157,7 @@ namespace InvestmentVisualisation.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(IncomingModel deleteIncoming)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpDelete Delete called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost Delete called");
 
             string result = await _repository.DeleteSingleIncoming(deleteIncoming.Id);
             if (!result.Equals("1"))

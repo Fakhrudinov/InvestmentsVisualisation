@@ -351,40 +351,9 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
+                query = query.Replace("@id", id.ToString());
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
-                {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
-                    {
-                        cmd.Connection = con;
-                        cmd.Parameters.AddWithValue("@id", id);
-
-                        try
-                        {
-                            await con.OpenAsync();
-
-                            //Return Int32 Number of rows affected
-                            int insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming execution " +
-                                $"affected {insertResult} lines");
-
-                            return insertResult.ToString();
-
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming Exception!" +
-                                $"\r\n{ex.Message}");
-                            return ex.Message;
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
-                    }
-                }
+                return await _commonRepo.DeleteSingleRecordByQuery(query);
             }
         }
     }

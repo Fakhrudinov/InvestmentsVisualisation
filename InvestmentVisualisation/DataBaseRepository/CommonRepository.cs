@@ -62,12 +62,12 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromCategory.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticCategories execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticCategories execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -93,7 +93,7 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticCategories Exception!\r\n" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticCategories Exception!\r\n" +
                                 $"{ex.Message}");
                         }
                         finally
@@ -110,12 +110,12 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromSecboard.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecBoards execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecBoards execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -140,7 +140,7 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecBoards Exception!\r\n" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecBoards Exception!\r\n" +
                                 $"{ex.Message}");
                         }
                         finally
@@ -157,12 +157,12 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetActualSecCodeAndSecBoard.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecCodes execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecCodes execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -188,13 +188,50 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecCodes Exception!\r\n" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecCodes Exception!\r\n" +
                                 $"{ex.Message}");
                         }
                         finally
                         {
                             con.Close();
                         }
+                    }
+                }
+            }
+        }
+
+        public async Task<string> DeleteSingleRecordByQuery(string query)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository DeleteSingleRecordByQuery " +
+                $"start execute query \r\n{query}");
+
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
+                {
+                    cmd.Connection = con;
+
+                    try
+                    {
+                        await con.OpenAsync();
+
+                        //Return Int32 Number of rows affected
+                        int insertResult = await cmd.ExecuteNonQueryAsync();
+                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository DeleteSingleRecordByQuery execution " +
+                            $"affected {insertResult} lines");
+
+                        return insertResult.ToString();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository DeleteSingleRecordByQuery Exception!" +
+                            $"\r\n{ex.Message}");
+                        return ex.Message;
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
                     }
                 }
             }

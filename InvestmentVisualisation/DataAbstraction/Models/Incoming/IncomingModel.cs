@@ -1,28 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DataAbstraction.Models.BaseModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace DataAbstraction.Models.Incoming
 {
-    public class IncomingModel
+    public class IncomingModel : BaseModel
     {
-
         public int Id { get; set; }
-
-        [Display(Name = "Дата")]
-        public DateTime Date { get; set; }
-
-        [Display(Name = "Тикер")]
-        public string SecCode { get; set; }
-
-        [Display(Name = "SecBoard")]
-        public int SecBoard { get; set; }
 
         [Display(Name = "Category")]
         public int Category { get; set; }
 
-        [Display(Name = "Сумма"), RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$", ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "The value must be greater than 0")]
+        [Display(Name = "Сумма")]
+        [RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$", ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
         public string Value { get; set; }
 
-        [Display(Name = "Комиссия"), RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$", ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
-        public string? Comission { get; set; }
     }
 }

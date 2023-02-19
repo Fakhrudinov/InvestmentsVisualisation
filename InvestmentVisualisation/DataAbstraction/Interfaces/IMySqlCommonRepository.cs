@@ -2,6 +2,7 @@
 {
     public interface IMySqlCommonRepository
     {
+        Task<string> DeleteSingleRecordByQuery(string query);
         void FillStaticCategories();
         void FillStaticSecBoards();
         void FillStaticSecCodes();

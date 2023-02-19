@@ -20,7 +20,7 @@ namespace InvestmentVisualisation.Controllers
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
         }
 
-        // GET: DealsController
+
         public async Task<IActionResult> Deals(int page = 1)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Deals called, page={page}");
@@ -40,68 +40,119 @@ namespace InvestmentVisualisation.Controllers
             return View(dealsWithPaginations);
         }
 
-
-        // GET: DealsController/Create
         public ActionResult Create()
         {
-            return View();
-        }
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Create called");
 
-        // POST: DealsController/Create
+            CreateDealsModel model = new CreateDealsModel();
+            model.Date = DateTime.Today.AddDays(-1);// обычно вношу за вчера
+
+            return View(model);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Create(CreateDealsModel model)
         {
-            try
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST Create called");
+
+            model.SecBoard = StaticData.SecCodes[StaticData.SecCodes.FindIndex(x => x.SecCode == model.SecCode)].SecBoard;
+
+            if (model.SecCode.Equals("0"))
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Create error " +
+                    $"- Сделка по secCode Деньги не возможна!");
+                ViewData["Message"] = $"Сделка по тикеру Деньги не возможна!";
                 return View();
             }
+            if (model.SecBoard == 1 && model.NKD is not null)
+            {
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Create error " +
+                    $"- NKD на акции недопустим");
+                ViewData["Message"] = $"NKD на акции недопустим";
+                return View();
+            }
+
+            model.AvPrice = model.AvPrice.Replace(',', '.');
+            if (model.Comission is not null)
+            {
+                model.Comission = model.Comission.Replace(',', '.');
+            }
+            if (model.NKD is not null)
+            {
+                model.NKD = model.NKD.Replace(',', '.');
+            }
+
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST Create validation complete, " +
+                $"try create at repository");
+
+            string result = await _repository.CreateNewDeal(model);
+            if (!result.Equals("1"))
+            {
+                ViewData["Message"] = $"Добавление не удалось. \r\n{result}";
+                return View();
+            }
+
+            return RedirectToAction("Deals");
         }
 
-        // GET: DealsController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            return View();
-        }
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Edit id={id} called");
 
-        // POST: DealsController/Edit/5
+            DealModel editedItem = await _repository.GetSingleDealById(id);
+
+            return View(editedItem);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(DealModel model)
         {
-            try
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost Edit called");
+
+            model.AvPrice = model.AvPrice.Replace(',', '.');
+            if (model.Comission is not null)
             {
-                return RedirectToAction(nameof(Index));
+                model.Comission = model.Comission.Replace(',', '.');
             }
-            catch
+            if (model.NKD is not null)
             {
-                return View();
+                model.NKD = model.NKD.Replace(',', '.');
             }
+
+            string result = await _repository.EditSingleDeal(model);
+            if (!result.Equals("1"))
+            {
+                ViewData["Message"] = $"Редактирование не удалось.\r\n{result}";
+                return View(model);
+            }
+
+            return RedirectToAction("Deals");
         }
 
-        // GET: DealsController/Delete/5
-        public ActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            return View();
-        }
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Delete id={id} called");
 
-        // POST: DealsController/Delete/5
+            DealModel deleteItem = await _repository.GetSingleDealById(id);
+
+            ViewData["SecBoard"] = @StaticData.SecBoards[StaticData.SecBoards.FindIndex(secb => secb.Id == deleteItem.SecBoard)].Name;
+
+            return View(deleteItem);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(DealModel model)
         {
-            try
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost Delete called");
+
+            string result = await _repository.DeleteSingleDeal(model.Id);
+            if (!result.Equals("1"))
             {
-                return RedirectToAction(nameof(Index));
+                ViewData["Message"] = $"Удаление не удалось.\r\n{result}";
+                return View(model);
             }
-            catch
-            {
-                return View();
-            }
+
+            return RedirectToAction("Deals");
         }
     }
 }

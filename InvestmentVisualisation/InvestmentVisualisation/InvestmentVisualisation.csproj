@@ -19,6 +19,24 @@
     <None Update="SqlQueries\CreateNewIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\Deals\CreateNewDeal.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\Deals\DeleteSingleDeal.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\Deals\EditSingleDeal.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\Deals\GetDealsCount.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\Deals\GetPageFromDeals.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\Deals\GetSingleDealById.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\DeleteSingleIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -44,7 +62,6 @@
 
   <ItemGroup>
     <Folder Include="SqlQueries\Deals\" />
-    <Folder Include="Views\Deals\" />
   </ItemGroup>
 
 </Project>
