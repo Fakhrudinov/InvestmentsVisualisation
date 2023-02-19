@@ -89,6 +89,12 @@ namespace InvestmentVisualisation.Controllers
 
             newIncoming.SecBoard = StaticData.SecCodes[StaticData.SecCodes.FindIndex(x => x.SecCode == newIncoming.SecCode)].SecBoard;
 
+            newIncoming.Value = newIncoming.Value.Replace(',', '.');
+            if (newIncoming.Comission is not null)
+            {
+                newIncoming.Comission = newIncoming.Comission.Replace(',', '.');
+            }
+
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} HomeController POST CreateIncoming validation complete, " +
                 $"try create at repository");
 
