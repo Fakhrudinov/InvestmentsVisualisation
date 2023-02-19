@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="SqlQueries\CreateNewIncoming.sql">
+    <None Update="SqlQueries\Incoming\CreateNewIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\Deals\CreateNewDeal.sql">
@@ -37,7 +37,7 @@
     <None Update="SqlQueries\Deals\GetSingleDealById.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\DeleteSingleIncoming.sql">
+    <None Update="SqlQueries\Incoming\DeleteSingleIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\GetActualSecCodeAndSecBoard.sql">
@@ -49,13 +49,13 @@
     <None Update="SqlQueries\GetAllFromSecboard.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\GetIncomingCount.sql">
+    <None Update="SqlQueries\Incoming\GetIncomingCount.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\GetPageFromIncoming.sql">
+    <None Update="SqlQueries\Incoming\GetPageFromIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\GetSingleIncomingById.sql">
+    <None Update="SqlQueries\Incoming\GetSingleIncomingById.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

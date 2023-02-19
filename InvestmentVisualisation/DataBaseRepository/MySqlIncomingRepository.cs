@@ -1,6 +1,5 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models;
-using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.Incoming;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
@@ -49,7 +48,7 @@ namespace DataBaseRepository
 
         public async Task<int> GetIncomingCount()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetIncomingCount.sql");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetIncomingCount.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
@@ -69,7 +68,7 @@ namespace DataBaseRepository
 
             List<IncomingModel> result = new List<IncomingModel>();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetPageFromIncoming.sql");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetPageFromIncoming.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
@@ -140,7 +139,7 @@ namespace DataBaseRepository
                 $"{newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} Category={newIncoming.Category} " +
                 $"Value={newIncoming.Value} Comission={newIncoming.Comission}");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "CreateNewIncoming.sql");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "CreateNewIncoming.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
@@ -212,7 +211,7 @@ namespace DataBaseRepository
 
             IncomingModel result = new IncomingModel();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetSingleIncomingById.sql");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetSingleIncomingById.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
@@ -277,7 +276,7 @@ namespace DataBaseRepository
                 $"Id={newIncoming.Id} {newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} " +
                 $"Category={newIncoming.Category} Value={newIncoming.Value} Comission={newIncoming.Comission}");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "EditSingleIncoming.sql");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "EditSingleIncoming.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
@@ -342,7 +341,7 @@ namespace DataBaseRepository
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming id={id} start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "DeleteSingleIncoming.sql");
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "DeleteSingleIncoming.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
