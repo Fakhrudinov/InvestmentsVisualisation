@@ -102,11 +102,35 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Incoming");
         }
 
-
-        public IActionResult Privacy()
+        public async Task<IActionResult> Edit(int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} HomeController GET Privacy called");
-            return View();
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} HomeController GET Edit id={id} called");
+
+            IncomingModel editedItem = await _repository.GetSingleIncomingById(id);
+
+            return View(editedItem);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(IncomingModel newIncoming)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} HomeController HttpPost Edit called");
+
+            newIncoming.Value = newIncoming.Value.Replace(',', '.');
+            if (newIncoming.Comission is not null)
+            {
+                newIncoming.Comission = newIncoming.Comission.Replace(',', '.');
+            }
+
+            string result = await _repository.EditSingleIncoming(newIncoming);
+            if (!result.Equals("1"))
+            {
+                ViewData["Message"] = $"Редактирование не удалось.\r\n{result}";
+                return View(newIncoming);
+            }
+
+            return RedirectToAction("Incoming");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

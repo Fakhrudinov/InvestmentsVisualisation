@@ -20,9 +20,9 @@ namespace DataAbstraction.Models
         public int Category { get; set; }
 
         [Display(Name = "Сумма")]
-        public decimal Value { get; set; }
+        public string Value { get; set; }
 
         [Display(Name = "Комиссия")]
-        public decimal ? Comission { get; set; }
+        public string ? Comission { get; set; }
     }
 }

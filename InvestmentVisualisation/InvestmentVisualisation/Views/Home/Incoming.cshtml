@@ -71,17 +71,17 @@
                 <td style="text-align:right;">
                     @Html.ActionLink("Edit", "Edit", new 
                         { 
-                            id = item.Id,
+                            id = item.Id/*,
                             date = item.Date,
                             seccode = item.SecCode,
                             secboard = item.SecBoard,
                             category = item.Category,
                             value = item.Value,
-                            comission = item.Comission
-                        }, new { @class = "btn btn-secondary"  })
+                            comission = item.Comission*/
+                        }, new { @class = "btn btn-primary btn-sm"  })
                     &nbsp;&nbsp;&nbsp;
                     <!--@Html.ActionLink("Details", "Details", new { id = item.Id }) |-->
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-secondary"  })
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
                 </td>
         </tr>
 }
@@ -89,17 +89,17 @@
 </table>
 
 
-    @if (Model.PageViewModel.HasPreviousPage)
+
+
+@if (Model.PageViewModel.HasNextPage)
+{
+    <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
+}
+<span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+@if (Model.PageViewModel.HasPreviousPage)
 {
     <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
 }
 
 
-<span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
-
-
-    @if (Model.PageViewModel.HasNextPage)
-    {
-        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
-    }
 

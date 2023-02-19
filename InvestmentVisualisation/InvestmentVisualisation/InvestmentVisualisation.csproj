@@ -34,6 +34,9 @@
     <None Update="SqlQueries\GetPageFromIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\GetSingleIncomingById.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

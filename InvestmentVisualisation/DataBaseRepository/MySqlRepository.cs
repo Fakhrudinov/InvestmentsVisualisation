@@ -3,6 +3,7 @@ using DataAbstraction.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Transactions;
 
 
 namespace DataBaseRepository
@@ -273,12 +274,12 @@ namespace DataBaseRepository
                                     //newIncoming.Category = StaticData.Categories[StaticData.Categories.FindIndex(sb => sb.Id == sdr.GetInt32("category"))];
                                     newIncoming.SecBoard = sdr.GetInt32("secboard");
                                     newIncoming.Category= sdr.GetInt32("category");
-                                    newIncoming.Value = sdr.GetDecimal("value");
+                                    newIncoming.Value = sdr.GetDecimal("value").ToString();
 
                                     int checkForNull = sdr.GetOrdinal("comission");
                                     if (!sdr.IsDBNull(checkForNull))
                                     {
-                                        newIncoming.Comission = sdr.GetDecimal("comission");
+                                        newIncoming.Comission = sdr.GetDecimal("comission").ToString();
                                     }
 
                                     result.Add(newIncoming);
@@ -364,15 +365,157 @@ namespace DataBaseRepository
                             await con.CloseAsync();
                         }
                     }
-                }
-
-                
+                }                
             }
 
             //INSERT INTO `incoming` (`date`, `seccode`, `secboard`, `category`, `value`)
             //  VALUES ('2023-02-16', 'TRMK',         '1', '1', '4482.8');
             //INSERT INTO `incoming` (`date`, `seccode`, `secboard`, `category`, `value`, `comission`)
             //  VALUES ('2023-02-16', 'RU000A101FG8', '2', '1', '432.4', '49.32');
+        }
+
+        public async Task<IncomingModel> GetSingleIncomingById(int id)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetSingleIncomingById={id} start");
+
+            IncomingModel result = new IncomingModel();
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetSingleIncomingById.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                
+                return result;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetSingleIncomingById={id} execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        cmd.Parameters.AddWithValue("@id", id);
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            {
+                                while (await sdr.ReadAsync())
+                                {
+                                    result.Id = sdr.GetInt32("id");
+                                    result.Date = sdr.GetDateTime("date");
+                                    result.SecCode = sdr.GetString("seccode");
+                                    result.SecBoard = sdr.GetInt32("secboard");
+                                    result.Category= sdr.GetInt32("category");
+                                    result.Value = sdr.GetDecimal("value").ToString();
+
+                                    int checkForNull = sdr.GetOrdinal("comission");
+                                    if (!sdr.IsDBNull(checkForNull))
+                                    {
+                                        result.Comission = sdr.GetDecimal("comission").ToString();
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetSingleIncomingById={id} Exception!" +
+                                $"\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
+
+        public async Task<string> EditSingleIncoming(IncomingModel newIncoming)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming start, newModel is\r\n" +
+                $"Id={newIncoming.Id} {newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} " +
+                $"Category={newIncoming.Category} Value={newIncoming.Value} Comission={newIncoming.Comission}");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "EditSingleIncoming.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                return "MySqlRepository Error! File with SQL script not found at " + filePath;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                //if (newIncoming.Comission is null)
+                //{
+                //    query = query.Replace("`value` = @value, ", "`value` = @value ");
+                //    query = query.Replace("`comission` = @comission", "");
+                //}
+
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;                       
+
+                        //@id @date_time, @seccode, @secboard, @category, @value, @comission
+                        cmd.Parameters.AddWithValue("@id", newIncoming.Id);
+                        cmd.Parameters.AddWithValue("@date_time", newIncoming.Date);
+                        cmd.Parameters.AddWithValue("@seccode", newIncoming.SecCode);
+                        cmd.Parameters.AddWithValue("@secboard", newIncoming.SecBoard);
+                        cmd.Parameters.AddWithValue("@category", newIncoming.Category);
+                        cmd.Parameters.AddWithValue("@value", newIncoming.Value);
+                        if (newIncoming.Comission is not null)
+                        {
+                            cmd.Parameters.AddWithValue("@comission", newIncoming.Comission);
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue("@comission", null);
+                        }
+
+                        try
+                        {
+                            await con.OpenAsync();
+                            //using var transaction = con.BeginTransaction();
+                            //cmd.Transaction = transaction;
+
+                            //Return Int32 Number of rows affected
+                            int insertResult = await cmd.ExecuteNonQueryAsync();
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming execution " +
+                                $"affected {insertResult} lines");
+
+                            //if (insertResult > 0)
+                            //{
+                            //    //transaction.Commit();
+                            //}
+
+                            return insertResult.ToString();
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming Exception!" +
+                                $"\r\n{ex.Message}");
+                            return ex.Message;
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+            }
         }
     }
 }
