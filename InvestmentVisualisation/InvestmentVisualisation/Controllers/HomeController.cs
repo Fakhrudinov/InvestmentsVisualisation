@@ -4,6 +4,7 @@ using InvestmentVisualisation.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -138,6 +139,35 @@ namespace InvestmentVisualisation.Controllers
 
             return RedirectToAction("Incoming");
         }
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} HomeController GET Delete id={id} called");
+
+            IncomingModel deleteItem = await _repository.GetSingleIncomingById(id);
+
+            ViewData["SecBoard"] = @StaticData.SecBoards[StaticData.SecBoards.FindIndex(secb => secb.Id == deleteItem.SecBoard)].Name;
+            ViewData["Category"] = @StaticData.Categories[StaticData.Categories.FindIndex(secb => secb.Id == deleteItem.Category)].Name;
+
+            return View(deleteItem);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(IncomingModel deleteIncoming)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} HomeController HttpDelete Delete called");
+
+            string result = await _repository.DeleteSingleIncoming(deleteIncoming.Id);
+            if (!result.Equals("1"))
+            {
+                ViewData["Message"] = $"Удаление не удалось.\r\n{result}";
+                return View(deleteIncoming);
+            }
+
+            return RedirectToAction("Incoming");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

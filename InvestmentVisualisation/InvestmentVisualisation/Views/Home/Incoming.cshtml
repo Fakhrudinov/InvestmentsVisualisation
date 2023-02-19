@@ -69,27 +69,14 @@
                 @Html.DisplayFor(modelItem => item.Comission)
             </td>
                 <td style="text-align:right;">
-                    @Html.ActionLink("Edit", "Edit", new 
-                        { 
-                            id = item.Id/*,
-                            date = item.Date,
-                            seccode = item.SecCode,
-                            secboard = item.SecBoard,
-                            category = item.Category,
-                            value = item.Value,
-                            comission = item.Comission*/
-                        }, new { @class = "btn btn-primary btn-sm"  })
-                    &nbsp;&nbsp;&nbsp;
-                    <!--@Html.ActionLink("Details", "Details", new { id = item.Id }) |-->
-                @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  })
+                        &nbsp;&nbsp;&nbsp;
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
                 </td>
         </tr>
 }
     </tbody>
 </table>
-
-
-
 
 @if (Model.PageViewModel.HasNextPage)
 {

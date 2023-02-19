@@ -3,8 +3,6 @@ using DataAbstraction.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
-using System.Transactions;
-
 
 namespace DataBaseRepository
 {
@@ -454,11 +452,6 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
-                //if (newIncoming.Comission is null)
-                //{
-                //    query = query.Replace("`value` = @value, ", "`value` = @value ");
-                //    query = query.Replace("`comission` = @comission", "");
-                //}
 
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming execute query \r\n{query}");
 
@@ -487,18 +480,11 @@ namespace DataBaseRepository
                         try
                         {
                             await con.OpenAsync();
-                            //using var transaction = con.BeginTransaction();
-                            //cmd.Transaction = transaction;
 
                             //Return Int32 Number of rows affected
                             int insertResult = await cmd.ExecuteNonQueryAsync();
                             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming execution " +
                                 $"affected {insertResult} lines");
-
-                            //if (insertResult > 0)
-                            //{
-                            //    //transaction.Commit();
-                            //}
 
                             return insertResult.ToString();
 
@@ -506,6 +492,56 @@ namespace DataBaseRepository
                         catch (Exception ex)
                         {
                             _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming Exception!" +
+                                $"\r\n{ex.Message}");
+                            return ex.Message;
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<string> DeleteSingleIncoming(int id)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming id={id} start");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "DeleteSingleIncoming.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                return "MySqlRepository Error! File with SQL script not found at " + filePath;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+                        cmd.Parameters.AddWithValue("@id", id);
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            //Return Int32 Number of rows affected
+                            int insertResult = await cmd.ExecuteNonQueryAsync();
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming execution " +
+                                $"affected {insertResult} lines");
+
+                            return insertResult.ToString();
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming Exception!" +
                                 $"\r\n{ex.Message}");
                             return ex.Message;
                         }
