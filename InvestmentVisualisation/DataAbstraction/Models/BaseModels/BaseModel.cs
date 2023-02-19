@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DataAbstraction.Models
-{
-    public class IncomingModel
-    {
 
+namespace DataAbstraction.Models.BaseModels
+{
+    public class BaseModel
+    {
         public int Id { get; set; }
 
-        [Display (Name = "Дата")]
+        [Display(Name = "Дата")]
         public DateTime Date { get; set; }
 
         [Display(Name = "Тикер")]
@@ -16,13 +16,9 @@ namespace DataAbstraction.Models
         [Display(Name = "SecBoard")]
         public int SecBoard { get; set; }
 
-        [Display(Name = "Category")]
-        public int Category { get; set; }
 
-        [Display(Name = "Сумма"), RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$", ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
-        public string Value { get; set; }
 
         [Display(Name = "Комиссия"), RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$", ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
-        public string ? Comission { get; set; }
+        public string? Comission { get; set; }
     }
 }

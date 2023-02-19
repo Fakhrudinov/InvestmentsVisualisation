@@ -1,7 +1,9 @@
 ﻿@using DataAbstraction.Models
-@model DataAbstraction.Models.IncomingModel
+@using DataAbstraction.Models.Incoming
 
-<h4>Изменить значения</h4>
+@model CreateIncomingModel
+
+<h4>Добавить изменение по деньгам</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -11,50 +13,38 @@
             <strong style="color:red"> @ViewData["Message"] </strong>
         }
 
-        <form asp-action="Edit">
+        <form asp-action="CreateIncoming">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
-                <label asp-for="Id" class="control-label"></label>
-                <input asp-for="Id" class="form-control" disabled />
-                <span asp-validation-for="Id" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
                 <label asp-for="Date" class="control-label"></label>
-                @Html.TextBoxFor(model => model.Date, "{0:yyyy-MM-ddTHH:mm:ss}",
-                new
-                {
-                @class = "form-control",
-                required = "required",
-                @type = "datetime-local"
-                })
+                    <!--<input asp-for="Date" class="form-control" />-->
+                    @Html.TextBoxFor(model => model.Date, "{0:yyyy-MM-ddTHH:mm:ss}", 
+                        new
+                            {
+                                @class = "form-control",
+                                required = "required",
+                                @type = "datetime-local"
+                            })
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="SecCode" class="control-label"></label>
-                @Html.DropDownListFor(model => model.SecCode, new SelectList(StaticData.SecCodes, "SecCode", "SecCode"),
-                new {
-                @class = "form-control"
-                })
-            </div>
-
-            <div class="form-group">
-                <label asp-for="SecBoard" class="control-label"></label>
-                @Html.DropDownListFor(model => model.SecBoard, new SelectList(StaticData.SecBoards, "Id", "Name"),
-                new {
-                @class = "form-control"
-                })
+                @Html.DropDownListFor(model => model.SecCode, new SelectList(StaticData.SecCodes, "SecCode", "SecCode"), 
+                    new {
+                            @class = "form-control"
+                        })
             </div>
 
             <div class="form-group">
                 <label asp-for="Category" class="control-label"></label>
                 @Html.DropDownListFor(model => model.Category, new SelectList(StaticData.Categories, "Id", "Name"),
-                new {
-                @class = "form-control"
-                })
+                    new {
+                            @class = "form-control"
+                        })
             </div>
+
 
             <div class="form-group">
                 <label asp-for="Value" class="control-label"></label>
@@ -71,13 +61,12 @@
             <hr />
 
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-danger" />
+                <input type="submit" value="Create" class="btn btn-primary" />
                 <a asp-action="Incoming" class="btn btn-success">Назад к списку зачислений</a>
             </div>
         </form>
     </div>
 </div>
-
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

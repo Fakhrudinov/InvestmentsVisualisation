@@ -1,19 +1,27 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models;
+using DataAbstraction.Models.BaseModels;
+using DataAbstraction.Models.Incoming;
+using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
 namespace DataBaseRepository
 {
-    public class MySqlRepository : IDataBaseRepository
+    public class MySqlIncomingRepository : IMySqlIncomingRepository
     {
-        private ILogger<MySqlRepository> _logger;
+        private ILogger<MySqlIncomingRepository> _logger;
         private readonly string _connectionString;
+        private IMySqlCommonRepository _commonRepo;
 
-        public MySqlRepository(IOptions<DataBaseConnectionSettings> connection, ILogger<MySqlRepository> logger)
+        public MySqlIncomingRepository(
+            IOptions<DataBaseConnectionSettings> connection, 
+            ILogger<MySqlIncomingRepository> logger,
+            IMySqlCommonRepository commonRepo)
         {
             _logger = logger;
+            _commonRepo = commonRepo;
            
             _connectionString = $"" +
                 $"Server={connection.Value.Server};" +
@@ -24,162 +32,20 @@ namespace DataBaseRepository
 
             if (StaticData.Categories.Count == 0)
             {
-                FillStaticCategories();
+                _commonRepo.FillStaticCategories();
             }
 
             if(StaticData.SecBoards.Count == 0)
             {
-                FillStaticSecBoards();
+                _commonRepo.FillStaticSecBoards();
             }
 
             if (StaticData.SecCodes.Count == 0)
             {
-                FillStaticSecCodes();
+                _commonRepo.FillStaticSecCodes();
             }
         }
 
-        private void FillStaticSecCodes()
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetActualSecCodeAndSecBoard.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecCodes execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
-                {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
-                    {
-                        cmd.Connection = con;
-                        try
-                        {
-                            con.Open();
-
-                            using (MySqlDataReader sdr = cmd.ExecuteReader())
-                            {
-                                while (sdr.Read())
-                                {
-                                    StaticSecCode newSecBoard = new StaticSecCode();
-
-                                    newSecBoard.SecBoard = sdr.GetInt32("secboard");
-                                    newSecBoard.SecCode = sdr.GetString("seccode");
-
-                                    StaticData.SecCodes.Add(newSecBoard);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecCodes Exception!\r\n" +
-                                $"{ex.Message}");
-                        }
-                        finally
-                        {
-                            con.Close();
-                        }
-                    }
-                }
-            }
-        }
-
-        private void FillStaticSecBoards()
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromSecboard.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecBoards execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
-                {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
-                    {
-                        cmd.Connection = con;
-                        try
-                        {
-                            con.Open();
-                            using (MySqlDataReader sdr = cmd.ExecuteReader())
-                            {
-                                while (sdr.Read())
-                                {
-                                    SecBoardCategory newSecBoard = new SecBoardCategory();
-
-                                    newSecBoard.Id = sdr.GetInt32(0);
-                                    newSecBoard.Name = sdr.GetString(1);
-
-                                    StaticData.SecBoards.Add(newSecBoard);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticSecBoards Exception!\r\n" +
-                                $"{ex.Message}");
-                        }
-                        finally
-                        {
-                            con.Close();
-                        }
-                    }
-                }
-            }
-        }
-
-        private void FillStaticCategories()
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromCategory.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticCategories execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
-                {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
-                    {
-                        cmd.Connection = con;
-
-                        try
-                        {
-                            con.Open();
-                            using (MySqlDataReader sdr = cmd.ExecuteReader())
-                            {
-                                while (sdr.Read())
-                                {
-                                    IncomingMoneyCategory newCategory = new IncomingMoneyCategory();
-
-                                    newCategory.Id = sdr.GetInt32(0);
-                                    newCategory.Name = sdr.GetString(1);
-
-                                    StaticData.Categories.Add(newCategory);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository FillStaticCategories Exception!\r\n" +
-                                $"{ex.Message}");
-                        }
-                        finally
-                        {
-                            con.Close();
-                        }
-                    }
-                }
-            }
-        }
 
         public async Task<int> GetIncomingCount()
         {
@@ -192,40 +58,8 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
-                return await GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(query);
             }
-        }
-
-        private async Task<int> GetTableCountBySqlQuery(string query)
-        {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetTableCountBySqlQuery start with \r\n{query}");
-
-            int result = 0;
-
-            using (MySqlConnection con = new MySqlConnection(_connectionString))
-            {
-                using (MySqlCommand cmd = new MySqlCommand(query))
-                {
-                    cmd.Connection = con;
-
-                    try
-                    {
-                        await con.OpenAsync();
-                        result = (int)(long)await cmd.ExecuteScalarAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetTableCountBySqlQuery Exception!\r\n" +
-                            $"{ex.Message}");
-                    }
-                    finally
-                    {
-                        await con.CloseAsync();
-                    }
-                }
-            }
-
-            return result;
         }
 
         public async Task<List<IncomingModel>> GetPageFromIncoming(int itemsAtPage, int pageNumber)

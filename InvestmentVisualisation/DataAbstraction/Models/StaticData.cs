@@ -1,4 +1,6 @@
-﻿namespace DataAbstraction.Models
+﻿using DataAbstraction.Models.BaseModels;
+
+namespace DataAbstraction.Models
 {
     public static class StaticData
     {

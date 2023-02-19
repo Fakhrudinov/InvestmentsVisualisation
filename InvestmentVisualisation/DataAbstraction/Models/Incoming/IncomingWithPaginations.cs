@@ -1,4 +1,4 @@
-﻿namespace DataAbstraction.Models
+﻿namespace DataAbstraction.Models.Incoming
 {
     public class IncomingWithPaginations
     {

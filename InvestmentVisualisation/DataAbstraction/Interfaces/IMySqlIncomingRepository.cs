@@ -1,8 +1,8 @@
-﻿using DataAbstraction.Models;
+﻿using DataAbstraction.Models.Incoming;
 
 namespace DataAbstraction.Interfaces
 {
-    public interface IDataBaseRepository
+    public interface IMySqlIncomingRepository
     {
         Task<string> CreateNewIncoming(CreateIncomingModel newIncoming);
         Task<string> DeleteSingleIncoming(int id);

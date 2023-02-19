@@ -42,4 +42,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="SqlQueries\Deals\" />
+    <Folder Include="Views\Deals\" />
+  </ItemGroup>
+
 </Project>
