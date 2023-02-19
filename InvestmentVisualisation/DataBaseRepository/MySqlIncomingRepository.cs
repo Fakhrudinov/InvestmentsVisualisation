@@ -51,7 +51,7 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetIncomingCount.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
                 return 0;
             }
             else
@@ -63,7 +63,7 @@ namespace DataBaseRepository
 
         public async Task<List<IncomingModel>> GetPageFromIncoming(int itemsAtPage, int pageNumber)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetPageFromIncoming start " +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetPageFromIncoming start " +
                 $"with itemsAtPage={itemsAtPage} page={pageNumber}");
 
             List<IncomingModel> result = new List<IncomingModel>();
@@ -71,13 +71,13 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetPageFromIncoming.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetPageFromIncoming execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetPageFromIncoming execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -119,7 +119,7 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetPageFromIncoming Exception!" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetPageFromIncoming Exception!" +
                                 $"\r\n{ex.Message}");
                         }
                         finally
@@ -135,15 +135,15 @@ namespace DataBaseRepository
 
         public async Task<string> CreateNewIncoming(CreateIncomingModel newIncoming)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository CreateNewIncoming start, newModel is\r\n" +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository CreateNewIncoming start, newModel is\r\n" +
                 $"{newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} Category={newIncoming.Category} " +
                 $"Value={newIncoming.Value} Comission={newIncoming.Comission}");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "CreateNewIncoming.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
-                return "MySqlRepository Error! File with SQL script not found at " + filePath;
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
+                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
             }
             else
             {
@@ -154,7 +154,7 @@ namespace DataBaseRepository
                     query = query.Replace(", @comission", "");
                 }
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository CreateNewIncoming execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository CreateNewIncoming execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -179,7 +179,7 @@ namespace DataBaseRepository
 
                             //Return Int32 Number of rows affected
                             var insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository CreateNewIncoming execution " +
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository CreateNewIncoming execution " +
                                 $"affected {insertResult} lines");
 
                             return insertResult.ToString();
@@ -187,7 +187,7 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository CreateNewIncoming Exception!" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository CreateNewIncoming Exception!" +
                                 $"\r\n{ex.Message}");
                             return ex.Message;
                         }
@@ -207,21 +207,21 @@ namespace DataBaseRepository
 
         public async Task<IncomingModel> GetSingleIncomingById(int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetSingleIncomingById={id} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetSingleIncomingById={id} start");
 
             IncomingModel result = new IncomingModel();
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetSingleIncomingById.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
                 
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetSingleIncomingById={id} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetSingleIncomingById={id} execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -256,7 +256,7 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository GetSingleIncomingById={id} Exception!" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetSingleIncomingById={id} Exception!" +
                                 $"\r\n{ex.Message}");
                         }
                         finally
@@ -272,21 +272,21 @@ namespace DataBaseRepository
 
         public async Task<string> EditSingleIncoming(IncomingModel newIncoming)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming start, newModel is\r\n" +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository EditSingleIncoming start, newModel is\r\n" +
                 $"Id={newIncoming.Id} {newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} " +
                 $"Category={newIncoming.Category} Value={newIncoming.Value} Comission={newIncoming.Comission}");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "EditSingleIncoming.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
-                return "MySqlRepository Error! File with SQL script not found at " + filePath;
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
+                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository EditSingleIncoming execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -316,7 +316,7 @@ namespace DataBaseRepository
 
                             //Return Int32 Number of rows affected
                             int insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming execution " +
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository EditSingleIncoming execution " +
                                 $"affected {insertResult} lines");
 
                             return insertResult.ToString();
@@ -324,7 +324,7 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository EditSingleIncoming Exception!" +
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository EditSingleIncoming Exception!" +
                                 $"\r\n{ex.Message}");
                             return ex.Message;
                         }
@@ -339,13 +339,13 @@ namespace DataBaseRepository
 
         public async Task<string> DeleteSingleIncoming(int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository DeleteSingleIncoming id={id} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository DeleteSingleIncoming id={id} start");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "DeleteSingleIncoming.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
-                return "MySqlRepository Error! File with SQL script not found at " + filePath;
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
+                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
             }
             else
             {
