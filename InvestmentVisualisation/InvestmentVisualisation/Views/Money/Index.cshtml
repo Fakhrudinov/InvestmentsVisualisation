@@ -1,4 +1,5 @@
-﻿@model IEnumerable<DataAbstraction.Models.MoneyByMonth.MoneyModel>
+﻿@using DataAbstraction.Models
+@model IEnumerable<DataAbstraction.Models.MoneyByMonth.MoneyModel>
 
 <table class="table">
     <thead>
@@ -40,7 +41,7 @@
                 @Html.DisplayFor(modelItem => item.Year)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Month)
+                @StaticData.MonthNames[StaticData.MonthNames.FindIndex(sb => sb.Id == item.Month)].Name
             </td>
             <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.TotalIn)

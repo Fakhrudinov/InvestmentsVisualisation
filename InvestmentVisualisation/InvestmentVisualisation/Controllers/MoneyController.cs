@@ -3,7 +3,9 @@ using DataAbstraction.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using DataAbstraction.Models.MoneyByMonth;
 using Microsoft.Extensions.Options;
-using NuGet.Protocol.Core.Types;
+using DataAbstraction.Models;
+using DataAbstraction.Models.BaseModels;
+using System.Globalization;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -18,6 +20,19 @@ namespace InvestmentVisualisation.Controllers
             _logger = logger;
             _repository = repository;
             _minimumYear = paginationSettings.Value.MoneyMinimumYear;
+
+            if (StaticData.MonthNames.Count == 0)
+            {
+                for (int i = 1; i <= 12; i++)
+                {
+                    MonthName newMonth = new MonthName();
+                    newMonth.Id = i;
+                    newMonth.Name = new DateTime(2023, i, 1).ToString("MMMM", CultureInfo.CreateSpecificCulture("ru"));
+
+                    StaticData.MonthNames.Add(newMonth);
+                }
+            }
+            
         }
 
 
