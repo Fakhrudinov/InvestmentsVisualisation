@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IMySqlCommonRepository, CommonRepository>();
 builder.Services.AddTransient<IMySqlIncomingRepository, MySqlIncomingRepository>();
 builder.Services.AddTransient<IMySqlDealsRepository, MySqlDealsRepository>();
+builder.Services.AddTransient<IMySqlMoneyRepository, MySqlMoneyRepository>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
