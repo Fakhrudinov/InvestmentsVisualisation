@@ -67,10 +67,17 @@
     <None Update="SqlQueries\Money\RecalculateMoney.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\YearView\GetYearViewPage.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\YearView\RecalculateYearView.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="SqlQueries\Deals\" />
+    <Folder Include="SqlQueries\YearView\" />
   </ItemGroup>
 
 </Project>

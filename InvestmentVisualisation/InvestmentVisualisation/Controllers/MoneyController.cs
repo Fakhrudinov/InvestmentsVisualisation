@@ -31,14 +31,13 @@ namespace InvestmentVisualisation.Controllers
 
                     StaticData.MonthNames.Add(newMonth);
                 }
-            }
-            
+            }            
         }
 
 
         public async Task<IActionResult> Index(int year = 0)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Deals called, year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Index called, year={year}");
 
             int currentYear = DateTime.Now.Year;
 

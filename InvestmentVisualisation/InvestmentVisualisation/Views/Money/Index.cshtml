@@ -1,87 +1,91 @@
 ﻿@using DataAbstraction.Models
 @model IEnumerable<DataAbstraction.Models.MoneyByMonth.MoneyModel>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Year)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Month)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.TotalIn)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.MonthIn)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.Divident)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.Dosrochnoe)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.DealsSum)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.BrokComission)
-            </th style="text-align:right;">
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.MoneySum)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Year)
-            </td>
-            <td>
-                @StaticData.MonthNames[StaticData.MonthNames.FindIndex(sb => sb.Id == item.Month)].Name
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.TotalIn)
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.MonthIn)
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.Divident)
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.Dosrochnoe)
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.DealsSum)
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.BrokComission)
-            </td>
-            <td style="text-align:right; font-weight: bold">
-                @Html.DisplayFor(modelItem => item.MoneySum)
-            </td>
-            <td>
-                @Html.ActionLink("Recalculate", "Recalculate", new {  year = item.Year, month = item.Month }, new { @class = "btn btn-block btn-primary btn-sm"  })
-            </td>
-        </tr>}
-    </tbody>
-</table>
+<div class="container">
 
-<a asp-action="Index" class="btn btn-success">Показать последний год</a> 
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Year)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Month)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.TotalIn)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.MonthIn)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.Divident)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.Dosrochnoe)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.DealsSum)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.BrokComission)
+                </th style="text-align:right;">
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.MoneySum)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                <td>
+                    @StaticData.MonthNames[StaticData.MonthNames.FindIndex(sb => sb.Id == item.Month)].Name
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.TotalIn)
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.MonthIn)
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.Divident)
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.Dosrochnoe)
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.DealsSum)
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.BrokComission)
+                </td>
+                <td style="text-align:right; font-weight: bold">
+                    @Html.DisplayFor(modelItem => item.MoneySum)
+                </td>
+                <td>
+                    @Html.ActionLink("Recalculate", "Recalculate", new {  year = item.Year, month = item.Month }, new { @class = "btn btn-block btn-primary btn-sm"  })
+                </td>
+            </tr>}
+        </tbody>
+    </table>
 
-@{  
-    if(ViewData["Navigation"]!=null)     
-    {  
-        if(ViewData.Values !=null && ViewData.Values.Count()>0)  
+    <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
+
+    @{  
+        if(ViewData["Navigation"]!=null)     
         {  
-            foreach (var item in ViewData["Navigation"] as List<int>)  
-            {
-                <a asp-action="Index" asp-route-year="@item" class="btn btn-default" style="border-color: #ddd;">@item</a>
+            if(ViewData.Values !=null && ViewData.Values.Count()>0)  
+            {  
+                foreach (var item in ViewData["Navigation"] as List<int>)  
+                {
+                    <a asp-action="Index" asp-route-year="@item" class="btn btn-default" style="border-color: #ddd;">@item</a>
+                }  
             }  
         }  
-    }  
-} 
+    } 
+
+</div>

@@ -6,89 +6,89 @@
 @{
     ViewData["Title"] = "Incoming";
 }
+<div class="container">
+    <h2>Зачисление и списание денег</h2>
 
-<h2>Зачисление и списание денег</h2>
-
-<p>
-    <a asp-area="" asp-controller="Incoming" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Date)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).SecCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).SecBoard)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Category)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Value)
-            </th>
-            <th style="text-align:right;">
-                @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Comission)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Incomings) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
-            </td>
-            <td>
-                @if (item.SecCode.Equals("0"))
-                {
-                    <span>Деньги</span>
-                }
-                else
-                {
-                    @Html.DisplayFor(modelItem => item.SecCode)
-                }
-            </td>
-            <td>
-                @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
-            </td>
-            <td>
-                @StaticData.Categories[StaticData.Categories.FindIndex(cat => cat.Id == item.Category)].Name
-            </td>
-            <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.Value)
-            </td>
-                <td style="text-align:right;">
-                @Html.DisplayFor(modelItem => item.Comission)
-            </td>
-                <td style="text-align:right;">
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  })
-                        &nbsp;&nbsp;&nbsp;
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
+    <p>
+        <a asp-area="" asp-controller="Incoming" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
+    </p>
+    <table class="table  table-hover">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Id)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Date)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).SecCode)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).SecBoard)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Category)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Value)
+                </th>
+                <th style="text-align:right;">
+                    @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Comission)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model.Incomings) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
                 </td>
-        </tr>
-}
-    </tbody>
-</table>
+                <td>
+                    @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
+                </td>
+                <td>
+                    @if (item.SecCode.Equals("0"))
+                    {
+                        <span>Деньги</span>
+                    }
+                    else
+                    {
+                        @Html.DisplayFor(modelItem => item.SecCode)
+                    }
+                </td>
+                <td>
+                    @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
+                </td>
+                <td>
+                    @StaticData.Categories[StaticData.Categories.FindIndex(cat => cat.Id == item.Category)].Name
+                </td>
+                <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.Value)
+                </td>
+                    <td style="text-align:right;">
+                    @Html.DisplayFor(modelItem => item.Comission)
+                </td>
+                    <td style="text-align:right;">
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  })
+                            &nbsp;&nbsp;&nbsp;
+                        @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
+                    </td>
+            </tr>
+    }
+        </tbody>
+    </table>
 
-@if (Model.PageViewModel.HasNextPage)
-{
-    <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
-}
-<span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
-@if (Model.PageViewModel.HasPreviousPage)
-{
-    <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
-}
-
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
+    }
+    <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+    @if (Model.PageViewModel.HasPreviousPage)
+    {
+        <a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
+    }
+</div>
 
 
