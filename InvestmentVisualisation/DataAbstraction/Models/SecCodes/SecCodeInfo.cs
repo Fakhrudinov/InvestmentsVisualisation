@@ -1,9 +1,9 @@
-﻿namespace DataAbstraction.Models.SecCodes
+﻿using DataAbstraction.Models.BaseModels;
+
+namespace DataAbstraction.Models.SecCodes
 {
-    public class SecCodeInfo
+    public class SecCodeInfo : SecCodeAndSecBoardModel
     {       
-        public string SecCode { get; set; }
-        public int SecBoard { get; set; }
         public string Name { get; set; }
         public string FullName { get; set; }
         public string ISIN { get; set; }

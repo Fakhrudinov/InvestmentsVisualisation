@@ -82,6 +82,15 @@
     <None Update="SqlQueries\SecCodes\GetSingleSecCodeBySecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\SecVolume\GetSecVolumeCountForYear.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecVolume\GetSecVolumePageForYear.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecVolume\RecalculateSecVolumeForYear.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\YearView\GetYearViewPage.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

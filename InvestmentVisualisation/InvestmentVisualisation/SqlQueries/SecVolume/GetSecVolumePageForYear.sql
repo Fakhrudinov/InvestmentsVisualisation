@@ -1,0 +1,1 @@
+﻿SELECT * FROM money_by_month where year = @year;

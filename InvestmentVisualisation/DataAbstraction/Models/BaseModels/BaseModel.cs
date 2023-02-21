@@ -3,16 +3,10 @@
 
 namespace DataAbstraction.Models.BaseModels
 {
-    public class BaseModel
+    public class BaseModel : SecCodeAndSecBoardModel
     {
         [Display(Name = "Дата")]
         public DateTime Date { get; set; }
-
-        [Display(Name = "Тикер")]
-        public string SecCode { get; set; }
-
-        [Display(Name = "SecBoard")]
-        public int SecBoard { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "The value must be greater than 0")]
         [Display(Name = "Комиссия")]
