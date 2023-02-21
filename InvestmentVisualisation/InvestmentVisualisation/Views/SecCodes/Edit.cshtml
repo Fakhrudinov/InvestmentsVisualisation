@@ -1,0 +1,65 @@
+﻿@using DataAbstraction.Models
+@model DataAbstraction.Models.SecCodes.SecCodeInfo
+
+<div class="container">
+
+    <h4>SecCodeInfo</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+                @if (ViewData["Message"] != null)
+                {
+                                <strong style="color:red"> @ViewData["Message"] </strong>
+                }
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="SecCode" class="control-label"></label>
+                    <input asp-for="SecCode" class="form-control" />
+                    <span asp-validation-for="SecCode" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SecBoard" class="control-label"></label>
+                    @Html.DropDownListFor(model => model.SecBoard, new SelectList(StaticData.SecBoards, "Id", "Name"),
+                    new {
+                    @class = "form-control"
+                    })
+                </div>
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="FullName" class="control-label"></label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ISIN" class="control-label"></label>
+                    <input asp-for="ISIN" class="form-control" />
+                    <span asp-validation-for="ISIN" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ExpiredDate" class="control-label"></label>
+                    @Html.TextBoxFor(model => model.ExpiredDate, "{0:yyyy-MM-ddTHH:mm:ss}",
+                        new
+                        {
+                            @class = "form-control",
+                            @type = "datetime-local"
+                        })
+                    <span asp-validation-for="ExpiredDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-danger" />
+                    <a asp-action="Index" class="btn btn-success">Назад к списку SecCodes</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+
+</div>

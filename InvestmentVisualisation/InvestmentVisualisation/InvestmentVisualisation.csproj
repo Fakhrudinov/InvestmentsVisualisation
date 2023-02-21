@@ -67,6 +67,21 @@
     <None Update="SqlQueries\Money\RecalculateMoney.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\SecCodes\CreateNewSecCode.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecCodes\EditSingleSecCode.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecCodes\GetPageFromSecCodes.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecCodes\GetSecCodesCount.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecCodes\GetSingleSecCodeBySecCode.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\YearView\GetYearViewPage.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -11,6 +11,7 @@ builder.Services.AddTransient<IMySqlIncomingRepository, MySqlIncomingRepository>
 builder.Services.AddTransient<IMySqlDealsRepository, MySqlDealsRepository>();
 builder.Services.AddTransient<IMySqlMoneyRepository, MySqlMoneyRepository>(); 
 builder.Services.AddTransient<IMySqlYearViewRepository, MySqlYearViewRepository>();
+builder.Services.AddTransient<IMySqlSecCodesRepository, MySqlSecCodesRepository>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
