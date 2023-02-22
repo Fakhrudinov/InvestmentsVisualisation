@@ -68,15 +68,17 @@
     }
         </tbody>
     </table>
+    <div>
+        @if (Model.PageViewModel.HasNextPage)
+        {
+            <a asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
+        }
+        <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+        @if (Model.PageViewModel.HasPreviousPage)
+        {
+            <a asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
+        }
 
-    @if (Model.PageViewModel.HasNextPage)
-    {
-        <a asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
-    }
-    <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
-    @if (Model.PageViewModel.HasPreviousPage)
-    {
-        <a asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
-    }
-
+        <a asp-action="Index" class="btn btn-success">Показать последний год</a>
+    </div>
 </div>

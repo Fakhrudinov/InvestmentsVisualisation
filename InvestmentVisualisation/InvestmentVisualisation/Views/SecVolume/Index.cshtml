@@ -1,0 +1,96 @@
+﻿@using DataAbstraction.Models
+@using DataAbstraction.Models.SecVolume
+
+@model SecVolumesWithPaginations
+
+@{
+    ViewData["Title"] = "SecVolume " + @Model.ShownYear;
+}
+
+<div class="container">
+
+    <div class="row justify-content-md-center">
+        <div class="col-sm-8"><h3 style="display:inline;">@Model.ShownYear</h3></div>
+        <div class="col-sm-2 align-right">
+            @Html.ActionLink("Recalculate " + (DateTime.Now.Year - 1).ToString() , "Recalculate", new {  year = DateTime.Now.Year - 1 }, new { @class = "btn btn-block btn-danger"  })
+        </div>
+        <div class="col-sm-2 align-right">
+            @Html.ActionLink("Recalculate " + DateTime.Now.Year , "Recalculate", new {  year = DateTime.Now.Year }, new { @class = "btn btn-block btn-danger"  })
+        </div>
+    </div>
+
+
+    <table class="table table-hover">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).SecCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).SecBoard)
+            </th>
+            <th>
+                    @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).Pieces)
+            </th>
+            <th>
+                    @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).AvPrice)
+            </th>
+            <th>
+                    @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).Volume)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.SecVolumes) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SecCode)
+            </td>
+            <td>
+                @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pieces)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AvPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Volume)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+    <div>
+        @if (Model.PageViewModel.HasNextPage)
+        {
+            <a asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" asp-route-year="@Model.ShownYear" class="btn btn-secondary"> Назад </a>
+        }
+        <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+        @if (Model.PageViewModel.HasPreviousPage)
+        {
+            <a asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" asp-route-year="@Model.ShownYear" class="btn btn-secondary"> Вперед</a>
+        }
+    </div>
+    <br />
+    @{
+        if (ViewData["Navigation"]!=null)
+        {
+            if (ViewData.Values !=null && ViewData.Values.Count()>0)
+            {
+                foreach (var item in ViewData["Navigation"] as List<int>)
+                {
+                    if (item == Model.ShownYear)
+                    {
+                            <div class="btn btn-success" style="border-color: #ddd;">@item</div>
+                    }
+                    else
+                    {
+                            <a asp-action="Index" asp-route-year="@item" class="btn btn-primary" style="border-color: #ddd;">@item</a>
+                    }                    
+                }
+            }
+        }
+    }
+</div>

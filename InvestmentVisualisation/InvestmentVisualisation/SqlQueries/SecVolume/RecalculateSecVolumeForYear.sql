@@ -1,1 +1,1 @@
-﻿call MoneyMonthRecalculate(@data);
+﻿call SecVolumeFullRecalc(@year);

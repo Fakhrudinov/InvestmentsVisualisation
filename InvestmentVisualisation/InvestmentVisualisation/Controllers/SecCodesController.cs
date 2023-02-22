@@ -4,7 +4,6 @@ using DataAbstraction.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecCodes;
-using DataAbstraction.Models.Deals;
 
 namespace InvestmentVisualisation.Controllers
 {

@@ -70,7 +70,7 @@ namespace InvestmentVisualisation.Controllers
                 await _repository.RecalculateMoney($"{year}-{month}-01");
             }
 
-            List<MoneyModel> moneyList = await _repository.GetMoneyLastYearPage();
+            //List<MoneyModel> moneyList = await _repository.GetMoneyLastYearPage();
             return RedirectToAction("Index");
         }        
     }

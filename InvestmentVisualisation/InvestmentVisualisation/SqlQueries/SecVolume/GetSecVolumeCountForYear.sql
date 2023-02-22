@@ -1,1 +1,1 @@
-﻿SELECT count(*) FROM incoming;
+﻿SELECT count(@name) FROM sec_volume;
