@@ -179,67 +179,67 @@
 
             if (item.Aug != null)
             {
-                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Август">
-                        @Html.DisplayFor(modelItem => item.Aug)
-                    </td>
+                <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Август">
+                    @Html.DisplayFor(modelItem => item.Aug)
+                </td>
             }
             else
             {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Aug)
-                    </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Aug)
+                </td>
             }
 
             if (item.Sep != null)
             {
-                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Сентябрь">
-                        @Html.DisplayFor(modelItem => item.Sep)
-                    </td>
+                <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Сентябрь">
+                    @Html.DisplayFor(modelItem => item.Sep)
+                </td>
             }
             else
             {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Sep)
-                    </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Sep)
+                </td>
             }
 
             if (item.Okt != null)
             {
-                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Октябрь">
-                        @Html.DisplayFor(modelItem => item.Okt)
-                    </td>
+                <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Октябрь">
+                    @Html.DisplayFor(modelItem => item.Okt)
+                </td>
             }
             else
             {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Okt)
-                    </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Okt)
+                </td>
             }
 
             if (item.Nov != null)
             {
-                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Ноябрь">
-                        @Html.DisplayFor(modelItem => item.Nov)
-                    </td>
+                <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Ноябрь">
+                    @Html.DisplayFor(modelItem => item.Nov)
+                </td>
             }
             else
             {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Nov)
-                    </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nov)
+                </td>
             }
 
             if (item.Dec != null)
             {
-                    <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Декабрь">
-                        @Html.DisplayFor(modelItem => item.Dec)
-                    </td>
+                <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Декабрь">
+                    @Html.DisplayFor(modelItem => item.Dec)
+                </td>
             }
             else
             {
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Dec)
-                    </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Dec)
+                </td>
             }
         }
 
@@ -247,10 +247,21 @@
             @Html.DisplayFor(modelItem => item.Summ)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.VolPercent)%
+            @{
+                if (item.VolPercent != null && item.VolPercent > 0)
+                {
+                    @Html.DisplayFor(modelItem => item.VolPercent)<span>%</span>
+                }
+            }
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.DivPercent)%
+            @{
+                if (item.DivPercent != null && item.DivPercent > 0)
+                {
+                    @Html.DisplayFor(modelItem => item.DivPercent)<span>%</span>
+
+                }
+            }            
         </td>
     </tr>}
 </tbody>
