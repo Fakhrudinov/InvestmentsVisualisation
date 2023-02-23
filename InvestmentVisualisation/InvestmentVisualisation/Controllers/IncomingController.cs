@@ -47,12 +47,23 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET CreateIncoming called");
 
             CreateIncomingModel model = new CreateIncomingModel();
-            model.Date = DateTime.Today.AddDays( -1 );// обычно вношу за вчера
+            model.Date = DateTime.Now.AddDays( -1 );// обычно вношу за вчера
             model.Category = 1;
 
             return View(model);
         }
+        public IActionResult CreateSpecificIncoming(DateTime data, string tiker, int category)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET CreateIncoming called " +
+                $"with parameters {data} {tiker} category={category}");
 
+            CreateIncomingModel model = new CreateIncomingModel();
+            model.Date = data;// обычно вношу за вчера
+            model.SecCode = tiker;
+            model.Category = category;
+
+            return View("CreateIncoming", model);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateIncoming(CreateIncomingModel newIncoming)

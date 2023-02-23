@@ -4,7 +4,6 @@ using DataAbstraction.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecVolume;
-using DataAbstraction.Models.MoneyByMonth;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -47,7 +46,7 @@ namespace InvestmentVisualisation.Controllers
                 _itemsAtPage);
 
             secVolumesWithPaginations.SecVolumes = await _repository.GetSecVolumePageForYear(_itemsAtPage, (page - 1) * _itemsAtPage, year);
-            secVolumesWithPaginations.ShownYear = year;
+            ViewBag.year = year;
 
             List<int> objSt = new List<int>();
             int currentYear = DateTime.Now.Year;
@@ -74,7 +73,7 @@ namespace InvestmentVisualisation.Controllers
                 year = DateTime.Now.Year; //для корректного RedirectToAction 
             }
 
-            return RedirectToAction("Index?year=" + year);
+            return RedirectToAction("Index", new { year = year });
         }
     }
 }

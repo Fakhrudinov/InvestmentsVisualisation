@@ -3,6 +3,27 @@
 
 <div class="container">
 
+    <div class="row justify-content-md-center">
+        <div class="col-sm-6">
+            @{
+                if(ViewBag.year == 0)
+                {
+                    <h3 style="display:inline;">Изменение денег за последний год</h3>
+                }
+                else
+                {
+                    <h3 style="display:inline;">Изменение денег за @ViewBag.year год</h3>
+                }
+                DateTime prev = DateTime.Now;
+                prev = prev.AddMonths(-1);
+            }
+        </div>
+        <div class="col-sm-5 align-right">
+             @Html.ActionLink("Recalculate previous month", "Recalculate", new {  year = prev.Year, month = prev.Month }, new { @class = "btn btn-block btn-danger" })
+            @Html.ActionLink("Recalculate current month", "Recalculate", new {  year = DateTime.Now.Year, month = DateTime.Now.Month }, new { @class = "btn btn-block btn-danger" })
+        </div>
+    </div>
+
     <table class="table table-hover">
         <thead>
             <tr>
@@ -33,7 +54,7 @@
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.MoneySum)
                 </th>
-                <th></th>
+                <!--<th></th>-->
             </tr>
         </thead>
         <tbody>
@@ -66,23 +87,42 @@
                 <td style="text-align:right; font-weight: bold">
                     @Html.DisplayFor(modelItem => item.MoneySum)
                 </td>
-                <td>
+                <!--<td>
                     @Html.ActionLink("Recalculate", "Recalculate", new {  year = item.Year, month = item.Month }, new { @class = "btn btn-block btn-primary btn-sm"  })
-                </td>
+                </td>-->
             </tr>}
         </tbody>
     </table>
 
-    <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
+    @{
+         if(ViewBag.year == 0)
+         {
+             <div class="btn btn-default" style="border-color: #ddd;">Показать последний год</div> 
+         }
+         else
+         {
+             <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
+         }
+     } 
+
+    
 
     @{  
         if(ViewData["Navigation"]!=null)     
         {  
             if(ViewData.Values !=null && ViewData.Values.Count()>0)  
             {  
-                foreach (var item in ViewData["Navigation"] as List<int>)  
+                foreach (int item in ViewData["Navigation"] as List<int>)  
                 {
-                    <a asp-action="Index" asp-route-year="@item" class="btn btn-default" style="border-color: #ddd;">@item</a>
+                     if(ViewBag.year == item)
+                     {
+                         <div class="btn btn-default" style="border-color: #ddd;">@item</div> 
+                     }
+                     else
+                     {
+                         <a asp-action="Index" asp-route-year="@item" class="btn btn-success" style="border-color: #ddd;">@item</a>
+                     }
+
                 }  
             }  
         }  

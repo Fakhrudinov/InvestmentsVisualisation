@@ -45,9 +45,21 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Create called");
 
             CreateDealsModel model = new CreateDealsModel();
-            model.Date = DateTime.Today.AddDays(-1);// обычно вношу за вчера
+            model.Date = DateTime.Now.AddDays(-1);// обычно вношу за вчера
 
             return View(model);
+        }
+        public ActionResult CreateSpecific(DateTime data, string tiker, string price, int pieces)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET CreateSpecific called " +
+                $"with parametres {data} {tiker} price={price} pieces={pieces}");
+
+            CreateDealsModel model = new CreateDealsModel();
+            model.Date = data;
+            model.SecCode = tiker;
+            model.AvPrice = price;
+            model.Pieces = pieces;
+            return View("Create", model);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

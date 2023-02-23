@@ -57,6 +57,7 @@ namespace InvestmentVisualisation.Controllers
                 objSt.Add(i);
             }
             ViewData["Navigation"] = objSt;
+            ViewBag.year = year;
 
             return View(moneyList);
         }
@@ -70,7 +71,6 @@ namespace InvestmentVisualisation.Controllers
                 await _repository.RecalculateMoney($"{year}-{month}-01");
             }
 
-            //List<MoneyModel> moneyList = await _repository.GetMoneyLastYearPage();
             return RedirectToAction("Index");
         }        
     }

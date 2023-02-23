@@ -71,8 +71,8 @@
                     @Html.DisplayFor(modelItem => item.Comission)
                 </td>
                     <td style="text-align:right;">
-                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  })
-                            &nbsp;&nbsp;&nbsp;
+                        @Html.ActionLink(" + ", "CreateSpecificIncoming", new { data = item.Date, tiker = item.SecCode, category = item.Category }, new { @class = "btn btn-primary btn-sm"  }) 
+                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  }) 
                         @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
                     </td>
             </tr>

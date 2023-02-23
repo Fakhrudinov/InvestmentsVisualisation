@@ -75,8 +75,15 @@
                 </td>
 
                 <td style="text-align:right;">
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  })
-                        &nbsp;&nbsp;&nbsp;
+                        @Html.ActionLink("+ ", "CreateSpecific",
+                    new 
+                        { 
+                            data = item.Date, 
+                            tiker = item.SecCode, 
+                            price = item.AvPrice,
+                            pieces = item.Pieces                        
+                        }, new { @class = "btn btn-primary btn-sm"  })
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  }) 
                     @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
                 </td>
             </tr>
