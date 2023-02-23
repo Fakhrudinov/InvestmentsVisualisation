@@ -29,6 +29,7 @@ namespace InvestmentVisualisation.Controllers
             {
                 // add recalc money && secVolume ??????????????????????????????????????????????????????
                 await _repository.RecalculateYearView(currentYear);
+                year = currentYear;
             }
             else
             {
@@ -38,7 +39,8 @@ namespace InvestmentVisualisation.Controllers
                 }
                 else
                 {
-                    // ругайся !
+                    // ругайся ?
+                    year = currentYear;
                 }
             }
 
@@ -50,6 +52,7 @@ namespace InvestmentVisualisation.Controllers
                 objSt.Add(i);
             }
             ViewData["Navigation"] = objSt;
+            ViewBag.year = year;
 
             return View(yearViews);
         }
