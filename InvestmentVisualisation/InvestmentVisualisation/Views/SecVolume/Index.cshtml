@@ -27,13 +27,13 @@
             <th>
                 @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).SecBoard)
             </th>
-            <th>
+                <th style="text-align:right;">
                 @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).Pieces)
             </th>
-            <th>
+                <th style="text-align:right;">
                 @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).AvPrice)
             </th>
-            <th>
+                <th style="text-align:right;">
                 @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).Volume)
             </th>
         </tr>
@@ -47,13 +47,13 @@
             <td>
                 @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
             </td>
-            <td>
+                    <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.Pieces)
             </td>
-            <td>
+                    <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.AvPrice)
             </td>
-            <td>
+                    <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.Volume)
             </td>
         </tr>
