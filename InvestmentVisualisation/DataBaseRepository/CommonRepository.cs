@@ -5,7 +5,6 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
-using DataAbstraction.Models.Incoming;
 
 namespace DataBaseRepository
 {
@@ -42,6 +41,7 @@ namespace DataBaseRepository
                     {
                         await con.OpenAsync();
                         result = (int)(long)await cmd.ExecuteScalarAsync();
+                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository GetTableCountBySqlQuery result tableCount={result}");
                     }
                     catch (Exception ex)
                     {
@@ -233,6 +233,45 @@ namespace DataBaseRepository
                     finally
                     {
                         await con.CloseAsync();
+                    }
+                }
+            }
+        }
+
+        public void FillFreeMoney()
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetMoneyValueFromLastYearMonth.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+                        try
+                        {
+                            con.Open();
+
+                            var money = cmd.ExecuteScalar();
+                            StaticData.FreeMoney = money.ToString();
+                            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney result money={money}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney Exception!" +
+                                $"\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            con.Close();
+                        }
                     }
                 }
             }

@@ -43,6 +43,11 @@ namespace DataBaseRepository
             {
                 _commonRepo.FillStaticSecCodes();
             }
+
+            if (StaticData.FreeMoney is null)
+            {
+                _commonRepo.FillFreeMoney();
+            }
         }
 
 
