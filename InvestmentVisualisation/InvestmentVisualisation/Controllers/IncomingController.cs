@@ -188,6 +188,7 @@ namespace InvestmentVisualisation.Controllers
             isin = isin.Substring(0, 12);
 
             string secCode = await _secCodesRepo.GetSecCodeByISIN(isin);
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GetSecCodeByISIN получили из репозитория={secCode}");
             return secCode;
         }
 

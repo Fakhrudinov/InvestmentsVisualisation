@@ -114,18 +114,18 @@ namespace InvestmentVisualisation.Controllers
             //string dateString = $"{dataSplitted[2]}-{dataSplitted[1]}-{dataSplitted[0]} {DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}";
             //model.Date = DateTime.Parse(dateString);
             model.Date = DateTime.Parse(textSplitted[startPointer + 1]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set date={model.Date}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set date={model.Date}");
 
             // количество // 60,000.00
             //string rawPieces = textSplitted[startPointer + 5]; 
             string pieces = textSplitted[startPointer + 5].Split('.').First();
             model.Pieces = Int32.Parse(pieces.Replace(",", ""));
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set Pieces={model.Pieces}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set Pieces={model.Pieces}");
 
             // цена // 4,583.5 или 0.08708
             //string rawPrice = textSplitted[startPointer + 6];
             model.AvPrice = CleanString(textSplitted[startPointer + 6]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set AvPrice={model.AvPrice}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set AvPrice={model.AvPrice}");
 
             //комиссия = комиссия биржи + комиссия брокера 1.79	0.24
             //string rawMoexComiss = textSplitted[startPointer + 11];
@@ -133,7 +133,7 @@ namespace InvestmentVisualisation.Controllers
             string moexComiss = CleanString(textSplitted[startPointer + 11]);
             string brokComiss = CleanString(textSplitted[startPointer + 12]);
             model.Comission = (decimal.Parse(moexComiss) + decimal.Parse(brokComiss)).ToString();
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set Comission={model.Comission} from {moexComiss} + {brokComiss}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set Comission={model.Comission} from {moexComiss} + {brokComiss}");
 
             // nkd // 289.20
             //string rawNkd = textSplitted[startPointer + 9];
@@ -142,18 +142,24 @@ namespace InvestmentVisualisation.Controllers
             {
                 model.NKD = nkd;
             }
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set NKD={model.NKD}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set NKD={model.NKD}");
 
             // тикер
-            string rawIsin = textSplitted[startPointer + 3];
+            //string rawIsin = textSplitted[startPointer + 3];
             string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(textSplitted[startPointer + 3]);
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из репозитория={rawSecCode}");
             //проверить, что нам прислали действительно seccode а не ошибку
             if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет
             {
                 //отправим найденное в ошибки
-                ViewData["Message"] = model.SecCode;
+                ViewData["Message"] = rawSecCode;
                 model.SecCode = "0";//сбросим присвоенную ошибку
             }
+            else
+            {
+                model.SecCode = rawSecCode;
+            }
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set SecCode={model.SecCode}");
 
             return View("Create", model);
         }
