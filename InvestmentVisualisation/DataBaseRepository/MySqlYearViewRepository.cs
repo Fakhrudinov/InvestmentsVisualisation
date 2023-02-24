@@ -1,5 +1,4 @@
 ﻿using DataAbstraction.Interfaces;
-using DataAbstraction.Models.MoneyByMonth;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.YearView;
 using Microsoft.Extensions.Logging;

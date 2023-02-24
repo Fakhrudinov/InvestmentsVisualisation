@@ -1,4 +1,5 @@
 ﻿using DataAbstraction.Interfaces;
+using DataAbstraction.Models;
 using DataAbstraction.Models.Deals;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,17 @@ namespace DataBaseRepository
                 $"User ID={connection.Value.UserId};" +
                 $"Password={connection.Value.Password};" +
                 $"Port={connection.Value.Port};" +
-                $"Database={connection.Value.Database}";  
+                $"Database={connection.Value.Database}";
+
+            if (StaticData.SecBoards.Count == 0)
+            {
+                _commonRepo.FillStaticSecBoards();
+            }
+
+            if (StaticData.SecCodes.Count == 0)
+            {
+                _commonRepo.FillStaticSecCodes();
+            }
         }
 
         public async Task<int> GetDealsCount()

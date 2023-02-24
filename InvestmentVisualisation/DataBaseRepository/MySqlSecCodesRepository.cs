@@ -1,4 +1,5 @@
 ﻿using DataAbstraction.Interfaces;
+using DataAbstraction.Models;
 using DataAbstraction.Models.SecCodes;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,11 @@ namespace DataBaseRepository
                 $"Password={connection.Value.Password};" +
                 $"Port={connection.Value.Port};" +
                 $"Database={connection.Value.Database}";
+
+            if (StaticData.SecBoards.Count == 0)
+            {
+                _commonRepo.FillStaticSecBoards();
+            }
         }
 
         public async Task<List<SecCodeInfo>> GetPageFromSecCodes(int itemsAtPage, int pageNumber)

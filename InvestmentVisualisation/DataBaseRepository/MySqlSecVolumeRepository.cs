@@ -1,4 +1,5 @@
 ﻿using DataAbstraction.Interfaces;
+using DataAbstraction.Models;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,16 @@ namespace DataBaseRepository
                 $"Password={connection.Value.Password};" +
                 $"Port={connection.Value.Port};" +
                 $"Database={connection.Value.Database}";
+
+            if (StaticData.SecBoards.Count == 0)
+            {
+                _commonRepo.FillStaticSecBoards();
+            }
+
+            if (StaticData.SecCodes.Count == 0)
+            {
+                _commonRepo.FillStaticSecCodes();
+            }
         }
 
         public async Task<int> GetSecVolumeCountForYear(int year)
