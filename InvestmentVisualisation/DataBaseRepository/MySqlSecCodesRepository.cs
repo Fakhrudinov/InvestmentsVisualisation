@@ -366,5 +366,13 @@ namespace DataBaseRepository
                 }
             }
         }
+
+        public void RenewStaticSecCodesList()
+        {
+            // сначала очистим List
+            StaticData.SecCodes.Clear();
+            // и наполним снова
+            _commonRepo.FillStaticSecCodes();
+        }
     }
 }

@@ -59,6 +59,8 @@ namespace InvestmentVisualisation.Controllers
                 return View();
             }
 
+            _repository.RenewStaticSecCodesList();
+
             return RedirectToAction("Index");
         }
 
@@ -82,6 +84,8 @@ namespace InvestmentVisualisation.Controllers
                 ViewData["Message"] = $"Редактирование не удалось.\r\n{result}";
                 return View(model);
             }
+
+            _repository.RenewStaticSecCodesList();
 
             return RedirectToAction("Index");
         }

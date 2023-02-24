@@ -10,5 +10,6 @@ namespace DataAbstraction.Interfaces
         Task<string> GetSecCodeByISIN(string isin);
         Task<int> GetSecCodesCount();
         Task<SecCodeInfo> GetSingleSecCodeBySecCode(string secCode);
+        void RenewStaticSecCodesList();
     }
 }
