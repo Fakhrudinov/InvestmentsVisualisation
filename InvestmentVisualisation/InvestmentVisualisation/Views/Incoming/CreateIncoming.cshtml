@@ -14,6 +14,13 @@
                 <strong style="color:red"> @ViewData["Message"] </strong>
             }
 
+            <form method="post" action="/Incoming/CreateFromText">
+                <div class="input-group mb-3">
+                    <input type="text" name="Text" class="form-control" placeholder="Вставьте строку из отчета" aria-describedby="button-addon1">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon1">Анализировать</button>
+                </div>
+            </form>
+
             <form asp-action="CreateIncoming">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 

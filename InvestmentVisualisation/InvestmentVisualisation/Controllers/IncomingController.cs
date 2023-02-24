@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
 
+
 namespace InvestmentVisualisation.Controllers
 {
     public class IncomingController : Controller
@@ -14,12 +15,18 @@ namespace InvestmentVisualisation.Controllers
         private readonly ILogger<IncomingController> _logger;
         private IMySqlIncomingRepository _repository;
         private int _itemsAtPage;
+        private IMySqlSecCodesRepository _secCodesRepo;
 
-        public IncomingController(ILogger<IncomingController> logger, IMySqlIncomingRepository repository, IOptions<PaginationSettings> paginationSettings)
+        public IncomingController(
+            ILogger<IncomingController> logger, 
+            IMySqlIncomingRepository repository, 
+            IOptions<PaginationSettings> paginationSettings,
+            IMySqlSecCodesRepository secCodesRepo)
         {
             _logger = logger;
             _repository = repository;
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
+            _secCodesRepo = secCodesRepo;
         }
 
         public async Task<IActionResult> Incoming(int page = 1)
@@ -64,6 +71,126 @@ namespace InvestmentVisualisation.Controllers
 
             return View("CreateIncoming", model);
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateFromText(string text)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText called, text={text}");
+
+            // /t = 5 штук . может быть и 6. isin искать в 5й или 6й
+            // Тип / Дата / Зачислено / Списано / Примеч / Примеч
+
+            //"Выплата дивидендов\t16.02.2023\t4,482.80\t0.00\t\tТМК, ПАО ао01; ISIN-RU000A0B6NK6;"
+            //"Выплата процентного дохода (эмитированы после 01.01.17)\t16.02.2023\t16.96\t0.00\t\tИС петролеум ОббП01; ISIN-RU000A1013C9;"
+            //"Поступление ДС клиента (безналичное)\t22.02.2023\t60,009.00\t0.00\t\tПеревод средств для участия в торгах по договору на брокерское обслуживание BP19195 от 11.10.2017 #ACC# BP19195-MS-01 #SBP89998#^НДС не облагается"
+            // Депозитарная комиссия - за хранение ЦБ	31.01.2023	0.00	533.52	Депо Базовый (№2, ФЛ+абон. 30р)
+            // Оборот по погашению ЦБ  14.02.2023  120.00  0.00 === никогда НЕТ isin!
+
+            CreateIncomingModel model = new CreateIncomingModel();
+            if (text is null || !text.Contains("\\t"))
+            {
+                ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + text;
+                return View("CreateIncoming");
+            }
+
+
+            string[] textSplitted = text.Split("\t");
+            if (textSplitted.Length < 3)
+            {
+                ViewData["Message"] = "Чтение строки не удалось, получено менее 3 элементов (2х табуляций-разделителей) в строке: " + text;
+                return View("CreateIncoming");
+            }
+
+            // тип операции
+            if (textSplitted[0].Contains("Выплата дивидендов") || textSplitted[0].Contains("Выплата процентного дохода"))
+            {
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=1 by 'Выплата дивидендов' ");
+                model.Category = 1;
+            }
+            else if (textSplitted[0].Contains("Оборот по погашению"))
+            {
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=2 by 'Оборот по погашению' ");
+                model.Category = 2;
+            }
+            else if (textSplitted[0].Contains("Поступление ДС клиента"))
+            {
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=0 seccode=0 by 'Поступление ДС клиента' ");
+                model.Category = 0;
+                model.SecCode = "0";
+            }
+            else if (textSplitted[0].Contains("Депозитарная комиссия"))
+            {
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=3 seccode=0 by 'Депозитарная комиссия' ");
+                model.Category = 3;
+                model.SecCode = "0";
+            }
+
+            // дата 
+            string[] dataSplitted = textSplitted[1].Split('.');
+            string dateString = $"{dataSplitted[2]}-{dataSplitted[1]}-{dataSplitted[0]} {DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}";
+            model.Date = DateTime.Parse(dateString);
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set {model.Date}");
+
+            //деньги
+            if (textSplitted[2].Length > 0 && !textSplitted[2].Equals("0.00"))
+            {
+                model.Value = textSplitted[2];
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set {model.Value} by textSplitted[2]");
+            }
+            else if (textSplitted[3].Length > 0 && !textSplitted[3].Equals("0.00"))
+            {
+                model.Value = textSplitted[3];
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set {model.Value} by textSplitted[3]");
+            }
+            model.Value = model.Value.Replace(",", "") ;
+
+            //ISIN to seccode
+            if (model.Category != 0) // это или деньги или не распознали ничего
+            {
+                if (model.Category == 2) // тут нет ISIN, надо запрашивать последний добавленный incoming и брать seccode оттуда 
+                {
+                    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText request last incoming. Reason: Category == 2");
+                    model.SecCode = await _repository.GetSecCodeFromLastRecord();
+                }
+                else // попробуем найти заполненный ISIN 
+                {
+                    if (textSplitted.Length >=4 && textSplitted[4].Length > 0 && textSplitted[4].Contains("ISIN-"))
+                    {
+                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText try set SecCode by {textSplitted[4]}");
+                        model.SecCode = await GetSecCodeByISIN(textSplitted[4]);
+                    }
+                    if (textSplitted.Length >=5 && textSplitted[5].Length > 0 && textSplitted[5].Contains("ISIN-"))
+                    {
+                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText try set SecCode by {textSplitted[5]}");
+                        model.SecCode = await GetSecCodeByISIN(textSplitted[5]);
+                    }
+
+                    //проверить, что нам прислали действительно seccode а не ошибку
+                    if (!StaticData.SecCodes.Any(x => x.SecCode == model.SecCode))// если нет
+                    {
+                        //отправим найденное в ошибки
+                        ViewData["Message"] = model.SecCode;
+                        model.SecCode = "0";//сбросим присвоенную ошибку
+                    }
+                }
+            }
+
+            return View("CreateIncoming", model);
+        }
+
+        private async Task<string> GetSecCodeByISIN(string text)
+        {
+            //ТМК, ПАО ао01; ISIN-RU000A0B6NK6;
+            string isin = text.Split("ISIN-")[1];
+            if (isin.Length < 12)
+            {
+                return "Ошибка. Длинна ISIN слишком мала: " + isin;
+            }
+            isin = isin.Substring(0, 12);
+
+            string secCode = await _secCodesRepo.GetSecCodeByISIN(isin);
+            return secCode;
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateIncoming(CreateIncomingModel newIncoming)

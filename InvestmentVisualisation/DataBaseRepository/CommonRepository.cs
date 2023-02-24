@@ -5,6 +5,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using DataAbstraction.Models.Incoming;
 
 namespace DataBaseRepository
 {

@@ -298,7 +298,6 @@ namespace DataBaseRepository
                                     {
                                         result.ExpiredDate = sdr.GetDateTime("expired_date");
                                     }
-
                                 }
                             }
                         }
@@ -315,6 +314,50 @@ namespace DataBaseRepository
                 }
 
                 return result;
+            }
+        }
+
+        public async Task<string> GetSecCodeByISIN(string isin)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSecCodeByISIN start " +
+                $"with isin={isin}");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "GetSecCodeByISIN.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                return "CommonRepository Error! File with SQL script not found at " + filePath;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSecCodeByISIN execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+                        cmd.Parameters.AddWithValue("@isin", isin);
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            return (string)await cmd.ExecuteScalarAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSecCodeByISIN Exception!" +
+                                $"\r\n{ex.Message}");
+                            return $"GetPageFromIncoming Exception! {ex.Message}";
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
             }
         }
     }

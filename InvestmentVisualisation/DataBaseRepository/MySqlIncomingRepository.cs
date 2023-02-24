@@ -355,5 +355,47 @@ namespace DataBaseRepository
                 return await _commonRepo.DeleteSingleRecordByQuery(query);
             }
         }
+
+        public async Task<string> GetSecCodeFromLastRecord()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetSecCodeFromLastRecord start");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "GetSecCodeFromLastRecord.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
+                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetSecCodeFromLastRecord execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            return (string)await cmd.ExecuteScalarAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetSecCodeFromLastRecord Exception!" +
+                                $"\r\n{ex.Message}");
+                            return $"GetSecCodeFromLastRecord Exception! {ex.Message}";
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+            }
+        }
     }
 }

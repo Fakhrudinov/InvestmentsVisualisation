@@ -16,6 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SqlQueries\Incoming\GetSecCodeFromLastRecord.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecCodes\GetSecCodeByISIN.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Incoming\CreateNewIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
