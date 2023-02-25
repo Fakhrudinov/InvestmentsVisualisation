@@ -12,10 +12,12 @@ namespace DataBaseRepository
         private ILogger<MySqlMoneyRepository> _logger;
         private readonly string _connectionString;
         private List<MoneyModel> _result = new List<MoneyModel>();
+        private IMySqlCommonRepository _commonRepo;
 
         public MySqlMoneyRepository(
             IOptions<DataBaseConnectionSettings> connection,
-            ILogger<MySqlMoneyRepository> logger)
+            ILogger<MySqlMoneyRepository> logger,
+            IMySqlCommonRepository commonRepo)
         {
             _logger = logger;
             _connectionString = $"" +
@@ -24,6 +26,8 @@ namespace DataBaseRepository
                 $"Password={connection.Value.Password};" +
                 $"Port={connection.Value.Port};" +
                 $"Database={connection.Value.Database}";
+
+            _commonRepo=commonRepo;
         }
 
         public async Task<List<MoneyModel>> GetMoneyLastYearPage()
@@ -191,6 +195,11 @@ namespace DataBaseRepository
                     }
                 }
             }
+        }
+
+        public void FillFreeMoney()
+        {
+            _commonRepo.FillFreeMoney();
         }
     }
 }

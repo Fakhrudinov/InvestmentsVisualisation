@@ -71,6 +71,12 @@ namespace InvestmentVisualisation.Controllers
                 await _repository.RecalculateMoney($"{year}-{month}-01");
             }
 
+            // если пересчет за последний месяц - обновить значение в layout.
+            if (year == DateTime.Now.Year && month == DateTime.Now.Month)
+            {
+                _repository.FillFreeMoney();
+            }
+
             return RedirectToAction("Index");
         }        
     }
