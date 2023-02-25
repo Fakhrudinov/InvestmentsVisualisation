@@ -3,7 +3,7 @@
 
 <div class="container">
 
-    <h4>SecCodeInfo</h4>
+    <h4>Редактировать инструмент</h4>
     <hr />
     <div class="row">
         <div class="col-md-4">
@@ -50,9 +50,11 @@
                         })
                     <span asp-validation-for="ExpiredDate" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+
+                <br />
+                <div class="form-group btn-group" style="width: 100%;">
                     <input type="submit" value="Save" class="btn btn-danger" />
-                    <a asp-action="Index" class="btn btn-success">Назад к списку SecCodes</a>
+                    <a asp-action="Index" class="btn btn-outline-success">Назад к списку SecCodes</a>
                 </div>
             </form>
         </div>
