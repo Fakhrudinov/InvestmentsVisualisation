@@ -85,13 +85,11 @@ namespace InvestmentVisualisation.Controllers
             // Депозитарная комиссия - за хранение ЦБ	31.01.2023	0.00	533.52	Депо Базовый (№2, ФЛ+абон. 30р)
             // Оборот по погашению ЦБ  14.02.2023  120.00  0.00 === никогда НЕТ isin!
 
-            CreateIncomingModel model = new CreateIncomingModel();
-            if (text is null || !text.Contains("\\t"))
+            if (text is null || !text.Contains("\t"))
             {
                 ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + text;
                 return View("CreateIncoming");
             }
-
 
             string[] textSplitted = text.Split("\t");
             if (textSplitted.Length < 3)
@@ -100,6 +98,7 @@ namespace InvestmentVisualisation.Controllers
                 return View("CreateIncoming");
             }
 
+            CreateIncomingModel model = new CreateIncomingModel();
             // тип операции
             if (textSplitted[0].Contains("Выплата дивидендов") || textSplitted[0].Contains("Выплата процентного дохода"))
             {

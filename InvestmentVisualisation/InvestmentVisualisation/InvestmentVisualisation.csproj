@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SqlQueries\Incoming\EditSingleIncoming.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Incoming\GetSecCodeFromLastRecord.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
