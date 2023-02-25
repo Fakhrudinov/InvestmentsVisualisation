@@ -15,8 +15,8 @@
             <div class="container">
                 <!--container-fluid-->
                 <a class="navbar-brand" asp-area="" asp-controller="Incoming" asp-action="Incoming">Статистика инвестиций</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <!--<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation" style="background-color:red;">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -43,6 +43,17 @@
                             <span class="nav-link text-dark">Free money: <strong>@StaticData.FreeMoney</strong></span>
                         </li>
                     </ul>
+                </div>-->
+                <div class="btn-group" role="group">
+                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
+                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Deals" asp-action="Deals">Сделки</a>
+                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
+                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="YearView" asp-action="Index">Таблица за год</a>
+                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
+                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="SecVolume" asp-action="Index">Объем инструментов</a>
+                </div>
+                <div class="col" style="text-align: right; ">
+                    <span class="nav-link text-dark">Остаток: <strong>@StaticData.FreeMoney</strong></span>
                 </div>
             </div>
         </nav>
