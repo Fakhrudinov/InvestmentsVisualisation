@@ -21,7 +21,7 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
+                        <li class="nav-item" @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" ? "active" : "")>
                             <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
                         </li>
                         <li class="nav-item">
@@ -44,13 +44,13 @@
                         </li>
                     </ul>
                 </div>-->
-                <div class="btn-group" role="group">
-                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
-                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Deals" asp-action="Deals">Сделки</a>
-                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
-                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="YearView" asp-action="Index">Таблица за год</a>
-                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
-                    <a class="btn btn-outline-secondary" asp-area="" asp-controller="SecVolume" asp-action="Index">Объем инструментов</a>
+                <div class="btn-group top_menu" role="group">
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" ? "active" : "")" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" ? "active" : "")" asp-area="" asp-controller="Deals" asp-action="Deals">Сделки</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Money" ? "active" : "")" asp-area="" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" ? "active" : "")" asp-area="" asp-controller="YearView" asp-action="Index">Таблица за год</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" ? "active" : "")" asp-area="" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecVolume" ? "active" : "")" asp-area="" asp-controller="SecVolume" asp-action="Index">Размер позиций</a>
                 </div>
                 <div class="col" style="text-align: right; ">
                     <span class="nav-link text-dark">Остаток: <strong>@StaticData.FreeMoney</strong></span>
