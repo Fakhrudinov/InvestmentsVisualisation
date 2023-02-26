@@ -17,52 +17,52 @@
             <th>
                 @Html.DisplayNameFor(model => model.AvPrice)
             </th>-->
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Volume)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Jan)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Feb)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Mar)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Apr)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.May)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Jun)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Jul)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Aug)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Sep)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Okt)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Nov)
             </th>
-            <th>
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Dec)
             </th>
-                <th style="text-align: right;">
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Summ)
             </th>
-                <th style="text-align: right;">
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.VolPercent)
             </th>
-                <th style="text-align: right;">
+                <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.DivPercent)
             </th>
         </tr>
@@ -82,13 +82,13 @@
         <td>
             @Html.DisplayFor(modelItem => item.AvPrice)
         </td>-->
-        <td>
+        <td style="text-align: right;">
             @Html.DisplayFor(modelItem => item.Volume)
         </td>
         @{
             if (item.Jan != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.Jan)
                             </td>
             }
@@ -101,7 +101,7 @@
 
             if (item.Feb != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.Feb)
                             </td>
             }
@@ -114,7 +114,7 @@
 
             if (item.Mar != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Март">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Март" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.Mar)
                             </td>
             }
@@ -127,7 +127,7 @@
 
             if (item.Apr != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Апрель">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Апрель" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.Apr)
                             </td>
             }
@@ -140,7 +140,7 @@
 
             if (item.May != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Май">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Май" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.May)
                             </td>
             }
@@ -153,7 +153,7 @@
 
             if (item.Jun != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июнь">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июнь" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.Jun)
                             </td>
             }
@@ -166,7 +166,7 @@
 
             if (item.Jul != null)
             {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июль">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июль" style="text-align: right;">
                                 @Html.DisplayFor(modelItem => item.Jul)
                             </td>
             }
@@ -179,7 +179,7 @@
 
             if (item.Aug != null)
             {
-                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Август">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Август" style="text-align: right;">
                             @Html.DisplayFor(modelItem => item.Aug)
                         </td>
             }
@@ -192,7 +192,7 @@
 
             if (item.Sep != null)
             {
-                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Сентябрь">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Сентябрь" style="text-align: right;">
                             @Html.DisplayFor(modelItem => item.Sep)
                         </td>
             }
@@ -205,7 +205,7 @@
 
             if (item.Okt != null)
             {
-                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Октябрь">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Октябрь" style="text-align: right;">
                             @Html.DisplayFor(modelItem => item.Okt)
                         </td>
             }
@@ -218,7 +218,7 @@
 
             if (item.Nov != null)
             {
-                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Ноябрь">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Ноябрь" style="text-align: right;">
                             @Html.DisplayFor(modelItem => item.Nov)
                         </td>
             }
@@ -231,7 +231,7 @@
 
             if (item.Dec != null)
             {
-                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Декабрь">
+                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Декабрь" style="text-align: right;">
                             @Html.DisplayFor(modelItem => item.Dec)
                         </td>
             }
