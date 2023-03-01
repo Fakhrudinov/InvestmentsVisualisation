@@ -12,6 +12,7 @@ namespace DataBaseRepository
     {
         private ILogger<CommonRepository> _logger;
         private readonly string _connectionString;
+        private readonly string _connectionDBName;
 
         public CommonRepository(IOptions<DataBaseConnectionSettings> connection, ILogger<CommonRepository> logger)
         {
@@ -23,6 +24,7 @@ namespace DataBaseRepository
                 $"Password={connection.Value.Password};" +
                 $"Port={connection.Value.Port};" +
                 $"Database={connection.Value.Database}";
+            _connectionDBName = connection.Value.Database;
         }
 
         public async Task<int> GetTableCountBySqlQuery(string query)
@@ -248,6 +250,8 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
+                query = query.Replace("@data_base", _connectionDBName);
+
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
