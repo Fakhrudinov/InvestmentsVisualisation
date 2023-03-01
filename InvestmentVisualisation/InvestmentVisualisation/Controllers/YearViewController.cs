@@ -11,12 +11,18 @@ namespace InvestmentVisualisation.Controllers
         private readonly ILogger<YearViewController> _logger;
         private IMySqlYearViewRepository _repository;
         private int _minimumYear;
+        private IMySqlSecVolumeRepository _secVolumeRepository;
 
-        public YearViewController(ILogger<YearViewController> logger, IMySqlYearViewRepository repository, IOptions<PaginationSettings> paginationSettings)
+        public YearViewController(
+            ILogger<YearViewController> logger, 
+            IMySqlYearViewRepository repository, 
+            IOptions<PaginationSettings> paginationSettings,            
+            IMySqlSecVolumeRepository secVolumeRepository)
         {
             _logger = logger;
             _repository = repository;
             _minimumYear = paginationSettings.Value.YearViewMinimumYear;
+            _secVolumeRepository = secVolumeRepository;
         }
 
         public async Task<IActionResult> Index(int year = 0)
@@ -24,25 +30,41 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController GET Deals called, year={year}");
 
             int currentYear = DateTime.Now.Year;
-            
-            if (year == 0)
+
+            if (year >= _minimumYear && year < currentYear)
             {
-                // add recalc money && secVolume ??????????????????????????????????????????????????????
-                await _repository.RecalculateYearView(currentYear);
-                year = currentYear;
+                await _repository.RecalculateYearView(year);
             }
             else
             {
-                if (year >= _minimumYear && year <= currentYear)
-                {
-                    await _repository.RecalculateYearView(year);
-                }
-                else
-                {
-                    // ругайся ?
-                    year = currentYear;
-                }
+                // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
+                await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
+                await _repository.RecalculateYearView(currentYear);
+                year = currentYear;
             }
+
+
+            //if (year == 0)
+            //{
+            //    // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
+            //    await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
+            //    await _repository.RecalculateYearView(currentYear);
+            //    year = currentYear;
+            //}
+            //else
+            //{
+            //    if (year >= _minimumYear && year <= currentYear)
+            //    {
+            //        await _repository.RecalculateYearView(year);
+            //    }
+            //    else
+            //    {
+            //        // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
+            //        await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
+            //        await _repository.RecalculateYearView(currentYear);
+            //        year = currentYear;
+            //    }
+            //}
 
             List<YearViewModel> yearViews = await _repository.GetYearViewPage();
 
