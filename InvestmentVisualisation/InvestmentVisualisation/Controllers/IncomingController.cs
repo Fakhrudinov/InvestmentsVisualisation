@@ -143,7 +143,7 @@ namespace InvestmentVisualisation.Controllers
             model.Value = model.Value.Replace(",", "") ;
 
             //ISIN to seccode
-            if (model.Category != 0) // это или деньги или не распознали ничего
+            if (model.Category != 0 && model.Category != 3) // это не зачисленные мной деньги или не списанная брок комиссия
             {
                 if (model.Category == 2) // тут нет ISIN, надо запрашивать последний добавленный incoming и брать seccode оттуда 
                 {
