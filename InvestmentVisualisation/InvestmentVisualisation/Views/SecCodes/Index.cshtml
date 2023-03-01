@@ -58,7 +58,7 @@
                 <td>
                         @if (item.ExpiredDate is not null)
                         {
-                            @Html.DisplayFor(modelItem => item.ExpiredDate)
+                            @Convert.ToDateTime(item.ExpiredDate).ToString("yyyy-MM-dd")
                         }                    
                 </td>
                 <td>
