@@ -43,29 +43,6 @@ namespace InvestmentVisualisation.Controllers
                 year = currentYear;
             }
 
-
-            //if (year == 0)
-            //{
-            //    // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
-            //    await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
-            //    await _repository.RecalculateYearView(currentYear);
-            //    year = currentYear;
-            //}
-            //else
-            //{
-            //    if (year >= _minimumYear && year <= currentYear)
-            //    {
-            //        await _repository.RecalculateYearView(year);
-            //    }
-            //    else
-            //    {
-            //        // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
-            //        await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
-            //        await _repository.RecalculateYearView(currentYear);
-            //        year = currentYear;
-            //    }
-            //}
-
             List<YearViewModel> yearViews = await _repository.GetYearViewPage();
 
             List<int> objSt = new List<int>();
