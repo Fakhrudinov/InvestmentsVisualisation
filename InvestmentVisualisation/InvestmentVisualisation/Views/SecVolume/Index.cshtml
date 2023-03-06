@@ -36,6 +36,7 @@
                 <th style="text-align:right;">
                 @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).Volume)
             </th>
+            <th style="background-color: red; text-align:right;"></th>
         </tr>
     </thead>
     <tbody>
@@ -47,14 +48,17 @@
             <td>
                 @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
             </td>
-                    <td style="text-align:right;">
+            <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.Pieces)
             </td>
-                    <td style="text-align:right;">
+            <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.AvPrice)
             </td>
-                    <td style="text-align:right;">
+            <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.Volume)
+            </td>
+            <td style="background-color: red; text-align:right;">
+                @Html.ActionLink("Show All " + item.SecCode, "Deals","Deals", new { secCode = item.SecCode }, new { @class = "btn btn-outline-success btn-sm"  })
             </td>
         </tr>
 }
@@ -81,11 +85,11 @@
                 {
                     if (item == ViewBag.year)
                     {
-                        <div class="btn btn-success" style="border-color: #ddd;">@item</div>
+                            <div class="btn btn-success" style="border-color: #ddd;">@item</div>
                     }
                     else
                     {
-                        <a asp-action="Index" asp-route-year="@item" class="btn btn-primary" style="border-color: #ddd;">@item</a>
+                            <a asp-action="Index" asp-route-year="@item" class="btn btn-primary" style="border-color: #ddd;">@item</a>
                     }                    
                 }
             }
