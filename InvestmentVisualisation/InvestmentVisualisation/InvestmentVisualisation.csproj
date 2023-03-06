@@ -19,6 +19,12 @@
     <None Update="SqlQueries\Incoming\EditSingleIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\Incoming\GetIncomingSpecificSecCodeCount.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\Incoming\GetPageFromIncomingSpecificSecCode.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Incoming\GetSecCodeFromLastRecord.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -115,5 +121,7 @@
     <Folder Include="SqlQueries\Deals\" />
     <Folder Include="SqlQueries\YearView\" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

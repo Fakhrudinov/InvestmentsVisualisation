@@ -402,5 +402,94 @@ namespace DataBaseRepository
                 }
             }
         }
+
+        public async Task<int> GetIncomingSpecificSecCodeCount(string secCode)
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetIncomingSpecificSecCodeCount.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
+                return 0;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                query = query.Replace("@secCode", secCode);
+
+                return await _commonRepo.GetTableCountBySqlQuery(query);
+            }
+        }
+
+        public async Task<List<IncomingModel>> GetPageFromIncomingSpecificSecCode(string secCode, int itemsAtPage, int pageNumber)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetPageFromIncomingSpecificSecCode start " +
+                $"with secCode={secCode} itemsAtPage={itemsAtPage} page={pageNumber}");
+
+            List<IncomingModel> result = new List<IncomingModel>();
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetPageFromIncomingSpecificSecCode.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! File with SQL script not found at " + filePath);
+                return result;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetPageFromIncomingSpecificSecCode " +
+                    $"execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
+                        cmd.Parameters.AddWithValue("@page_number", pageNumber);
+                        cmd.Parameters.AddWithValue("@secCode", secCode);
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            {
+                                while (await sdr.ReadAsync())
+                                {
+                                    IncomingModel newIncoming = new IncomingModel();
+
+                                    newIncoming.Id = sdr.GetInt32("id");
+                                    newIncoming.Date = sdr.GetDateTime("date");
+                                    newIncoming.SecCode = sdr.GetString("seccode");
+                                    newIncoming.SecBoard = sdr.GetInt32("secboard");
+                                    newIncoming.Category= sdr.GetInt32("category");
+                                    newIncoming.Value = sdr.GetDecimal("value").ToString();
+
+                                    int checkForNull = sdr.GetOrdinal("comission");
+                                    if (!sdr.IsDBNull(checkForNull))
+                                    {
+                                        newIncoming.Comission = sdr.GetDecimal("comission").ToString();
+                                    }
+
+                                    result.Add(newIncoming);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository GetPageFromIncomingSpecificSecCode Exception!" +
+                                $"\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
     }
 }

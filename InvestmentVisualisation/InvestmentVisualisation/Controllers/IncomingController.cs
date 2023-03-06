@@ -29,12 +29,21 @@ namespace InvestmentVisualisation.Controllers
             _secCodesRepo = secCodesRepo;
         }
 
-        public async Task<IActionResult> Incoming(int page = 1)
+        public async Task<IActionResult> Incoming(int page = 1, string secCode = "")
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Incoming called, page={page}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Incoming called, page={page} secCode={secCode}");
             //https://localhost:7226/Incoming/Incoming?page=3
 
-            int count = await _repository.GetIncomingCount();
+            int count = 0;
+            if (secCode.Length > 0)
+            {
+                count = await _repository.GetIncomingSpecificSecCodeCount(secCode);
+            }
+            else
+            {
+                count = await _repository.GetIncomingCount();
+            }
+
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController Incoming table size={count}");
 
             IncomingWithPaginations incomingWithPaginations = new IncomingWithPaginations();
@@ -43,8 +52,16 @@ namespace InvestmentVisualisation.Controllers
                 count, 
                 page,
                 _itemsAtPage);
-            
-            incomingWithPaginations.Incomings = await _repository.GetPageFromIncoming(_itemsAtPage, (page - 1) * _itemsAtPage);
+
+            if (secCode.Length > 0)
+            {
+                ViewBag.secCode = secCode;
+                incomingWithPaginations.Incomings = await _repository.GetPageFromIncomingSpecificSecCode(secCode, _itemsAtPage, (page - 1) * _itemsAtPage);
+            }
+            else
+            {
+                incomingWithPaginations.Incomings = await _repository.GetPageFromIncoming(_itemsAtPage, (page - 1) * _itemsAtPage);
+            }
 
             return View(incomingWithPaginations);
         }
