@@ -36,7 +36,7 @@
                 <th style="text-align:right;">
                 @Html.DisplayNameFor(model => model.SecVolumes.ElementAt(0).Volume)
             </th>
-            <th style="background-color: red; text-align:right;"></th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -57,8 +57,9 @@
             <td style="text-align:right;">
                 @Html.DisplayFor(modelItem => item.Volume)
             </td>
-            <td style="background-color: red; text-align:right;">
-                @Html.ActionLink("Show All " + item.SecCode, "Deals","Deals", new { secCode = item.SecCode }, new { @class = "btn btn-outline-success btn-sm"  })
+            <td class="col-3" style="text-align:right;">
+                @Html.ActionLink("Show all deals", "Deals", "Deals", new { secCode = item.SecCode }, new { @class = "btn btn-outline-secondary btn-sm"  })
+                @Html.ActionLink("Show all money", "Incoming", "Incoming", new { secCode = item.SecCode }, new { @class = "btn btn-outline-secondary btn-sm"  })
             </td>
         </tr>
 }
