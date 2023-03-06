@@ -4,6 +4,7 @@ using DataAbstraction.Interfaces;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.Deals;
+using DataAbstraction.Models.Incoming;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -27,11 +28,19 @@ namespace InvestmentVisualisation.Controllers
         }
 
 
-        public async Task<IActionResult> Deals(int page = 1)
+        public async Task<IActionResult> Deals(int page = 1, string secCode = "")
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Deals called, page={page}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Deals called, page={page} secCode={secCode}");
 
-            int count = await _repository.GetDealsCount();
+            int count = 0;
+            if (secCode.Length > 0)
+            {
+                count = await _repository.GetDealsSpecificSecCodeCount(secCode);
+            }
+            else
+            {
+                count = await _repository.GetDealsCount();
+            }
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Deals table size={count}");
 
             DealsWithPaginations dealsWithPaginations = new DealsWithPaginations();
@@ -41,7 +50,15 @@ namespace InvestmentVisualisation.Controllers
             page,
             _itemsAtPage);
 
-            dealsWithPaginations.Deals = await _repository.GetPageFromDeals(_itemsAtPage, (page - 1) * _itemsAtPage);
+            if (secCode.Length > 0)
+            {
+                ViewBag.secCode = secCode;
+                dealsWithPaginations.Deals = await _repository.GetPageFromDealsSpecificSecCode(secCode, _itemsAtPage, (page - 1) * _itemsAtPage);
+            }
+            else
+            {
+                dealsWithPaginations.Deals = await _repository.GetPageFromDeals(_itemsAtPage, (page - 1) * _itemsAtPage);
+            }            
 
             return View(dealsWithPaginations);
         }

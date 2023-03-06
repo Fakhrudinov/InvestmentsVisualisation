@@ -376,5 +376,101 @@ namespace DataBaseRepository
                 return await _commonRepo.DeleteSingleRecordByQuery(query);
             }
         }
+
+        public async Task<int> GetDealsSpecificSecCodeCount(string secCode)
+        {
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetDealsSpecificSecCodeCount.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                return 0;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                query = query.Replace("@secCode", secCode);
+
+                return await _commonRepo.GetTableCountBySqlQuery(query);
+            }
+        }
+
+        public async Task<List<DealModel>> GetPageFromDealsSpecificSecCode(string secCode, int itemsAtPage, int pageNumber)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDealsSpecificSecCode start " +
+                $"with secCode={secCode} itemsAtPage={itemsAtPage} page={pageNumber}");
+
+            List<DealModel> result = new List<DealModel>();
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetPageFromDealsSpecificSecCode.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                return result;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDealsSpecificSecCode " +
+                    $"execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
+                        cmd.Parameters.AddWithValue("@page_number", pageNumber);
+                        cmd.Parameters.AddWithValue("@secCode", secCode);
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            {
+                                while (await sdr.ReadAsync())
+                                {
+                                    DealModel newDeal = new DealModel();
+
+                                    newDeal.Id = sdr.GetInt32("id");
+                                    newDeal.Date = sdr.GetDateTime("date");
+                                    newDeal.SecCode = sdr.GetString("seccode");
+                                    newDeal.SecBoard = sdr.GetInt32("secboard");
+
+                                    newDeal.AvPrice = sdr.GetDecimal("av_price").ToString();
+                                    newDeal.Pieces = sdr.GetInt32("pieces");
+
+                                    int checkForNull = sdr.GetOrdinal("comission");
+                                    if (!sdr.IsDBNull(checkForNull))
+                                    {
+                                        newDeal.Comission = sdr.GetDecimal("comission").ToString();
+                                    }
+
+                                    int checkForNullNkd = sdr.GetOrdinal("nkd");
+                                    if (!sdr.IsDBNull(checkForNullNkd))
+                                    {
+                                        newDeal.NKD = sdr.GetDecimal("nkd").ToString();
+                                    }
+
+                                    result.Add(newDeal);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDealsSpecificSecCode Exception!" +
+                                $"\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+
+                return result;
+            }
+        }
     }
 }

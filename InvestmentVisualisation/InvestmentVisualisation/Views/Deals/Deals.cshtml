@@ -9,10 +9,27 @@
 
 <div class="container">
 
-    <h2>Сделки</h2>
+    @{
+        if (ViewBag.secCode is null)
+        {
+            <h2>Все сделки</h2>
+        }
+        else
+        {
+            <h2>Все сделки с @ViewBag.secCode</h2>
+        }
+    }
 
     <p>
         <a asp-area="" asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
+
+        @{
+            if (ViewBag.secCode is not null)
+            {
+                <a asp-area="" asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">Назад к списку всех сделок</a>
+            }
+        }
+
     </p>
     <table class="table table-hover">
         <thead>
@@ -75,8 +92,15 @@
                 </td>
 
                 <td style="text-align:right;">
-                        @Html.ActionLink("+ ", "CreateSpecific",
-                    new 
+                    @{
+                        if (ViewBag.secCode is null)
+                        {
+                            @Html.ActionLink("Show All " + item.SecCode, "Deals", new { secCode = item.SecCode }, new { @class = "btn btn-outline-success btn-sm"  })
+                        }
+                    }
+
+                    @Html.ActionLink("+ ", "CreateSpecific",
+                        new 
                         { 
                             data = item.Date, 
                             tiker = item.SecCode, 
@@ -93,12 +117,30 @@
 
     @if (Model.PageViewModel.HasNextPage)
     {
-        <a asp-action="Deals" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
+        if (ViewBag.secCode is not null)
+        {
+            @Html.ActionLink("Назад", "Deals", new { page = @Model.PageViewModel.PageNumber + 1, secCode = ViewBag.secCode }, new { @class = "btn btn-secondary"  })
+        }
+        else
+        {
+            @Html.ActionLink("Назад", "Deals", new { page = @Model.PageViewModel.PageNumber + 1 }, new { @class = "btn btn-secondary"  })
+        }
+        //<a asp-action="Deals" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
     }
+
     <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+
     @if (Model.PageViewModel.HasPreviousPage)
     {
-        <a asp-action="Deals" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
+        if (ViewBag.secCode is not null)
+        {
+            @Html.ActionLink("Вперед", "Deals", new { page = @Model.PageViewModel.PageNumber - 1, secCode = ViewBag.secCode }, new { @class = "btn btn-secondary"  })
+        }
+        else
+        {
+            @Html.ActionLink("Вперед", "Deals", new { page = @Model.PageViewModel.PageNumber - 1 }, new { @class = "btn btn-secondary"  })
+        }
+       //<a asp-action="Deals" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
     }
 
 </div>
