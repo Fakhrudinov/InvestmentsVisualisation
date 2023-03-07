@@ -75,5 +75,50 @@ namespace InvestmentVisualisation.Controllers
 
             return RedirectToAction("Index", new { year = year });
         }
+
+        public async Task<IActionResult> SecVolumeLast3YearsDynamic()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET SecVolumeLast3YearsDynamic called");
+
+            List<SecVolumeLast3YearsDynamicModel> model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+
+            CalculateChangesPercentsForList(model);
+
+            ViewBag.year = DateTime.Now.Year;
+            return View(model);
+        }
+
+        private void CalculateChangesPercentsForList(List<SecVolumeLast3YearsDynamicModel> model)
+        {
+            foreach (SecVolumeLast3YearsDynamicModel record in model)
+            {
+                if (record.PreviousYearPieces is null)
+                {
+                    record.LastYearChanges = 100;
+                }
+
+                if (record.PreviousPreviousYearPieces is null && record.PreviousYearPieces is not null)
+                {
+                    record.PreviousYearChanges = 100;
+                }
+
+                if(record.PreviousYearPieces is not null)
+                {
+                    record.LastYearChanges = CalcPercent(record.LastYearPieces, (int)record.PreviousYearPieces);
+                }
+
+                if (record.PreviousPreviousYearPieces is not null && record.PreviousYearPieces is not null)
+                {
+                    record.PreviousYearChanges = CalcPercent((int)record.PreviousYearPieces, (int)record.PreviousPreviousYearPieces);
+                }
+            }
+        }
+
+        private decimal CalcPercent(int last, int previous)
+        {
+            int differ = last - previous;
+            decimal change = (decimal)((decimal)differ/previous);
+            return change * 100;
+        }
     }
 }
