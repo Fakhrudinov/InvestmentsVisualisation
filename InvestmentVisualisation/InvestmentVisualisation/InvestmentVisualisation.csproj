@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DataAbstraction\DataAbstraction.csproj" />
     <ProjectReference Include="..\DataBaseRepository\DataBaseRepository.csproj" />
+    <ProjectReference Include="..\HttpDataRepository\HttpDataRepository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

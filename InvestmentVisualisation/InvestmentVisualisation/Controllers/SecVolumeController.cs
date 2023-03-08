@@ -4,6 +4,8 @@ using DataAbstraction.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecVolume;
+using DataAbstraction.Models.BaseModels;
+using DataAbstraction.Models.MoneyByMonth;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -13,16 +15,19 @@ namespace InvestmentVisualisation.Controllers
         private IMySqlSecVolumeRepository _repository;
         private int _itemsAtPage;
         private int _minimumYear;
+        private ISmartLabDividents _webRepository;
 
         public SecVolumeController(
             ILogger<SecVolumeController> logger, 
             IMySqlSecVolumeRepository repository, 
-            IOptions<PaginationSettings> paginationSettings)
+            IOptions<PaginationSettings> paginationSettings,
+            ISmartLabDividents webRepository)
         {
             _logger = logger;
             _repository = repository;
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
             _minimumYear = paginationSettings.Value.SecVolumeMinimumYear;
+            _webRepository = webRepository;
         }
 
         public async Task<IActionResult> Index(int page = 1, int year = 0)
@@ -84,8 +89,31 @@ namespace InvestmentVisualisation.Controllers
 
             CalculateChangesPercentsForList(model);
 
+            List<SecCodeAndDividentModel> smartLabDivs = await _webRepository.GetDividentsTable();
+            SetDividentsFromSmartLabToModel(smartLabDivs, model);
+           
             ViewBag.year = DateTime.Now.Year;
+            if (smartLabDivs.Count > 0)
+            {
+                ViewBag.SmartLab = true;
+            }
+            
             return View(model);
+        }
+
+        private void SetDividentsFromSmartLabToModel(List<SecCodeAndDividentModel> smartLabDivs, List<SecVolumeLast3YearsDynamicModel> model)
+        {
+            if (smartLabDivs.Count > 0)
+            {
+                foreach (SecCodeAndDividentModel smDiv in smartLabDivs)
+                {
+                    int index = model.FindIndex(sv => sv.SecCode == smDiv.SecCode);
+                    if (index > 0)
+                    {
+                        model[index].SmartLabDividents = smDiv.Divident;
+                    }                    
+                }
+            }
         }
 
         private void CalculateChangesPercentsForList(List<SecVolumeLast3YearsDynamicModel> model)

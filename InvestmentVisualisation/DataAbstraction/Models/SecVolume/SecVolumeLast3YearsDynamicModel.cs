@@ -20,5 +20,7 @@ namespace DataAbstraction.Models.SecVolume
 
         [DisplayFormat(DataFormatString = "{0:0.000000}")]
         public decimal LastYearVolume { get; set; }
+
+        public string SmartLabDividents { get; set; }
     }
 }

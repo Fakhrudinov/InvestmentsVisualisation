@@ -1,6 +1,7 @@
 using DataAbstraction.Interfaces;
 using DataAbstraction.Models.Settings;
 using DataBaseRepository;
+using HttpDataRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +15,11 @@ builder.Services.AddTransient<IMySqlYearViewRepository, MySqlYearViewRepository>
 builder.Services.AddTransient<IMySqlSecCodesRepository, MySqlSecCodesRepository>();
 builder.Services.AddTransient<IMySqlSecVolumeRepository, MySqlSecVolumeRepository>();
 
+builder.Services.AddTransient<ISmartLabDividents, SmartLabDividents>();
+
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
+builder.Services.Configure<SmartLabDiviPageSettings>(builder.Configuration.GetSection("SmartLabDiviPageSettings"));
 
 var app = builder.Build();
 
@@ -37,5 +41,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
+    //pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
 
 app.Run();

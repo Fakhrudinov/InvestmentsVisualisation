@@ -16,6 +16,14 @@
                 </th>
                 <th colspan="2" class="border border-dark border-bottom-0" style="text-align:center;">@p</th>
                 <th colspan="3" class="border border-dark border-bottom-0" style="text-align:center;">@ViewBag.year</th>
+                @{
+                    if (ViewBag.SmartLab == true)
+                    {
+                        <th rowspan="2" class="border border-dark" style="text-align:center;">
+                            SmLab див<br />доходность
+                        </th>
+                    }
+                }
             </tr>
             <tr>
                 <th class="border border-dark border-top-0" style="text-align:right;">
@@ -62,7 +70,11 @@
                 <td style="text-align:right;">
                     @Html.DisplayFor(modelItem => item.PreviousYearPieces)
                 </td>
-                    <td style="text-align:right;border-left-color:black; border-left-width: 1px; background-color: @(@item.LastYearChanges > 0 && @item.LastYearChanges != 100 ? "lightgreen" : "")">
+                    <td style="
+                            text-align:right;
+                            border-left-color:black; 
+                            border-left-width: 1px; 
+                            background-color: @(@item.LastYearChanges > 0 && @item.LastYearChanges != 100 ? "lightgreen" : "")">
                     @Html.DisplayFor(modelItem => item.LastYearChanges)
                     %   
                 </td>
@@ -72,6 +84,14 @@
                 <td style="text-align:right;border-right-color:black; border-right-width: 1px;">
                     @Html.DisplayFor(modelItem => item.LastYearVolume)
                 </td>
+                @{
+                    if (ViewBag.SmartLab == true)
+                    {
+                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                            @Html.DisplayFor(modelItem => item.SmartLabDividents)
+                        </td>
+                    }
+                }
             </tr>
     }
         </tbody>
