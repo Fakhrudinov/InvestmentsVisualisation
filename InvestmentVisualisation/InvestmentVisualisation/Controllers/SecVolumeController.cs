@@ -128,8 +128,13 @@ namespace InvestmentVisualisation.Controllers
             {
                 foreach (SecCodeAndDividentModel smDiv in dividents)
                 {
+                    if (smDiv.SecCode.Contains("AKRN"))
+                    {
+                        Console.WriteLine();
+                    }
+
                     int index = model.FindIndex(sv => sv.SecCode == smDiv.SecCode);
-                    if (index > 0)
+                    if (index >= 0)
                     {
                         if (webSite == WebSites.SmartLab)
                         {
