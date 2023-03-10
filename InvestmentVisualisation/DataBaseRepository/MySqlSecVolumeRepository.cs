@@ -39,6 +39,11 @@ namespace DataBaseRepository
             {
                 _commonRepo.FillStaticSecCodes();
             }
+
+            if (StaticData.FreeMoney is null)
+            {
+                _commonRepo.FillFreeMoney();
+            }
         }
 
         public async Task<int> GetSecVolumeCountForYear(int year)

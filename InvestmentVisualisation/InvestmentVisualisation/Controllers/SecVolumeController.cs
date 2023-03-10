@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.BaseModels;
-using DataAbstraction.Models.MoneyByMonth;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -15,13 +14,20 @@ namespace InvestmentVisualisation.Controllers
         private IMySqlSecVolumeRepository _repository;
         private int _itemsAtPage;
         private int _minimumYear;
-        private ISmartLabDividents _webRepository;
+        private IWebDividents _webRepository;
+
+        private enum WebSites
+        {
+            SmartLab = 0,
+            InvLab = 1,
+            Dohod = 2
+        }
 
         public SecVolumeController(
             ILogger<SecVolumeController> logger, 
             IMySqlSecVolumeRepository repository, 
             IOptions<PaginationSettings> paginationSettings,
-            ISmartLabDividents webRepository)
+            IWebDividents webRepository)
         {
             _logger = logger;
             _repository = repository;
@@ -89,29 +95,74 @@ namespace InvestmentVisualisation.Controllers
 
             CalculateChangesPercentsForList(model);
 
-            List<SecCodeAndDividentModel> smartLabDivs = await _webRepository.GetDividentsTable();
-            SetDividentsFromSmartLabToModel(smartLabDivs, model);
-           
-            ViewBag.year = DateTime.Now.Year;
+            List<SecCodeAndDividentModel>? dohodDivs = _webRepository.GetDividentsTableFromDohod();
+            SetDividentsToModel(dohodDivs, model, WebSites.Dohod);
+            if (dohodDivs.Count > 0)
+            {
+                ViewBag.DohodDivs = true;
+            }
+
+            List<SecCodeAndDividentModel>? invLabDivs = _webRepository.GetDividentsTableFromInvLab();
+            SetDividentsToModel(invLabDivs, model, WebSites.InvLab);
+            if (invLabDivs.Count > 0)
+            {
+                ViewBag.InvLabDivs = true;
+            }
+
+            List<SecCodeAndDividentModel> ? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
+            SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
             if (smartLabDivs.Count > 0)
             {
                 ViewBag.SmartLab = true;
             }
-            
+
+            ViewBag.year = DateTime.Now.Year;
+
+
             return View(model);
         }
 
-        private void SetDividentsFromSmartLabToModel(List<SecCodeAndDividentModel> smartLabDivs, List<SecVolumeLast3YearsDynamicModel> model)
+        private void SetDividentsToModel(List<SecCodeAndDividentModel> ? dividents, List<SecVolumeLast3YearsDynamicModel> model, WebSites webSite)
         {
-            if (smartLabDivs.Count > 0)
+            if (dividents is not null)
             {
-                foreach (SecCodeAndDividentModel smDiv in smartLabDivs)
+                foreach (SecCodeAndDividentModel smDiv in dividents)
                 {
                     int index = model.FindIndex(sv => sv.SecCode == smDiv.SecCode);
                     if (index > 0)
                     {
-                        model[index].SmartLabDividents = smDiv.Divident;
-                    }                    
+                        if (webSite == WebSites.SmartLab)
+                        {
+                            model[index].SmartLabDividents = smDiv.Divident;
+                        }
+                        else if (webSite == WebSites.InvLab)
+                        {
+                            model[index].InvLabDividents = smDiv.Divident;
+                        }
+                        else if (webSite == WebSites.Dohod)
+                        {
+                            model[index].DohodDividents = smDiv.Divident;
+                        }                        
+                    }
+                    else
+                    {
+                        // добавим в модель недостающий seccode
+                        SecVolumeLast3YearsDynamicModel newModel = new SecVolumeLast3YearsDynamicModel { SecCode = smDiv.SecCode };
+                        if (webSite == WebSites.SmartLab)
+                        {
+                            newModel.SmartLabDividents = smDiv.Divident;
+                        }
+                        else if(webSite == WebSites.InvLab)
+                        {
+                            newModel.InvLabDividents = smDiv.Divident;
+                        }
+                        else if(webSite == WebSites.Dohod)
+                        {
+                            newModel.DohodDividents = smDiv.Divident;
+                        }
+
+                        model.Add(newModel);
+                    }
                 }
             }
         }

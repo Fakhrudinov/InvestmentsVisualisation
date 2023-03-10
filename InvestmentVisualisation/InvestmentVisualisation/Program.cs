@@ -15,11 +15,14 @@ builder.Services.AddTransient<IMySqlYearViewRepository, MySqlYearViewRepository>
 builder.Services.AddTransient<IMySqlSecCodesRepository, MySqlSecCodesRepository>();
 builder.Services.AddTransient<IMySqlSecVolumeRepository, MySqlSecVolumeRepository>();
 
-builder.Services.AddTransient<ISmartLabDividents, SmartLabDividents>();
+builder.Services.AddTransient<IWebDividents, WebDividents>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
-builder.Services.Configure<SmartLabDiviPageSettings>(builder.Configuration.GetSection("SmartLabDiviPageSettings"));
+
+builder.Services.Configure<WebDiviPageSettings>("SmLab", builder.Configuration.GetSection("WebPageDividentInfo:SmartLabDiviPageSettings"));
+builder.Services.Configure<WebDiviPageSettings>("InvLab", builder.Configuration.GetSection("WebPageDividentInfo:InvLabDiviPageSettings"));
+builder.Services.Configure<WebDiviPageSettings>("Dohod", builder.Configuration.GetSection("WebPageDividentInfo:DohodDiviPageSettings"));
 
 var app = builder.Build();
 
