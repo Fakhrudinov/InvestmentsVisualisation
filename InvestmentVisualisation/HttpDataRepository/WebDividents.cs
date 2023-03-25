@@ -4,6 +4,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
+using System.Reflection;
 
 namespace HttpDataRepository
 {
@@ -78,6 +79,11 @@ namespace HttpDataRepository
                     continue;
                 }
 
+                if (newDiv.SecCode.Contains("AKRN"))
+                {
+                    Console.WriteLine();
+                }
+
                 newDiv.Divident = CleanTextFromHtmlTags(dataTr[options.NumberOfCellWithDiscont], options.CleanWordsFromCell);
                 if (newDiv.Divident.Equals("0%") || 
                     newDiv.Divident.Replace(",", ".").Equals("0.0%") ||
@@ -89,13 +95,74 @@ namespace HttpDataRepository
 
                 _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividents " +
                     $"Add SecCodeAndDividentModel='{newDiv.SecCode}' '{newDiv.Divident}'");
-                result.Add(newDiv);
+
+                /// пробуем найти, если нет - добавляем.
+                /// если есть, сравниваем, одинаковые ПРОПУСКАЕМ
+                /// если меньше, чем есть - ПРОПУСКАЕМ
+                /// если больше - заменяем существуещее значение
+                int index = result.FindIndex(res => res.SecCode == newDiv.SecCode);
+                if (index >= 0)
+                {
+                    if (result[index].Divident.Equals(newDiv.Divident))
+                    {
+                        // ПРОПУСКАЕМ одинаковые
+                        continue;
+                    }
+                    else
+                    {
+                        bool biggerThenExist = CompareTwoDividentsValues(result[index].Divident, newDiv.Divident);
+                        if (biggerThenExist )
+                        {
+                            //если больше - заменяем существуещее значение
+                            result[index].Divident = newDiv.Divident;
+                        }
+                    }
+                }
+                else
+                {
+                    // не нашли, добавляем
+                    result.Add(newDiv);
+                }                
             }
 
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividents " +
                 $"result list count is {result.Count}");
 
             return result;
+        }
+
+        private bool CompareTwoDividentsValues(string divident1, string divident2)
+        {
+            decimal divExist = GetDecimalFromDivString(divident1);
+            decimal divNew = GetDecimalFromDivString(divident2);
+
+            if (divExist < divNew)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private decimal GetDecimalFromDivString(string divident)
+        {
+            divident = divident.Replace("%", "");
+            divident = divident.Replace(".", ",");
+            decimal dec;
+            if (decimal.TryParse(divident, out dec))
+            {
+                return dec;
+            }
+            else
+            {
+                divident = divident.Replace(",", ".");
+                if (decimal.TryParse(divident, out dec))
+                {
+                    return dec;
+                }
+            }
+
+            return dec;
         }
 
         private string ? GetSecCodeFromTD(string rawText)
