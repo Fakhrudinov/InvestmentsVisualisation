@@ -38,7 +38,7 @@ namespace HttpDataRepository
 
         public List<SecCodeAndDividentModel>? GetDividentsTableFromDohod()
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromInvLab called for InvLab");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromInvLab called for Dohod");
             return GetDividents(_dohodOptions);
         }
 
