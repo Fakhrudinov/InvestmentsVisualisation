@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DataAbstraction.Models.SecVolume.SecVolumeLast3YearsDynamicModel>
+﻿@model IEnumerable<DataAbstraction.Models.SecVolume.SecVolumeLast2YearsDynamicModel>
 
 @{
     int pp = ViewBag.year - 2;
@@ -8,7 +8,7 @@
 }
 
 <div class="container">
-    <h3>Увеличение позиций в последние 3 года и данные по дивам сторонних сайтов</h3>
+    <h3>Увеличение позиций в последние 2 года и данные по дивам сторонних сайтов</h3>
     <table class="table table-hover table-sm">
         <thead class="table-light">
             <tr>
@@ -17,38 +17,38 @@
                 <th class="border border-dark border-bottom-0" style="text-align:center;">
                     @pp
                 </th>
-                <th colspan="2" class="border border-dark border-bottom-0" style="text-align:center;">@p</th>
+                <th class="border border-dark border-bottom-0" style="text-align:center;">@p</th>
                 <th colspan="3" class="border border-dark border-bottom-0" style="text-align:center;">@ViewBag.year</th>
                 @{
                     if (ViewBag.SmartLab == true)
                     {
                         <th rowspan="2" class="border border-dark" style="text-align:center;">
-                            SmLab<br />prev
+                            <a href="https://smart-lab.ru/dividends/yield/" target="_blank">SmLab</a>
+                            <br />prev
                         </th>
                     }
 
                     if (ViewBag.InvLabDivs == true)
                     {
                         <th rowspan="2" class="border border-dark" style="text-align:center;">
-                            InvLab<br />future
+                            <a href="https://invlab.ru/akcii/rossiyskie-dividendnye/" target="_blank">InvLab</a>
+                            <br />future
                         </th>
                     }
                     if (ViewBag.DohodDivs == true)
                     {
                         <th rowspan="2" class="border border-dark" style="text-align:center;">
-                            Dohod<br />future
+                            <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
+                            <br />future
                         </th>
                     }                    
                 }
             </tr>
             <tr>
-                <th class="border border-dark border-top-0" style="text-align:right;">
+                <th class="border border-dark border-top-0" style="text-align:center;">
                     штук
                 </th>
-                <th style="text-align:right;">
-                    %докупки
-                </th>
-                <th style="text-align:right;">
+                <th style="text-align:center;">
                     штук
                 </th>
                 <th style="border-left-color:black; border-left-width: 1px; text-align:right;">
@@ -71,17 +71,13 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
-                    <td style="text-align:right;border-left-color:black; border-left-width: 1px;">
+                    <td style="
+                            text-align:right;
+                            border-right-color:black;
+                            border-right-width: 1px;
+                            border-left-color:black; 
+                            border-left-width: 1px;">
                     @Html.DisplayFor(modelItem => item.PreviousPreviousYearPieces)
-                </td>
-                <td style="text-align:right;border-left-color:black; border-left-width: 1px;">
-                    @Html.DisplayFor(modelItem => item.PreviousYearChanges)
-                    @{
-                        if (item.PreviousYearChanges is not null)
-                        {
-                            <span>%</span>
-                        }
-                    }
                 </td>
                 <td style="text-align:right;">
                     @Html.DisplayFor(modelItem => item.PreviousYearPieces)
@@ -90,7 +86,7 @@
                             text-align:right;
                             border-left-color:black; 
                             border-left-width: 1px; 
-                            background-color: @(@item.LastYearChanges > 0 && @item.LastYearChanges != 100 ? "lightgreen" : "")">
+                            background-color: @(@item.LastYearChanges > 0 ? "lightgreen" : "")">
                     @Html.DisplayFor(modelItem => item.LastYearChanges)
                     %   
                 </td>

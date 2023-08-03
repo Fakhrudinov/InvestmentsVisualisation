@@ -173,12 +173,12 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<List<SecVolumeLast3YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(int year)
+        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(int year)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumeLast3YearsDynamic start " +
                $"with year={year}");
 
-            List<SecVolumeLast3YearsDynamicModel> result = new List<SecVolumeLast3YearsDynamicModel>();
+            List<SecVolumeLast2YearsDynamicModel> result = new List<SecVolumeLast2YearsDynamicModel>();
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecVolume", "GetSecVolumeLast3YearsDynamic.sql");
             if (!File.Exists(filePath))
@@ -211,7 +211,7 @@ namespace DataBaseRepository
                             {
                                 while (await sdr.ReadAsync())
                                 {
-                                    SecVolumeLast3YearsDynamicModel model = new SecVolumeLast3YearsDynamicModel();
+                                    SecVolumeLast2YearsDynamicModel model = new SecVolumeLast2YearsDynamicModel();
 
                                     model.SecCode = sdr.GetString("seccode");
                                     model.Name = sdr.GetString("name");

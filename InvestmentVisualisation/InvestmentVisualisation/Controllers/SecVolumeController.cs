@@ -91,7 +91,7 @@ namespace InvestmentVisualisation.Controllers
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET SecVolumeLast3YearsDynamic called");
 
-            List<SecVolumeLast3YearsDynamicModel> model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+            List<SecVolumeLast2YearsDynamicModel> model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
 
             CalculateChangesPercentsForList(model);
 
@@ -122,7 +122,7 @@ namespace InvestmentVisualisation.Controllers
             return View(model);
         }
 
-        private void SetDividentsToModel(List<SecCodeAndDividentModel> ? dividents, List<SecVolumeLast3YearsDynamicModel> model, WebSites webSite)
+        private void SetDividentsToModel(List<SecCodeAndDividentModel> ? dividents, List<SecVolumeLast2YearsDynamicModel> model, WebSites webSite)
         {
             if (dividents is not null)
             {
@@ -152,7 +152,7 @@ namespace InvestmentVisualisation.Controllers
                     else
                     {
                         // добавим в модель недостающий seccode
-                        SecVolumeLast3YearsDynamicModel newModel = new SecVolumeLast3YearsDynamicModel { SecCode = smDiv.SecCode };
+                        SecVolumeLast2YearsDynamicModel newModel = new SecVolumeLast2YearsDynamicModel { SecCode = smDiv.SecCode };
                         if (webSite == WebSites.SmartLab)
                         {
                             newModel.SmartLabDividents = smDiv.Divident;
@@ -172,28 +172,18 @@ namespace InvestmentVisualisation.Controllers
             }
         }
 
-        private void CalculateChangesPercentsForList(List<SecVolumeLast3YearsDynamicModel> model)
+        private void CalculateChangesPercentsForList(List<SecVolumeLast2YearsDynamicModel> model)
         {
-            foreach (SecVolumeLast3YearsDynamicModel record in model)
+            foreach (SecVolumeLast2YearsDynamicModel record in model)
             {
                 if (record.PreviousYearPieces is null)
                 {
                     record.LastYearChanges = 100;
                 }
 
-                if (record.PreviousPreviousYearPieces is null && record.PreviousYearPieces is not null)
-                {
-                    record.PreviousYearChanges = 100;
-                }
-
                 if(record.PreviousYearPieces is not null)
                 {
                     record.LastYearChanges = CalcPercent(record.LastYearPieces, (int)record.PreviousYearPieces);
-                }
-
-                if (record.PreviousPreviousYearPieces is not null && record.PreviousYearPieces is not null)
-                {
-                    record.PreviousYearChanges = CalcPercent((int)record.PreviousYearPieces, (int)record.PreviousPreviousYearPieces);
                 }
             }
         }

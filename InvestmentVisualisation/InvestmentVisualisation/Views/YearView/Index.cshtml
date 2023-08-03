@@ -17,254 +17,256 @@
             <th>
                 @Html.DisplayNameFor(model => model.AvPrice)
             </th>-->
-                <th style="text-align: center;">
+            <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.Volume)
             </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Jan)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Feb)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Mar)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Apr)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.May)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Jun)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Jul)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Aug)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Sep)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Okt)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Nov)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Dec)
-            </th>
-                <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Summ)
-            </th>
-                <th style="text-align: center;">
+            <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.VolPercent)
             </th>
-                <th style="text-align: center;">
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Jan)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Feb)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Mar)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Apr)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.May)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Jun)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Jul)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Aug)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Sep)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Okt)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Nov)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Dec)
+            </th>
+            <th style="text-align: center;">
+                @Html.DisplayNameFor(model => model.Summ)
+            </th>
+            <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.DivPercent)
             </th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.SecCode)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-    <!--<td>
-            @Html.DisplayFor(modelItem => item.Pieces)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.AvPrice)
-        </td>-->
-        <td style="text-align: right;">
-            @Html.DisplayFor(modelItem => item.Volume)
-        </td>
-        @{
-            if (item.Jan != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.Jan)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Jan)
-                            </td>
-            }
-
-            if (item.Feb != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.Feb)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Feb)
-                            </td>
-            }
-
-            if (item.Mar != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Март" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.Mar)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Mar)
-                            </td>
-            }
-
-            if (item.Apr != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Апрель" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.Apr)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Apr)
-                            </td>
-            }
-
-            if (item.May != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Май" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.May)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.May)
-                            </td>
-            }
-
-            if (item.Jun != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июнь" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.Jun)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Jun)
-                            </td>
-            }
-
-            if (item.Jul != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июль" style="text-align: right;">
-                                @Html.DisplayFor(modelItem => item.Jul)
-                            </td>
-            }
-            else
-            {
-                            <td>
-                                @Html.DisplayFor(modelItem => item.Jul)
-                            </td>
-            }
-
-            if (item.Aug != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Август" style="text-align: right;">
-                            @Html.DisplayFor(modelItem => item.Aug)
-                        </td>
-            }
-            else
-            {
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Aug)
-                        </td>
-            }
-
-            if (item.Sep != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Сентябрь" style="text-align: right;">
-                            @Html.DisplayFor(modelItem => item.Sep)
-                        </td>
-            }
-            else
-            {
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Sep)
-                        </td>
-            }
-
-            if (item.Okt != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Октябрь" style="text-align: right;">
-                            @Html.DisplayFor(modelItem => item.Okt)
-                        </td>
-            }
-            else
-            {
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Okt)
-                        </td>
-            }
-
-            if (item.Nov != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Ноябрь" style="text-align: right;">
-                            @Html.DisplayFor(modelItem => item.Nov)
-                        </td>
-            }
-            else
-            {
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Nov)
-                        </td>
-            }
-
-            if (item.Dec != null)
-            {
-                            <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Декабрь" style="text-align: right;">
-                            @Html.DisplayFor(modelItem => item.Dec)
-                        </td>
-            }
-            else
-            {
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Dec)
-                        </td>
-            }
-        }
-
-        <td style="font-weight: bold; text-align: right;">
-            @Html.DisplayFor(modelItem => item.Summ)
-        </td>
-        <td style="text-align: right;">
-            @{
-                if (item.VolPercent != null && item.VolPercent > 0)
-                {
+        @foreach (var item in Model) 
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SecCode)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <!--<td>
+                    @Html.DisplayFor(modelItem => item.Pieces)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AvPrice)
+                </td>-->
+                <td style="text-align: right;">
+                    @Html.DisplayFor(modelItem => item.Volume)
+                </td>
+                <td style="text-align: right;">
+                    @{
+                        if (item.VolPercent != null && item.VolPercent > 0)
+                        {
                             @Html.DisplayFor(modelItem => item.VolPercent)<span>%</span>
-                }
-            }
-        </td>
-        <td style="text-align: right;">
-            @{
-                if (item.DivPercent != null && item.DivPercent > 0)
-                {
-                            @Html.DisplayFor(modelItem => item.DivPercent)<span>%</span>
+                        }
+                    }
+                </td>
+                @{
+                    if (item.Jan != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Январь" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Jan)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Jan)
+                        </td>
+                    }
 
+                    if (item.Feb != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Февраль" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Feb)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Feb)
+                        </td>
+                    }
+
+                    if (item.Mar != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Март" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Mar)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Mar)
+                        </td>
+                    }
+
+                    if (item.Apr != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Апрель" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Apr)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Apr)
+                        </td>
+                    }
+
+                    if (item.May != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Май" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.May)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.May)
+                        </td>
+                    }
+
+                    if (item.Jun != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июнь" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Jun)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Jun)
+                        </td>
+                    }
+
+                    if (item.Jul != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Июль" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Jul)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Jul)
+                        </td>
+                    }
+
+                    if (item.Aug != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Август" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Aug)
+                        </td>
+                    }
+                    else
+                    {
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Aug)
+                                </td>
+                    }
+
+                    if (item.Sep != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Сентябрь" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Sep)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Sep)
+                        </td>
+                    }
+
+                    if (item.Okt != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Октябрь" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Okt)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Okt)
+                        </td>
+                    }
+
+                    if (item.Nov != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Ноябрь" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Nov)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Nov)
+                        </td>
+                    }
+
+                    if (item.Dec != null)
+                    {
+                        <td data-bs-toggle="tooltip" data-bs-placement="top" title="@item.FullName Декабрь" style="text-align: right;">
+                            @Html.DisplayFor(modelItem => item.Dec)
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Dec)
+                        </td>
+                    }
                 }
-            }            
-        </td>
-    </tr>}
-</tbody>
+
+                <td style="font-weight: bold; text-align: right;">
+                    @Html.DisplayFor(modelItem => item.Summ)
+                </td>
+
+                <td style="text-align: right;">
+                    @{
+                        if (item.DivPercent != null && item.DivPercent > 0)
+                        {
+                            @Html.DisplayFor(modelItem => item.DivPercent)<span>%</span>
+                        }
+                    }            
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @{
@@ -276,11 +278,11 @@
             {
                 if (ViewBag.year == item)
                 {
-                            <div class="btn btn-default" style="border-color: #ddd;">@item</div>
+                    <div class="btn btn-default" style="border-color: #ddd;">@item</div>
                 }
                 else
                 {
-                            <a asp-action="Index" asp-route-year="@item" class="btn btn-success">@item</a>
+                    <a asp-action="Index" asp-route-year="@item" class="btn btn-success">@item</a>
                 }
             }
         }

@@ -30,7 +30,7 @@ namespace DataAbstraction.Models.YearView
         public decimal? Nov { get; set; }
         public decimal? Dec { get; set; }
 
-        [Display(Name = "Сумма дивидентов")]
+        [Display(Name = "Дивидент за год")]
         public decimal? Summ { get; set; }
 
         [Display(Name = "% докупки")]

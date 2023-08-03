@@ -3,7 +3,7 @@
 
 namespace DataAbstraction.Models.SecVolume
 {
-    public class SecVolumeLast3YearsDynamicModel
+    public class SecVolumeLast2YearsDynamicModel
     {
         [Display(Name = "Тикер")]
         public string SecCode { get; set; }
@@ -12,7 +12,6 @@ namespace DataAbstraction.Models.SecVolume
 
         public int ? PreviousPreviousYearPieces { get; set; }
 
-        public decimal ? PreviousYearChanges { get; set; }
         public int ? PreviousYearPieces { get; set; }
 
         public decimal LastYearChanges { get; set; }
