@@ -41,7 +41,14 @@
                             <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
                             <br />future
                         </th>
-                    }                    
+                    }
+                    if (ViewBag.Vsdelke == true)
+                    {
+                        <th rowspan="2" class="border border-dark" style="text-align:center;">
+                            <a href="https://vsdelke.ru/dividendy/" target="_blank">VSdelke</a>
+                            <br />future
+                        </th>
+                    }
                 }
             </tr>
             <tr>
@@ -113,6 +120,12 @@
                     {
                         <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
                             @Html.DisplayFor(modelItem => item.DohodDividents)
+                        </td>
+                    }
+                    if (ViewBag.Vsdelke == true)
+                    {
+                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                            @Html.DisplayFor(modelItem => item.VsdelkeDividents)
                         </td>
                     }
                 }

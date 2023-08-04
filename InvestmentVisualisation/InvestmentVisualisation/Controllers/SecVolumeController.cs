@@ -20,7 +20,8 @@ namespace InvestmentVisualisation.Controllers
         {
             SmartLab = 0,
             InvLab = 1,
-            Dohod = 2
+            Dohod = 2,
+            Vsdelke = 3
         }
 
         public SecVolumeController(
@@ -109,11 +110,18 @@ namespace InvestmentVisualisation.Controllers
                 ViewBag.InvLabDivs = true;
             }
 
-            List<SecCodeAndDividentModel> ? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
+            List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
             SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
             if (smartLabDivs.Count > 0)
             {
                 ViewBag.SmartLab = true;
+            }
+
+            List<SecCodeAndDividentModel>? vsdelkeDivs = _webRepository.GetDividentsTableFromVsdelke();
+            SetDividentsToModel(vsdelkeDivs, model, WebSites.Vsdelke);
+            if (vsdelkeDivs is not null && vsdelkeDivs.Count > 0)
+            {
+                ViewBag.Vsdelke = true;
             }
 
             ViewBag.year = DateTime.Now.Year;
@@ -147,7 +155,11 @@ namespace InvestmentVisualisation.Controllers
                         else if (webSite == WebSites.Dohod)
                         {
                             model[index].DohodDividents = smDiv.Divident;
-                        }                        
+                        }
+                        else if (webSite == WebSites.Vsdelke)
+                        {
+                            model[index].VsdelkeDividents = smDiv.Divident;
+                        }
                     }
                     else
                     {
@@ -164,6 +176,10 @@ namespace InvestmentVisualisation.Controllers
                         else if(webSite == WebSites.Dohod)
                         {
                             newModel.DohodDividents = smDiv.Divident;
+                        }
+                        else if (webSite == WebSites.Vsdelke)
+                        {
+                            newModel.VsdelkeDividents = smDiv.Divident;
                         }
 
                         model.Add(newModel);

@@ -7,5 +7,6 @@ namespace DataAbstraction.Interfaces
         List<SecCodeAndDividentModel>? GetDividentsTableFromDohod();
         List<SecCodeAndDividentModel>? GetDividentsTableFromInvLab();
         List<SecCodeAndDividentModel> ? GetDividentsTableFromSmartLab();
+        List<SecCodeAndDividentModel>? GetDividentsTableFromVsdelke();
     }
 }

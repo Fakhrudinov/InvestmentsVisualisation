@@ -4,7 +4,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
-using System.Reflection;
+
 
 namespace HttpDataRepository
 {
@@ -14,6 +14,7 @@ namespace HttpDataRepository
         private readonly WebDiviPageSettings _smLabOptions;
         private readonly WebDiviPageSettings _invLabOptions;
         private readonly WebDiviPageSettings _dohodOptions;
+        private readonly WebDiviPageSettings _vsdelkeOptions;
 
         public WebDividents(ILogger<WebDividents> logger, 
             IOptionsSnapshot<WebDiviPageSettings> namedOptions)
@@ -22,24 +23,31 @@ namespace HttpDataRepository
             _smLabOptions=namedOptions.Get("SmLab");
             _invLabOptions=namedOptions.Get("InvLab");
             _dohodOptions=namedOptions.Get("Dohod");
+            _vsdelkeOptions=namedOptions.Get("Vsdelke");
         }
 
         public List<SecCodeAndDividentModel> ? GetDividentsTableFromSmartLab()
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromSmartLab called for SmartLab");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromSmartLab called");
             return GetDividents(_smLabOptions);
         }
 
         public List<SecCodeAndDividentModel>? GetDividentsTableFromInvLab()
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromInvLab called for InvLab");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromInvLab called");
             return GetDividents(_invLabOptions);
         }
 
         public List<SecCodeAndDividentModel>? GetDividentsTableFromDohod()
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromInvLab called for Dohod");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromDohod called");
             return GetDividents(_dohodOptions);
+        }
+
+        public List<SecCodeAndDividentModel>? GetDividentsTableFromVsdelke()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromVsdelke called");
+            return GetDividents(_vsdelkeOptions);
         }
 
         private List<SecCodeAndDividentModel> ? GetDividents(WebDiviPageSettings options)
@@ -72,19 +80,29 @@ namespace HttpDataRepository
                 string[] dataTr = rawDataTableSplitted[i].Split(options.TableCellSplitter);
                 SecCodeAndDividentModel newDiv = new SecCodeAndDividentModel();
 
-                newDiv.SecCode = GetSecCodeFromTD(dataTr[options.NumberOfCellWithHref].Replace("\"", "'"));
+                // for vsdelke.ru - alternative get SecCode method - from <font class="tiker">BELU</font>
+                if (options.BaseUrl.Contains("vsdelke.ru"))
+                {
+                    newDiv.SecCode = GetSecCodeFromVsdelkeTD(dataTr[options.NumberOfCellWithHref].Replace("\"", "'"));
+                }
+                else // other contain seccode in href
+                {
+                    newDiv.SecCode = GetSecCodeFromTD(dataTr[options.NumberOfCellWithHref].Replace("\"", "'"));
+                }
+                
                 if (newDiv.SecCode is null)
                 {
                     //не найден href
                     continue;
                 }
 
-                if (newDiv.SecCode.Contains("AKRN"))
-                {
-                    Console.WriteLine();
-                }
+                // debug point
+                //if (newDiv.SecCode.Contains("AKRN"))
+                //{
+                //    Console.WriteLine();
+                //}
 
-                newDiv.Divident = CleanTextFromHtmlTags(dataTr[options.NumberOfCellWithDiscont], options.CleanWordsFromCell);
+                newDiv.Divident = CleanTextFromHtmlTags(dataTr[options.NumberOfCellWithDiscont].Replace("\"", "'"), options.CleanWordsFromCell);
                 if (newDiv.Divident.Equals("0%") || 
                     newDiv.Divident.Replace(",", ".").Equals("0.0%") ||
                     newDiv.Divident.Replace(",", ".").Equals("0.00%"))
@@ -131,6 +149,7 @@ namespace HttpDataRepository
             return result;
         }
 
+
         private bool CompareTwoDividentsValues(string divident1, string divident2)
         {
             decimal divExist = GetDecimalFromDivString(divident1);
@@ -165,6 +184,26 @@ namespace HttpDataRepository
             return dec;
         }
 
+
+        private string GetSecCodeFromVsdelkeTD(string rawText)
+        {
+            //<td aria-label="Компания">
+            //  <a class="a_emitent" title="Посмотреть полный календарь дивидендов компании Белуга Групп ПАО ао" href="/dividendy/beluga.html">Белуга ао</a>
+            //  <font class="tiker">BELU</font>
+            //</td>
+
+            int startIndex = rawText.IndexOf("tiker");
+            if (startIndex == -1)
+            {
+                return null;
+            }
+
+            string result = rawText.Substring(startIndex + 7); // 6 = lenght of href=\"
+            int endIndex = result.IndexOf("</font>");
+            result = result.Substring(0, endIndex);
+
+            return result;
+        }
         private string ? GetSecCodeFromTD(string rawText)
         {
             //<a href="/ik/analytics/dividend/trmk">
@@ -198,6 +237,12 @@ namespace HttpDataRepository
         {
             //firstly remove all before '>'
             rawText = rawText.Substring(rawText.IndexOf(">") + 1);
+
+            // for vsdelke - remove all in ()
+            if (rawText.Contains('('))
+            {
+                rawText = rawText.Substring(0, rawText.IndexOf("("));
+            }            
 
             foreach (string removeThis in cleanWordsFromCell)
             {
