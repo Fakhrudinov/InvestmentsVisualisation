@@ -1,4 +1,16 @@
 ﻿@using DataAbstraction.Models
+
+@{
+    int currentYear = DateTime.Now.Year;
+    int prevYear = currentYear - 1;
+    int prevPrevYear = currentYear - 2;
+
+    DateTime prev = DateTime.Now;
+    int currentMonth = DateTime.Now.Month;
+    int prevMonthYear = prev.AddMonths(-1).Year;
+    int prevMonth = prev.AddMonths(-1).Month;
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,43 +30,159 @@
             <div class="container">
                 <!--container-fluid-->
                 <a class="navbar-brand" asp-area="" asp-controller="Incoming" asp-action="Incoming">Мои инвестиции</a>
-                <!--<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation" style="background-color:red;">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item" @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" ? "active" : "")>
-                            <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="Deals" asp-action="Deals">Сделки</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="YearView" asp-action="Index">Таблица за год</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-secondary mx-1" asp-area="" asp-controller="SecVolume" asp-action="Index">Расчет объемов</a>
-                        </li>
-                        <li class="col" style="text-align: right; ">
-                            <span class="nav-link text-dark">Free money: <strong>@StaticData.FreeMoney</strong></span>
-                        </li>
-                    </ul>
-                </div>-->
-                <div class="btn-group top_menu" role="group">
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" ? "active" : "")" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" ? "active" : "")" asp-area="" asp-controller="Deals" asp-action="Deals">Сделки</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Money" ? "active" : "")" asp-area="" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" ? "active" : "")" asp-area="" asp-controller="YearView" asp-action="Index">Таблица за год</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" ? "active" : "")" asp-area="" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecVolume" ? "active" : "")" asp-area="" asp-controller="SecVolume" asp-action="Index">Размер позиций</a>
+
+                @*<div class="btn-group top_menu" role="group">
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" 
+                        ? "active" : "")" asp-area="" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" 
+                        ? "active" : "")" asp-area="" asp-controller="Deals" asp-action="Deals">Сделки</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Money" 
+                        ? "active" : "")" asp-area="" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" 
+                        ? "active" : "")" asp-area="" asp-controller="YearView" asp-action="Index">Таблица за год</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" 
+                        ? "active" : "")" asp-area="" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
+                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecVolume" 
+                        ? "active" : "")" asp-area="" asp-controller="SecVolume" asp-action="Index">Размер позиций</a>
+                </div>*@
+
+                <div class="btn-group" role="group" aria-label="TopMenu">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" ? "active" : "")"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Входящие деньги
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="Incoming" asp-action="Incoming" class="dropdown-item">Список входящих</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="Incoming" asp-action="CreateIncoming" class="dropdown-item">Добавить входящие деньги</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a asp-area="" asp-controller="Incoming" asp-action="HelpPage" class="dropdown-item">Help</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" ? "active" : "")"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Сделки
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="Deals" asp-action="Deals" class="dropdown-item">Список сделок</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="Deals" asp-action="Create" class="dropdown-item">Добавить сделку</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle @(ViewContext.RouteData.Values["controller"].ToString() == "Money" ? "active" : "")"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Деньги
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="Money" asp-action="Index" class="dropdown-item">Показать последние 12 месяцев</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="Money" asp-action="Index" asp-route-year="@currentYear" class="dropdown-item">
+                                    Показать @currentYear год
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="Money" asp-action="Index" asp-route-year="@prevYear" class="dropdown-item">
+                                    Показать @prevYear год
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="Money" asp-action="Index" asp-route-year="@prevPrevYear" class="dropdown-item">
+                                    Показать @prevPrevYear год
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a asp-area="" asp-controller="Money" asp-action="Recalculate" class="dropdown-item" 
+                                    asp-route-year="@currentYear" asp-route-month="@currentMonth">
+                                    Recalculate current month
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="Money" asp-action="Recalculate" class="dropdown-item"
+                                   asp-route-year="@prevMonthYear" asp-route-month="@prevMonth">
+                                    Recalculate previous month
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" ? "active" : "")"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Таблица за год
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="YearView" asp-action="Index" class="dropdown-item">Этот год</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="YearView" asp-action="Index" asp-route-year="@prevYear" class="dropdown-item">Предыдущий год</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="YearView" asp-action="Index" asp-route-year="@prevPrevYear" class="dropdown-item">2 года назад</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" ? "active" : "")"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Инструменты
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="SecCodes" asp-action="Index" class="dropdown-item">Список инструментов</a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="SecCodes" asp-action="Create" class="dropdown-item">Добавить инструмент</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle @(ViewContext.RouteData.Values["controller"].ToString() == "SecVolume" ? "active" : "")"
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Размер позиций
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item">Динамика позиций за 3 года</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a asp-area="" asp-controller="SecVolume" asp-action="Index" class="dropdown-item">Список позиций</a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a asp-area="" asp-controller="SecVolume" asp-action="Recalculate" asp-route-year="@currentYear" class="dropdown-item">
+                                    Recalculate @currentYear
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-area="" asp-controller="SecVolume" asp-action="Recalculate" asp-route-year="@prevYear" class="dropdown-item">
+                                    Recalculate @prevYear
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
                 </div>
+
                 <div class="col" style="text-align: right; ">
                     <span class="nav-link text-dark">Остаток: <strong>@StaticData.FreeMoney</strong></span>
                 </div>
