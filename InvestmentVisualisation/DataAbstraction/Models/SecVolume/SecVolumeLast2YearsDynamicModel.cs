@@ -24,5 +24,9 @@ namespace DataAbstraction.Models.SecVolume
         public string? InvLabDividents { get; set; }
         public string? DohodDividents { get; set; }
         public string? VsdelkeDividents { get; set; }
+
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
+        [DataType(DataType.Date)]
+        public DateTime NextDivDate { get; set; }
     }
 }

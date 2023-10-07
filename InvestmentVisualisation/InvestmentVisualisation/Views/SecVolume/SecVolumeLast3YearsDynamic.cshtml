@@ -22,31 +22,29 @@
                 @{
                     if (ViewBag.SmartLab == true)
                     {
-                        <th rowspan="2" class="border border-dark" style="text-align:center;">
+                        <th class="border border-dark border-bottom-0" style="text-align:center;">
                             <a href="https://smart-lab.ru/dividends/yield/" target="_blank">SmLab</a>
-                            <br />prev
+
                         </th>
                     }
-
                     if (ViewBag.InvLabDivs == true)
                     {
-                        <th rowspan="2" class="border border-dark" style="text-align:center;">
+                        <th class="border border-dark border-bottom-0" style="text-align:center;">
                             <a href="https://invlab.ru/akcii/rossiyskie-dividendnye/" target="_blank">InvLab</a>
-                            <br />future
-                        </th>
-                    }
-                    if (ViewBag.DohodDivs == true)
-                    {
-                        <th rowspan="2" class="border border-dark" style="text-align:center;">
-                            <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
-                            <br />future
+
                         </th>
                     }
                     if (ViewBag.Vsdelke == true)
                     {
-                        <th rowspan="2" class="border border-dark" style="text-align:center;">
+                        <th class="border border-dark border-bottom-0" style="text-align:center;">
                             <a href="https://vsdelke.ru/dividendy/" target="_blank">VSdelke</a>
-                            <br />future
+
+                        </th>
+                    }
+                    if (ViewBag.DohodDivs == true)
+                    {
+                        <th colspan="2" class="border border-dark border-bottom-0" style="text-align:center;">
+                            <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
                         </th>
                     }
                 }
@@ -67,6 +65,36 @@
                 <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
                     объем
                 </th>
+                @{
+                    if (ViewBag.SmartLab == true)
+                    {
+                        <th class="border border-dark border-top-0" style="text-align:center;">
+                            prev
+                        </th>
+                    }
+                    if (ViewBag.InvLabDivs == true)
+                    {
+                        <th class="border border-dark border-top-0" style="text-align:center;">
+                            future
+                        </th>
+                    }
+                    if (ViewBag.Vsdelke == true)
+                    {
+                        <th class="border border-dark border-top-0" style="text-align:center;">
+                            future
+                        </th>
+                    }
+                    if (ViewBag.DohodDivs == true)
+                    {
+                        <th style="text-align:right;">
+                            future
+                        </th>
+                        <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                            Даты
+                        </th>
+                    }
+                }
+
             </tr>
         </thead>
         <tbody>
@@ -103,23 +131,32 @@
                 <td style="text-align:right;border-right-color:black; border-right-width: 1px;">
                     @Html.DisplayFor(modelItem => item.LastYearVolume)
                 </td>
-                @{
+                    @{
                     if (ViewBag.SmartLab == true)
                     {
+                        string tiker = item.SecCode.Substring(0, 4);
+                        string link = "https://smart-lab.ru/q/" + tiker + "/dividend/";
                         <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            @Html.DisplayFor(modelItem => item.SmartLabDividents)
-                        </td>
+                            <a href="@link" target="_blank" style="text-decoration: none; color:black;">
+                                @if (item.SmartLabDividents is not null)
+                                {
+                                    <div style="">
+                                        @Html.DisplayFor(modelItem => item.SmartLabDividents)
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="">
+                                        &nbsp;
+                                    </div>
+                                }                                    
+                            </a>
+                        </td>                            
                     }
                     if (ViewBag.InvLabDivs == true)
                     {
                         <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
                             @Html.DisplayFor(modelItem => item.InvLabDividents)
-                        </td>
-                    }
-                    if (ViewBag.DohodDivs == true)
-                    {
-                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            @Html.DisplayFor(modelItem => item.DohodDividents)
                         </td>
                     }
                     if (ViewBag.Vsdelke == true)
@@ -128,6 +165,56 @@
                             @Html.DisplayFor(modelItem => item.VsdelkeDividents)
                         </td>
                     }
+                    if (ViewBag.DohodDivs == true)
+                    {
+                        string link = "https://www.dohod.ru/ik/analytics/dividend/" + item.SecCode.ToLower();
+                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                            <a href="@link" target="_blank" style="text-decoration: none; color:black;">
+                                @if (item.DohodDividents is not null)
+                                {
+                                    <div style="">
+                                        @Html.DisplayFor(modelItem => item.DohodDividents)
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div style="">
+                                        &nbsp;
+                                    </div>
+                                }
+                            </a>
+                        </td>
+                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                            @{
+                                if (item.NextDivDate > DateTime.MinValue)
+                                {
+                                    string txtColor = "black";
+                                    string txtWeight = "normal";
+                                    if (item.NextDivDate <= DateTime.Now.AddMonths(4))
+                                    {
+                                        txtColor = "darkred";
+                                    }
+
+                                    if (item.NextDivDate <= DateTime.Now.AddMonths(3))
+                                    {
+                                        txtColor = "red";
+                                    }
+                                        
+                                    if (item.NextDivDate <= DateTime.Now.AddMonths(2))
+                                    {
+                                        txtColor = "orange";
+                                    }
+                                        
+                                    if (item.NextDivDate <= DateTime.Now.AddMonths(1))
+                                    {
+                                        txtWeight = "bold";
+                                    }
+                                    <span style="font-weight: @txtWeight; color: @txtColor; ">@Html.DisplayFor(modelItem => item.NextDivDate)</span>
+                                }
+                            }                                
+                        </td>
+                    }
+
                 }
             </tr>
     }

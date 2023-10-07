@@ -44,7 +44,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
-    //pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
+    //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
+    pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
 
 app.Run();

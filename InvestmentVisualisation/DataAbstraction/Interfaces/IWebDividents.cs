@@ -4,7 +4,7 @@ namespace DataAbstraction.Interfaces
 {
     public interface IWebDividents
     {
-        List<SecCodeAndDividentModel>? GetDividentsTableFromDohod();
+        DohodDivsAndDatesModel? GetDividentsTableFromDohod();
         List<SecCodeAndDividentModel>? GetDividentsTableFromInvLab();
         List<SecCodeAndDividentModel> ? GetDividentsTableFromSmartLab();
         List<SecCodeAndDividentModel>? GetDividentsTableFromVsdelke();

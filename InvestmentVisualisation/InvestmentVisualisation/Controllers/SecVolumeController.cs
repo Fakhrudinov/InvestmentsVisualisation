@@ -96,23 +96,24 @@ namespace InvestmentVisualisation.Controllers
 
             CalculateChangesPercentsForList(model);
 
-            List<SecCodeAndDividentModel>? dohodDivs = _webRepository.GetDividentsTableFromDohod();
-            SetDividentsToModel(dohodDivs, model, WebSites.Dohod);
-            if (dohodDivs.Count > 0)
+            DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod();            
+            if (dohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
             {
+                SetDividentsToModel(dohodDivs.DohodDivs, model, WebSites.Dohod);
+                SetDividentDatesToModel(dohodDivs.DohodDates, model);
                 ViewBag.DohodDivs = true;
             }
 
             List<SecCodeAndDividentModel>? invLabDivs = _webRepository.GetDividentsTableFromInvLab();
             SetDividentsToModel(invLabDivs, model, WebSites.InvLab);
-            if (invLabDivs.Count > 0)
+            if (invLabDivs is not null && invLabDivs.Count > 0)
             {
                 ViewBag.InvLabDivs = true;
             }
 
             List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
             SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
-            if (smartLabDivs.Count > 0)
+            if (smartLabDivs is not null && smartLabDivs.Count > 0)
             {
                 ViewBag.SmartLab = true;
             }
@@ -124,10 +125,80 @@ namespace InvestmentVisualisation.Controllers
                 ViewBag.Vsdelke = true;
             }
 
+            // clean model from (not mine) +-0 div pozitions
+            RemoveEmptyPositionWithLowDivs(model);
+
             ViewBag.year = DateTime.Now.Year;
 
-
             return View(model);
+        }
+
+        private void RemoveEmptyPositionWithLowDivs(List<SecVolumeLast2YearsDynamicModel> model)
+        {
+            for (int i = model.Count -1; i>0; i--)
+            {
+                //var item = model[i];
+                //Console.WriteLine(model[i].SecCode);
+
+                // exit point - model item has values
+                if (model[i].Name is not null)
+                {
+                    break;
+                }
+
+                //check items divs. if any divs > 5 then skip. else remove
+                bool smartLabDividents = IsItBiggerThenFive(model[i].SmartLabDividents);
+                bool dohodDividents = IsItBiggerThenFive(model[i].DohodDividents);
+                bool vsdelkeDividents = IsItBiggerThenFive(model[i].VsdelkeDividents);
+                bool invLabDividents = IsItBiggerThenFive(model[i].InvLabDividents);
+
+                if (!smartLabDividents && !dohodDividents && !vsdelkeDividents && !invLabDividents)
+                {
+                    model.RemoveAt(i);
+                }
+            }
+        }
+
+        private bool IsItBiggerThenFive(string? dividentString)
+        {
+            if (dividentString is null)
+            {
+                return false;
+            }
+            int divident;
+            int.TryParse(dividentString.Split(',').First(), out divident);
+
+            if(divident < 5)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private void SetDividentDatesToModel(List<SecCodeAndTimeToCutOffModel>? dohodDates, List<SecVolumeLast2YearsDynamicModel> model)
+        {
+            foreach (SecCodeAndTimeToCutOffModel smDivDate in dohodDates)
+            {
+                //if (smDivDate.SecCode.Contains("NLMK"))
+                //{
+                //    Console.WriteLine();
+                //}
+
+                int index = model.FindIndex(sv => sv.SecCode == smDivDate.SecCode);
+                if (index >= 0)
+                {
+                    model[index].NextDivDate = smDivDate.Date;
+                }
+                else
+                {
+                    // добавим в модель недостающий seccode
+                    SecVolumeLast2YearsDynamicModel newModel = new SecVolumeLast2YearsDynamicModel { SecCode = smDivDate.SecCode };
+                    newModel.NextDivDate = smDivDate.Date;
+
+                    model.Add(newModel);
+                }
+            }
         }
 
         private void SetDividentsToModel(List<SecCodeAndDividentModel> ? dividents, List<SecVolumeLast2YearsDynamicModel> model, WebSites webSite)
