@@ -113,6 +113,9 @@
     <None Update="SqlQueries\SecVolume\GetSecVolumeLast3YearsDynamic.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\SecVolume\GetSecVolumeLast3YearsDynamicSortedByVolume.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\SecVolume\GetSecVolumePageForYear.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

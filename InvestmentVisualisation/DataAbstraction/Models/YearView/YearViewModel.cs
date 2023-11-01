@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace DataAbstraction.Models.YearView
 {
@@ -12,7 +11,7 @@ namespace DataAbstraction.Models.YearView
 
         public decimal? AvPrice { get; set; }
 
-        [Display(Name = "Размер позиции")]
+        [Display(Name = "Vol")]
         public decimal Volume { get; set; }
 
         public decimal? Jan { get; set; }
@@ -30,13 +29,13 @@ namespace DataAbstraction.Models.YearView
         public decimal? Nov { get; set; }
         public decimal? Dec { get; set; }
 
-        [Display(Name = "Дивидент за год")]
+        [Display(Name = "Див: Руб")]
         public decimal? Summ { get; set; }
 
-        [Display(Name = "% докупки")]
+        [Display(Name = "% увелич")]
         public decimal? VolPercent { get; set; }
 
-        [Display(Name = "% дивидент")]
+        [Display(Name = "Див: %")]
         public decimal? DivPercent { get; set; }
 
         public string FullName { get; set; }

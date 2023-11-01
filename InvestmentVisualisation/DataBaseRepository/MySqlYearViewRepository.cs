@@ -34,13 +34,15 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "YearView", "GetYearViewPage.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository GetYearViewPage execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository GetYearViewPage " +
+                    $"execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -182,8 +184,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository GetYearViewPage Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository GetYearViewPage " +
+                                $"Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -196,20 +198,23 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task RecalculateYearView(int year)
+        public async Task RecalculateYearView(int year, bool sortedByVolume)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView {year} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView " +
+                $"year={year} sortedByVolume={sortedByVolume} start");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "YearView", "RecalculateYearView.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView {year} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView " +
+                    $"{year} sortedByVolume={sortedByVolume} execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -218,18 +223,20 @@ namespace DataBaseRepository
                         cmd.Connection = con;
 
                         cmd.Parameters.AddWithValue("@year", year);
+                        cmd.Parameters.AddWithValue("@sortedByVolume", sortedByVolume);
 
                         try
                         {
                             await con.OpenAsync();
                             await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView executed");
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"RecalculateYearView executed");
 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"RecalculateYearView Exception!\r\n{ex.Message}");
                         }
                         finally
                         {

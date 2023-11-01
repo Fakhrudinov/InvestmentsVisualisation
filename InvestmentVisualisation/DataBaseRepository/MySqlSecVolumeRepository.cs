@@ -175,12 +175,27 @@ namespace DataBaseRepository
 
         public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(int year)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumeLast3YearsDynamic start " +
-               $"with year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                $"GetSecVolumeLast3YearsDynamic start with year={year}");
 
+            return await GetSecVolumeLast3YearsDynamicByQueryName("GetSecVolumeLast3YearsDynamic.sql", year);
+        }
+        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicSortedByVolume(int year)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                $"GetSecVolumeLast3YearsDynamicSortedByVolume start with year={year}");
+
+            return await GetSecVolumeLast3YearsDynamicByQueryName("GetSecVolumeLast3YearsDynamicSortedByVolume.sql", year);
+        }
+        private async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicByQueryName(string queryName, int year)
+        {
             List<SecVolumeLast2YearsDynamicModel> result = new List<SecVolumeLast2YearsDynamicModel>();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecVolume", "GetSecVolumeLast3YearsDynamic.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecVolume",
+                queryName);
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! " +
@@ -194,8 +209,8 @@ namespace DataBaseRepository
                 query = query.Replace("@prev_year", (year - 1).ToString());
                 query = query.Replace("@prev_prev_year", (year - 2).ToString());
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumeLast3YearsDynamic " +
-                    $"execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                    $"GetSecVolumeLast3YearsDynamicByQueryName execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -226,7 +241,7 @@ namespace DataBaseRepository
                                     if (!sdr.IsDBNull(checkForNull2))
                                     {
                                         model.PreviousYearPieces = sdr.GetInt32("pieces_" + (year - 1));
-                                    }                                  
+                                    }
 
                                     model.LastYearPieces = sdr.GetInt32("pieces_" + year);
                                     model.LastYearVolume = sdr.GetDecimal("volume_" + year);
@@ -237,8 +252,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumeLast3YearsDynamic " +
-                                $"Exception!\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                                $"GetSecVolumeLast3YearsDynamicByQueryName Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -249,6 +264,7 @@ namespace DataBaseRepository
 
                 return result;
             }
+
         }
     }
 }

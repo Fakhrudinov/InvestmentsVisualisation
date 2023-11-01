@@ -25,7 +25,7 @@ namespace InvestmentVisualisation.Controllers
             _secVolumeRepository = secVolumeRepository;
         }
 
-        public async Task<IActionResult> Index(int year = 0)
+        public async Task<IActionResult> Index(int year = 0, bool sortedByVolume = false)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController GET Deals called, year={year}");
 
@@ -33,13 +33,13 @@ namespace InvestmentVisualisation.Controllers
 
             if (year >= _minimumYear && year < currentYear)
             {
-                await _repository.RecalculateYearView(year);
+                await _repository.RecalculateYearView(year, sortedByVolume);
             }
             else
             {
                 // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
                 await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
-                await _repository.RecalculateYearView(currentYear);
+                await _repository.RecalculateYearView(currentYear, sortedByVolume);
                 year = currentYear;
             }
 
@@ -52,6 +52,7 @@ namespace InvestmentVisualisation.Controllers
             }
             ViewData["Navigation"] = objSt;
             ViewBag.year = year;
+            ViewBag.SortedByVolume = sortedByVolume;
 
             return View(yearViews);
         }

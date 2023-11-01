@@ -6,7 +6,26 @@
         <!-- style="position: sticky; top: 45px;background: white;"-->
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.SecCode)
+                @*@Html.DisplayNameFor(model => model.SecCode)*@
+
+                @{
+                    if (ViewBag.SortedByVolume is true)
+                    {
+                        <div>
+                            <a asp-controller="YearView" asp-action="Index" asp-route-sortedByVolume="false" 
+                                style="text-decoration: none">
+                                    @Html.DisplayNameFor(model => model.SecCode)<span style="color:red;">&#9661;</span>
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            @Html.DisplayNameFor(model => model.SecCode)<span style="color:red;">&#9660;</span>
+                        </div>
+                    }
+                }
+
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Name)
@@ -18,7 +37,21 @@
                 @Html.DisplayNameFor(model => model.AvPrice)
             </th>-->
             <th style="text-align: center;">
-                @Html.DisplayNameFor(model => model.Volume)
+                @*@Html.DisplayNameFor(model => model.Volume)*@
+                @{
+                    if (ViewBag.SortedByVolume is false)
+                    {
+                        <a asp-controller="YearView" asp-action="Index" asp-route-sortedByVolume="true"
+                           style="text-decoration: none">
+                                @Html.DisplayNameFor(model => model.Volume)<span style="color:red;">&#9661;</span>
+                        </a>
+                    }
+                    else
+                    {
+                        @Html.DisplayNameFor(model => model.Volume)<span style="color:red;">&#9660;</span>
+                    }
+                }
+
             </th>
             <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.VolPercent)

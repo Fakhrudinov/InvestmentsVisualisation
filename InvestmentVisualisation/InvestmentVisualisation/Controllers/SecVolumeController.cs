@@ -88,15 +88,26 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Index", new { year = year });
         }
 
-        public async Task<IActionResult> SecVolumeLast3YearsDynamic()
+        public async Task<IActionResult> SecVolumeLast3YearsDynamic(bool sortedByVolume = false)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET SecVolumeLast3YearsDynamic called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET " +
+                $"SecVolumeLast3YearsDynamic called, sortedByVolume={sortedByVolume}");
 
-            List<SecVolumeLast2YearsDynamicModel> model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+            ViewBag.SortedByVolume = sortedByVolume;
+
+            List<SecVolumeLast2YearsDynamicModel> model = new List<SecVolumeLast2YearsDynamicModel>();
+            if (!sortedByVolume)
+            {
+                model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+            }
+            else
+            {
+                model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(DateTime.Now.Year);
+            }            
 
             CalculateChangesPercentsForList(model);
 
-            DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod();            
+            DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod();
             if (dohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
             {
                 SetDividentsToModel(dohodDivs.DohodDivs, model, WebSites.Dohod);

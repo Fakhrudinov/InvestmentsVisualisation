@@ -12,7 +12,25 @@
     <table class="table table-hover table-sm">
         <thead class="table-light">
             <tr>
-                <th rowspan="2" style="border-left:black 1px solid; border-top:black 1px solid; border-bottom:black 1px solid;">тикер</th>
+                <th rowspan="2" style="border-left:black 1px solid; border-top:black 1px solid; border-bottom:black 1px solid;">
+                    @*тикер*@
+                    @{
+                        if (ViewBag.SortedByVolume is true)
+                        {
+                            <div>
+                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" asp-route-sortedByVolume="false" style="text-decoration: none">
+                                    тикер<span style="color:red;">&#9661;</span>
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                тикер<span style="color:red;">&#9660;</span>
+                            </div>
+                        }
+                    }
+                </th>
                 <th rowspan="2" style="border-top:black 1px solid; border-bottom:black 1px solid;">имя</th>
                 <th class="border border-dark border-bottom-0" style="text-align:center;">
                     @pp
@@ -63,7 +81,29 @@
                     штук
                 </th>
                 <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                    объем
+                    @* объем*@
+
+                    @{
+                        if (ViewBag.SortedByVolume is false)
+                        {
+                            <div>
+                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" asp-route-sortedByVolume="true" style="text-decoration: none">
+                                    Vol<span style="color:red;">&#9661;</span>
+                                </a>                                
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                Vol<span style="color:red;">&#9660;</span>
+                            </div>
+                        }
+                    }
+
+@*                    <div class="col-sm-12 col-md-12 form-inline">
+                        Vol<a href="##" style="color:red; text-decoration:none;">&#9660;</a>
+                    </div>*@
+                    
                 </th>
                 @{
                     if (ViewBag.SmartLab == true)
