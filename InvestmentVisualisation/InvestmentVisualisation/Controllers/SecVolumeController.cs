@@ -88,22 +88,24 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Index", new { year = year });
         }
 
-        public async Task<IActionResult> SecVolumeLast3YearsDynamic(bool sortedByVolume = false)
+        public async Task<IActionResult> SecVolumeLast3YearsDynamic(string sortMode = "byTiker")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET " +
-                $"SecVolumeLast3YearsDynamic called, sortedByVolume={sortedByVolume}");
+                $"SecVolumeLast3YearsDynamic called, sortMode={sortMode}");
 
-            ViewBag.SortedByVolume = sortedByVolume;
+            ViewBag.SortMode = sortMode;
+            ViewBag.year = DateTime.Now.Year;
 
             List<SecVolumeLast2YearsDynamicModel> model = new List<SecVolumeLast2YearsDynamicModel>();
-            if (!sortedByVolume)
+
+            if(sortMode.Equals("byVolume"))
             {
-                model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+                model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(DateTime.Now.Year);
             }
             else
             {
-                model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(DateTime.Now.Year);
-            }            
+                model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+            }
 
             CalculateChangesPercentsForList(model);
 
@@ -139,7 +141,26 @@ namespace InvestmentVisualisation.Controllers
             // clean model from (not mine) +-0 div pozitions
             RemoveEmptyPositionWithLowDivs(model);
 
-            ViewBag.year = DateTime.Now.Year;
+            if (sortMode.Equals("byTime"))
+            {
+                // move empty DateTime items in temp list
+                List<SecVolumeLast2YearsDynamicModel> temporary = new List<SecVolumeLast2YearsDynamicModel>();
+                for (int i = model.Count - 1; i >= 0; i--)
+                {
+                    if (model[i].NextDivDate == DateTime.MinValue)
+                    {
+                        temporary.Add(model[i]);
+                        model.RemoveAt(i);
+                    }
+                }
+                // do sort by SecCode
+                temporary = temporary.OrderBy(e => e.SecCode).ToList();
+
+                // do sort by DateTime
+                model = model.OrderBy(e => e.NextDivDate).ToList();
+
+                model.AddRange(temporary);
+            }
 
             return View(model);
         }

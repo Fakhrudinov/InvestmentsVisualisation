@@ -15,18 +15,19 @@
                 <th rowspan="2" style="border-left:black 1px solid; border-top:black 1px solid; border-bottom:black 1px solid;">
                     @*тикер*@
                     @{
-                        if (ViewBag.SortedByVolume is true)
+                        if (ViewBag.SortMode == "byTiker")
                         {
                             <div>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" asp-route-sortedByVolume="false" style="text-decoration: none">
-                                    тикер<span style="color:red;">&#9661;</span>
-                                </a>
+                                тикер<span style="color:red;">&#9660;</span>
                             </div>
                         }
                         else
                         {
                             <div>
-                                тикер<span style="color:red;">&#9660;</span>
+                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                    asp-route-sortMode="byTiker" style="text-decoration: none">
+                                    тикер<span style="color:red;">&#9661;</span>
+                                </a>
                             </div>
                         }
                     }
@@ -84,18 +85,20 @@
                     @* объем*@
 
                     @{
-                        if (ViewBag.SortedByVolume is false)
+                        if (ViewBag.SortMode == "byVolume")
                         {
                             <div>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" asp-route-sortedByVolume="true" style="text-decoration: none">
-                                    Vol<span style="color:red;">&#9661;</span>
-                                </a>                                
+                                Vol<span style="color:red;">&#9660;</span>
                             </div>
+
                         }
                         else
                         {
                             <div>
-                                Vol<span style="color:red;">&#9660;</span>
+                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                    asp-route-sortMode="byVolume" style="text-decoration: none">
+                                    Vol<span style="color:red;">&#9661;</span>
+                                </a>
                             </div>
                         }
                     }
@@ -130,7 +133,25 @@
                             future
                         </th>
                         <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            Даты
+                            @*Даты*@
+
+                            @{
+                                if (ViewBag.SortMode == "byTime")
+                                {
+                                    <div>
+                                        Даты<span style="color:red;">&#9660;</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                            asp-route-sortMode="byTime" style="text-decoration: none">
+                                            Даты<span style="color:red;">&#9661;</span>
+                                        </a>
+                                    </div>
+                                }
+                            }
                         </th>
                     }
                 }
@@ -254,7 +275,6 @@
                             }                                
                         </td>
                     }
-
                 }
             </tr>
     }
