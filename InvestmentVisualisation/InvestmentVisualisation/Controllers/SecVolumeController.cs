@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.BaseModels;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -162,7 +164,74 @@ namespace InvestmentVisualisation.Controllers
                 model.AddRange(temporary);
             }
 
+            CalculateColorDependingByDivsValues(model);
+
             return View(model);
+        }
+
+        private void CalculateColorDependingByDivsValues(List<SecVolumeLast2YearsDynamicModel> model)
+        {
+            // color grade from high to low
+            //  darkgreen
+            //  green
+            //  springgreen // mediumseagreen
+            //  lightgreen
+
+            foreach (var item in model)
+            {
+                int past = 0;
+                if (item.SmartLabDividents is not null && 
+                    Int16.TryParse(item.SmartLabDividents.Split(',')[0], out short intValue))
+                {
+                    past++;
+                    if (intValue > 7)
+                    {
+                        past = past + 10;
+                    }
+                }
+
+                int mask = 0;
+                //00
+                //-x = is not null for any future = 03/0
+                //x- = is more than 7% for future = 30/0
+                //00
+
+                // надо ли что то возвращать вообще??? ______________________________________________________________
+
+                int? futInvLab = GetIntOrNullFromString(item.InvLabDividents, ref mask);
+                int? futVsdelke = GetIntOrNullFromString(item.VsdelkeDividents, ref mask);
+                int? futDohod = GetIntOrNullFromString(item.DohodDividents, ref mask);
+
+                // all values > 7%
+                if (past > 10 && mask > 30)
+                {
+                    item.LineColor = "darkgreen; color: white";
+                }
+                else
+                {
+
+                }
+            }
+        }
+
+        private int? GetIntOrNullFromString(string? stringValue, ref int mask)
+        {
+            if (stringValue is null)
+            {
+                return null;
+            }
+
+            if (Int16.TryParse(stringValue.Split(',')[0], out short intValue))
+            {
+                mask++;
+
+                if (intValue > 7)
+                {
+                    mask = mask + 10;
+                }
+            }
+
+            return 1;
         }
 
         private void RemoveEmptyPositionWithLowDivs(List<SecVolumeLast2YearsDynamicModel> model)

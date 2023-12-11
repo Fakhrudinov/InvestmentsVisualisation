@@ -2,7 +2,7 @@
 
 @{
     int pp = ViewBag.year - 2;
-    int p = ViewBag.year - 1;
+    int p = ViewBag.year - 1;    
 
     ViewData["Title"] = "SecVolume volume grows table";
 }
@@ -197,8 +197,12 @@
                     {
                         string tiker = item.SecCode.Substring(0, 4);
                         string link = "https://smart-lab.ru/q/" + tiker + "/dividend/";
-                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            <a href="@link" target="_blank" style="text-decoration: none; color:black;">
+                        <td style="
+                                    border-right-color:black; 
+                                    border-right-width: 1px;
+                                    text-align:right; 
+                                    background-color:@item.LineColor;">
+                            <a href="@link" target="_blank" style="text-decoration: none;background-color:@item.LineColor;">
                                 @if (item.SmartLabDividents is not null)
                                 {
                                     <div style="">
@@ -216,21 +220,33 @@
                     }
                     if (ViewBag.InvLabDivs == true)
                     {
-                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                        <td style="
+                                    border-right-color:black; 
+                                    border-right-width: 1px;
+                                    text-align:right; 
+                                    background-color:@item.LineColor;">
                             @Html.DisplayFor(modelItem => item.InvLabDividents)
                         </td>
                     }
                     if (ViewBag.Vsdelke == true)
                     {
-                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                        <td style="
+                                    border-right-color:black; 
+                                    border-right-width: 1px;
+                                    text-align:right; 
+                                    background-color:@item.LineColor;">
                             @Html.DisplayFor(modelItem => item.VsdelkeDividents)
                         </td>
                     }
                     if (ViewBag.DohodDivs == true)
                     {
                         string link = "https://www.dohod.ru/ik/analytics/dividend/" + item.SecCode.ToLower();
-                        <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            <a href="@link" target="_blank" style="text-decoration: none; color:black;">
+                        <td style="
+                                    border-right-color:black; 
+                                    border-right-width: 1px;
+                                    text-align:right; 
+                                    background-color:@item.LineColor;">
+                            <a href="@link" target="_blank" style="text-decoration: none; background-color:@item.LineColor;">
                                 @if (item.DohodDividents is not null)
                                 {
                                     <div style="">

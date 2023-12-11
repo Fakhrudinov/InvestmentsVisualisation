@@ -25,6 +25,8 @@ namespace DataAbstraction.Models.SecVolume
         public string? DohodDividents { get; set; }
         public string? VsdelkeDividents { get; set; }
 
+        public string LineColor { get; set; } = "white; color: black";
+
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         [DataType(DataType.Date)]
         public DateTime NextDivDate { get; set; }

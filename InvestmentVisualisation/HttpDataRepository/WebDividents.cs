@@ -14,21 +14,12 @@ namespace HttpDataRepository
         private readonly IOptionsSnapshot<WebDiviPageSettings> _namedOptions;
         private WebDiviPageSettings _options;
 
-        //private readonly WebDiviPageSettings _smLabOptions;
-        //private readonly WebDiviPageSettings _invLabOptions;
-        //private readonly WebDiviPageSettings _dohodOptions;
-        //private readonly WebDiviPageSettings _vsdelkeOptions; 
-
         public WebDividents(
             ILogger<WebDividents> logger, 
             IOptionsSnapshot<WebDiviPageSettings> namedOptions)
         {
             _logger = logger;
             _namedOptions = namedOptions;
-            //_smLabOptions=namedOptions.Get("SmLab");
-            //_invLabOptions=namedOptions.Get("InvLab");
-            //_dohodOptions=namedOptions.Get("Dohod");
-            //_vsdelkeOptions=namedOptions.Get("Vsdelke");
         }
 
         public DohodDivsAndDatesModel? GetDividentsTableFromDohod()
@@ -79,100 +70,9 @@ namespace HttpDataRepository
                 return null;
             }
 
-            ////get fool html source
-            //string ? rawHtmlSource = GetFullHtmlPage(options.BaseUrl);
-
-            //if (rawHtmlSource is null || !rawHtmlSource.Contains(options.StartWord) || !rawHtmlSource.Contains(options.EndWord))
-            //{
-            //    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividents " +
-            //        $"rawHtmlSource is null " +
-            //        $"or StartWord pointer '{options.StartWord}' is not found " +
-            //        $"or EndWord pointer '{options.EndWord}' is not found!");
-
-            //    return null;
-            //}
-
-            ////cut table from full html source
-            //int startIndex = rawHtmlSource.IndexOf(options.StartWord);
-            //int endIndex = rawHtmlSource.Substring(startIndex).IndexOf(options.EndWord);
-
-            //string rawDataTable = rawHtmlSource.Substring(startIndex, endIndex);
-            //_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividents splitted text lenght is {rawDataTable.Length}");
-
-            ////split
-            //string[] rawDataTableSplitted = rawDataTable.Split(options.TableRowSplitter);
-
             //заполним дивиденты
             List<SecCodeAndDividentModel> result = GetDividentsFromHtml(rawDataTableSplitted);
 
-            //List<SecCodeAndDividentModel> result = new List<SecCodeAndDividentModel>();
-            //for (int i = _options.NumberOfRowToStartSearchData; i < rawDataTableSplitted.Length; i++)
-            //{
-            //    string[] dataTr = rawDataTableSplitted[i].Split(_options.TableCellSplitter);
-            //    SecCodeAndDividentModel newDiv = new SecCodeAndDividentModel();
-
-            //    // for vsdelke.ru - alternative get SecCode method - from <font class="tiker">BELU</font>
-            //    if (_options.BaseUrl.Contains("vsdelke.ru"))
-            //    {
-            //        newDiv.SecCode = GetSecCodeFromVsdelkeTD(dataTr[_options.NumberOfCellWithHref].Replace("\"", "'"));
-            //    }
-            //    else // other contain seccode in href
-            //    {
-            //        newDiv.SecCode = GetSecCodeFromTD(dataTr[_options.NumberOfCellWithHref].Replace("\"", "'"));
-            //    }
-                
-            //    if (newDiv.SecCode is null)
-            //    {
-            //        //не найден href
-            //        continue;
-            //    }
-
-            //    // debug point
-            //    //if (newDiv.SecCode.Contains("AKRN"))
-            //    //{
-            //    //    Console.WriteLine();
-            //    //}
-
-            //    newDiv.Divident = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithDiscont].Replace("\"", "'"), _options.CleanWordsFromCell);
-            //    if (newDiv.Divident.Equals("0%") || 
-            //        newDiv.Divident.Replace(",", ".").Equals("0.0%") ||
-            //        newDiv.Divident.Replace(",", ".").Equals("0.00%"))
-            //    {
-            //        // не добавляем пустые
-            //        continue;
-            //    }
-
-            //    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividents " +
-            //        $"Add SecCodeAndDividentModel='{newDiv.SecCode}' '{newDiv.Divident}'");
-
-            //    /// пробуем найти, если нет - добавляем.
-            //    /// если есть, сравниваем, одинаковые ПРОПУСКАЕМ
-            //    /// если меньше, чем есть - ПРОПУСКАЕМ
-            //    /// если больше - заменяем существуещее значение
-            //    int index = result.FindIndex(res => res.SecCode == newDiv.SecCode);
-            //    if (index >= 0)
-            //    {
-            //        if (result[index].Divident.Equals(newDiv.Divident))
-            //        {
-            //            // ПРОПУСКАЕМ одинаковые
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            bool biggerThenExist = CompareTwoDividentsValues(result[index].Divident, newDiv.Divident);
-            //            if (biggerThenExist )
-            //            {
-            //                //если больше - заменяем существуещее значение
-            //                result[index].Divident = newDiv.Divident;
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // не нашли, добавляем
-            //        result.Add(newDiv);
-            //    }                
-            //}
 
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividents " +
                 $"result list count is {result.Count}");
@@ -265,12 +165,6 @@ namespace HttpDataRepository
             List<SecCodeAndDividentModel> result = new List<SecCodeAndDividentModel>();
             for (int i = _options.NumberOfRowToStartSearchData; i < rawDataTableSplitted.Length; i++)
             {
-                // debug point
-                //if (newDiv.SecCode.Contains("AKRN"))
-                //{
-                //    Console.WriteLine();
-                //}
-
                 string[] dataTr = rawDataTableSplitted[i].Split(_options.TableCellSplitter);
                 SecCodeAndDividentModel newDiv = new SecCodeAndDividentModel();
 
@@ -284,6 +178,18 @@ namespace HttpDataRepository
                 {
                     newDiv.SecCode = GetSecCodeFromTD(dataTr[_options.NumberOfCellWithHref].Replace("\"", "'"));
                 }
+
+                // in smart lab both AO and AP strings looks to AO page, so we check this markets and correct tikers name
+                if (_options.BaseUrl.Contains("smart-lab.ru"))
+                {
+                    newDiv.SecCode = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithHref].Replace("\"", "'"));
+                }
+
+                ////debug point
+                //if (newDiv.SecCode.Contains("WTCM"))
+                //{
+                //    Console.WriteLine();
+                //}
 
                 if (newDiv.SecCode is null)
                 {
