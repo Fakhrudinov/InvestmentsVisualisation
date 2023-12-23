@@ -7,6 +7,7 @@ using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.BaseModels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Primitives;
+using System.Reflection;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -27,8 +28,8 @@ namespace InvestmentVisualisation.Controllers
         }
 
         public SecVolumeController(
-            ILogger<SecVolumeController> logger, 
-            IMySqlSecVolumeRepository repository, 
+            ILogger<SecVolumeController> logger,
+            IMySqlSecVolumeRepository repository,
             IOptions<PaginationSettings> paginationSettings,
             IWebDividents webRepository)
         {
@@ -47,7 +48,7 @@ namespace InvestmentVisualisation.Controllers
             {
                 year = DateTime.Now.Year;
             }
-            
+
             int count = await _repository.GetSecVolumeCountForYear(year);
 
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController SecVolumes table for year={year} size={count}");
@@ -100,7 +101,7 @@ namespace InvestmentVisualisation.Controllers
 
             List<SecVolumeLast2YearsDynamicModel> model = new List<SecVolumeLast2YearsDynamicModel>();
 
-            if(sortMode.Equals("byVolume"))
+            if (sortMode.Equals("byVolume"))
             {
                 model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(DateTime.Now.Year);
             }
@@ -168,6 +169,11 @@ namespace InvestmentVisualisation.Controllers
 
             return View(model);
         }
+
+        public async Task<IActionResult> VolumeChart()
+        {
+			return View();
+		}
 
         private void CalculateColorDependingByDivsValues(List<SecVolumeLast2YearsDynamicModel> model)
         {
