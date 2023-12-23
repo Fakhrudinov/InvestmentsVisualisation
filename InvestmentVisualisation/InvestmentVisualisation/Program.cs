@@ -44,7 +44,20 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
-    pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
+    pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
+    //pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
 
 app.Run();
+
+/*
+ * 22 december(12) 2024 - self signed sertificate will be out of date
+ * error on start is NET::ERR_CERT_INVALID
+ * 
+ * Do this in Package Manager console:
+ *  dotnet dev-certs https --clean
+ *  dotnet dev-certs https --trust
+ *  restart brawser
+ * 
+ * How to see certificates:
+ * win+r and run certmgr.msc
+ */
