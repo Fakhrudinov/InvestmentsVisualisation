@@ -19,7 +19,7 @@
     <title>@ViewData["Title"] - Investments</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/InvestmentVisualisation.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/InvestmentVisualisation.styles.css" asp-append-version="true" />    
 </head>
 <body>
     <header>
@@ -185,6 +185,12 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
+                                <a asp-area="" asp-controller="SecVolume" asp-action="VolumeChart" class="dropdown-item">
+                                    Chart
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
                                 <a asp-area="" asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
                                    class="dropdown-item">Динамика позиций за 3 года сортированная по тикеру</a>
                             </li>
@@ -237,9 +243,11 @@
         </main>
     </div>
 
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("scripts", required: false)
+    @await RenderSectionAsync("head", required: false)
 </body>
 </html>

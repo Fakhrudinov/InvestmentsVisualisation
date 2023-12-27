@@ -107,6 +107,9 @@
     <None Update="SqlQueries\SecCodes\GetSingleSecCodeBySecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\SecVolume\GetSecVolumeChartData.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\SecVolume\GetSecVolumeCountForYear.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

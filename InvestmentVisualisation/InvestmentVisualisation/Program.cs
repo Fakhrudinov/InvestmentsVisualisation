@@ -20,10 +20,14 @@ builder.Services.AddTransient<IWebDividents, WebDividents>();
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
 
-builder.Services.Configure<WebDiviPageSettings>("SmLab", builder.Configuration.GetSection("WebPageDividentInfo:SmartLabDiviPageSettings"));
-builder.Services.Configure<WebDiviPageSettings>("InvLab", builder.Configuration.GetSection("WebPageDividentInfo:InvLabDiviPageSettings"));
-builder.Services.Configure<WebDiviPageSettings>("Dohod", builder.Configuration.GetSection("WebPageDividentInfo:DohodDiviPageSettings"));
-builder.Services.Configure<WebDiviPageSettings>("Vsdelke", builder.Configuration.GetSection("WebPageDividentInfo:VsdelkeDiviPageSettings"));
+builder.Services
+    .Configure<WebDiviPageSettings>("SmLab", builder.Configuration.GetSection("WebPageDividentInfo:SmartLabDiviPageSettings"));
+builder.Services
+    .Configure<WebDiviPageSettings>("InvLab", builder.Configuration.GetSection("WebPageDividentInfo:InvLabDiviPageSettings"));
+builder.Services
+    .Configure<WebDiviPageSettings>("Dohod", builder.Configuration.GetSection("WebPageDividentInfo:DohodDiviPageSettings"));
+builder.Services
+    .Configure<WebDiviPageSettings>("Vsdelke", builder.Configuration.GetSection("WebPageDividentInfo:VsdelkeDiviPageSettings"));
 
 var app = builder.Build();
 
@@ -31,7 +35,8 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Incoming/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days.
+    // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -44,7 +49,8 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
+    //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
+    pattern: "{controller=SecVolume}/{action=VolumeChart}");
     //pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
 
 app.Run();

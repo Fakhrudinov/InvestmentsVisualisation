@@ -266,5 +266,71 @@ namespace DataBaseRepository
             }
 
         }
-    }
+
+		public async Task<List<ChartItemModel>> GetVolumeChartData()
+		{
+			int year = DateTime.Now.Year;
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetVolumeChartData" +
+                $" with year = {year} ");
+
+			List<ChartItemModel> result = new List<ChartItemModel>();
+
+			string filePath = Path.Combine(
+				Directory.GetCurrentDirectory(),
+				"SqlQueries",
+				"SecVolume",
+				"GetSecVolumeChartData.sql");
+			if (!File.Exists(filePath))
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} GetVolumeChartData Error! " +
+					$"File with SQL script not found at " + filePath);
+				return result;
+			}
+			else
+			{
+				string query = File.ReadAllText(filePath);
+				query = query.Replace("@year", year.ToString());
+
+				_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                    $"GetVolumeChartData execute query GetSecVolumeChartData.sql\r\n{query}");
+
+				using (MySqlConnection con = new MySqlConnection(_connectionString))
+				{
+					using (MySqlCommand cmd = new MySqlCommand(query))
+					{
+						cmd.Connection = con;
+
+						try
+						{
+							await con.OpenAsync();
+
+							using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+							{
+								while (await sdr.ReadAsync())
+								{
+									ChartItemModel model = new ChartItemModel
+                                        (
+                                            sdr.GetString("NAME"),
+										    sdr.GetDecimal("VOLUME")
+										);
+									result.Add(model);
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+								$"GetVolumeChartData Exception!\r\n{ex.Message}");
+						}
+						finally
+						{
+							await con.CloseAsync();
+						}
+					}
+				}
+
+				return result;
+			}
+		}
+	}
 }
