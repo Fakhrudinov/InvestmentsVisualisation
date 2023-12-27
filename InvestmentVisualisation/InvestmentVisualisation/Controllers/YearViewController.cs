@@ -27,7 +27,7 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> Index(int year = 0, bool sortedByVolume = false)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController GET Deals called, year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController GET Index called, year={year}");
 
             int currentYear = DateTime.Now.Year;
 
@@ -56,5 +56,14 @@ namespace InvestmentVisualisation.Controllers
 
             return View(yearViews);
         }
+
+        public async Task<IActionResult> Last12Month()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController Last12Month");
+
+
+
+            return View();
+        }        
     }
 }
