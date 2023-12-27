@@ -5,12 +5,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.BaseModels;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Primitives;
-using System.Reflection;
+using Newtonsoft.Json;
 
 namespace InvestmentVisualisation.Controllers
 {
+    ////DataContract for Serializing Data - required to serve in JSON format
+    //[DataContract]
+    //public class DataPoint
+    //{
+    //    public DataPoint(string label, double y)
+    //    {
+    //        this.Label = label;
+    //        this.Y = y;
+    //    }
+
+    //    //Explicitly setting the name to be used while serializing to JSON.
+    //    [DataMember(Name = "label")]
+    //    public string Label = "";
+
+    //    //Explicitly setting the name to be used while serializing to JSON.
+    //    [DataMember(Name = "y")]
+    //    public Nullable<double> Y = null;
+    //}
+
     public class SecVolumeController : Controller
     {
         private readonly ILogger<SecVolumeController> _logger;
@@ -172,6 +189,88 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> VolumeChart()
         {
+			// get dat from DB
+			// (summ all volumes) / 100 = 1%
+			// calculate % in each position
+			// calculate rows number - for chart height calculation
+			// summ AO and AP
+			// sort data
+
+			List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData();
+
+            // calculate 1%
+            decimal totalVolume = 0;
+            foreach (ChartItemModel chartItem in chartItemsRaw)
+            {
+                totalVolume = totalVolume + chartItem.Y;
+			}
+            decimal onePercent = totalVolume/ 100;
+
+            // any AP items save to separare list
+			List<ChartItemModel> chartItems = new List<ChartItemModel>();
+			List<ChartItemModel> chartItemsTemporaryForAP = new List<ChartItemModel>();
+			foreach (ChartItemModel chartItem in chartItemsRaw)
+			{
+                if (chartItem.Label.Length == 5 && chartItem.Label.EndsWith("P")) // for AP list
+                {
+					chartItemsTemporaryForAP.Add
+	                    (new ChartItemModel
+		                    (
+								chartItem.Label,
+			                    Math.Round(chartItem.Y / onePercent, 2)
+		                    )
+	                    );
+				}
+                else // for AO list
+                {
+					chartItems.Add
+	                    (new ChartItemModel
+		                    (
+								//chartItem.Label,
+                                chartItem.Label.Length > 10 ? chartItem.Label.Substring(0,10) : chartItem.Label,
+								Math.Round(chartItem.Y / onePercent, 2)
+		                    )
+	                    );
+				}
+            }
+
+			// add AP items to AO list summing with exist AO values
+            foreach (ChartItemModel chartItemAP in chartItemsTemporaryForAP)
+            {
+                bool isExist = false;
+
+				foreach (ChartItemModel chartItem in chartItems)
+                {
+                    if (chartItem.Label.Length == 4 && chartItemAP.Label.Substring(0,4).Equals(chartItem.Label))
+                    {
+						// summ with exist position in AO list
+						chartItem.Label = chartItem.Label + "+" + chartItemAP.Label;
+                        chartItem.Y = chartItem.Y + chartItemAP.Y;
+
+						isExist = true;
+						break;
+                    }
+                }
+
+                // add new position to AO list
+				if (!isExist)
+				{
+					chartItems.Add
+						(new ChartItemModel
+							(
+								chartItemAP.Label,
+								chartItemAP.Y
+							)
+						);
+				}
+			}
+
+			// sort
+			chartItems = chartItems.OrderBy( chartItem => chartItem.Y ).ToList();
+
+			ViewBag.ChartData = JsonConvert.SerializeObject(chartItems);
+			ViewBag.ChartItemsCount = chartItems.Count;
+
 			return View();
 		}
 

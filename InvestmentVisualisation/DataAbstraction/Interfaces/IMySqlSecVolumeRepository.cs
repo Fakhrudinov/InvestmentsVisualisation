@@ -8,6 +8,7 @@ namespace DataAbstraction.Interfaces
         Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(int year);
         Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicSortedByVolume(int year);
         Task<List<SecVolumeModel>> GetSecVolumePageForYear(int itemsAtPage, int v, int year);
-        Task RecalculateSecVolumeForYear(int year);
+		Task<List<ChartItemModel>> GetVolumeChartData();
+		Task RecalculateSecVolumeForYear(int year);
     }
 }
