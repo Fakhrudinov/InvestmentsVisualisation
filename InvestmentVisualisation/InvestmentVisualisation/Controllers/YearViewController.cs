@@ -61,9 +61,50 @@ namespace InvestmentVisualisation.Controllers
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController Last12Month");
 
+            // create view
+            await _repository.CallFillViewShowLast12Month();
+            
+            // get view
+            List<YearViewModel> last12MonthView = await _repository.GetLast12MonthViewPage();
+
+            // fill summ
+            for (int i = 0; i < last12MonthView.Count; i++)
+            {
+                decimal divSumm =
+                    (last12MonthView[i].Jan is null ? 0 : (decimal)last12MonthView[i].Jan) +
+                    (last12MonthView[i].Feb is null ? 0 : (decimal)last12MonthView[i].Feb) +
+                    (last12MonthView[i].Mar is null ? 0 : (decimal)last12MonthView[i].Mar) +
+                    (last12MonthView[i].Apr is null ? 0 : (decimal)last12MonthView[i].Apr) +
+                    (last12MonthView[i].May is null ? 0 : (decimal)last12MonthView[i].May) +
+                    (last12MonthView[i].Jun is null ? 0 : (decimal)last12MonthView[i].Jun) +
+                    (last12MonthView[i].Jul is null ? 0 : (decimal)last12MonthView[i].Jul) +
+                    (last12MonthView[i].Aug is null ? 0 : (decimal)last12MonthView[i].Aug) +
+                    (last12MonthView[i].Sep is null ? 0 : (decimal)last12MonthView[i].Sep) +
+                    (last12MonthView[i].Okt is null ? 0 : (decimal)last12MonthView[i].Okt) +
+                    (last12MonthView[i].Nov is null ? 0 : (decimal)last12MonthView[i].Nov) +
+                    (last12MonthView[i].Dec is null ? 0 : (decimal)last12MonthView[i].Dec);
+
+                if (divSumm > 0)
+                {
+                    last12MonthView[i].Summ = divSumm;
+                }
+            }
+
+            // fill % divs to volume
+            for (int i = 0; i < last12MonthView.Count; i++)
+            {
+                if (last12MonthView[i].Summ is not null)
+                {
+                    decimal onePercent = last12MonthView[i].Volume / 100;
+                    last12MonthView[i].DivPercent = (decimal)last12MonthView[i].Summ / onePercent;
+                }
+            }
+
+            // DROP TABLE
+            await _repository.DropTableLast12MonthView();
 
 
-            return View();
+            return View(last12MonthView);
         }        
     }
 }

@@ -125,6 +125,15 @@
     <None Update="SqlQueries\SecVolume\RecalculateSecVolumeForYear.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\YearView\CallFillViewShowLast12Month.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\YearView\DropTableLast12MonthView.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\YearView\GetLast12MonthViewPage.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\YearView\GetYearViewPage.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

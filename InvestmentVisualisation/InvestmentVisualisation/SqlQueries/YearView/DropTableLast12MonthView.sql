@@ -1,0 +1,1 @@
+﻿DROP TABLE IF EXISTS temp_last_year_view;

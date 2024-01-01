@@ -69,17 +69,17 @@ namespace DataBaseRepository
                                         newLine.ISIN = sdr.GetString("isin");
                                     }
 
-                                    int checkForNull2 = sdr.GetOrdinal("pieces");
-                                    if (!sdr.IsDBNull(checkForNull2))
-                                    {
-                                        newLine.Pieces = sdr.GetInt32("pieces");
-                                    }
+                                    //int checkForNull2 = sdr.GetOrdinal("pieces");
+                                    //if (!sdr.IsDBNull(checkForNull2))
+                                    //{
+                                    //    newLine.Pieces = sdr.GetInt32("pieces");
+                                    //}
 
-                                    int checkForNull3 = sdr.GetOrdinal("av_price");
-                                    if (!sdr.IsDBNull(checkForNull3))
-                                    {
-                                        newLine.AvPrice = sdr.GetDecimal("av_price");
-                                    }
+                                    //int checkForNull3 = sdr.GetOrdinal("av_price");
+                                    //if (!sdr.IsDBNull(checkForNull3))
+                                    //{
+                                    //    newLine.AvPrice = sdr.GetDecimal("av_price");
+                                    //}
 
                                     newLine.Volume = sdr.GetDecimal("volume");
 
@@ -244,6 +244,245 @@ namespace DataBaseRepository
                         }
                     }
                 }
+            }
+        }
+
+        public async Task CallFillViewShowLast12Month()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                $"CallFillViewShowLast12Month start");
+
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "YearView", 
+                "CallFillViewShowLast12Month.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                    $"CallFillViewShowLast12Month execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        try
+                        {
+                            await con.OpenAsync();
+                            await cmd.ExecuteNonQueryAsync();
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"CallFillViewShowLast12Month executed");
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"CallFillViewShowLast12Month Exception!\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task DropTableLast12MonthView()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                $"DropTableLast12MonthView start");
+
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "YearView", 
+                "DropTableLast12MonthView.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                    $"DropTableLast12MonthView execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        try
+                        {
+                            await con.OpenAsync();
+                            await cmd.ExecuteNonQueryAsync();
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"DropTableLast12MonthView executed");
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"DropTableLast12MonthView Exception!\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+            }
+        }
+
+        public async Task<List<YearViewModel>> GetLast12MonthViewPage()
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                $"GetLast12MonthViewPage start");
+
+            List<YearViewModel> result = new List<YearViewModel>();
+
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "YearView", 
+                "GetLast12MonthViewPage.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+                return result;
+            }
+            else
+            {
+                string query = File.ReadAllText(filePath);
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                    $"GetLast12MonthViewPage execute query \r\n{query}");
+
+                using (MySqlConnection con = new MySqlConnection(_connectionString))
+                {
+                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    {
+                        cmd.Connection = con;
+
+                        try
+                        {
+                            await con.OpenAsync();
+
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            {
+                                while (await sdr.ReadAsync())
+                                {
+                                    YearViewModel newLine = new YearViewModel();
+
+                                    newLine.SecCode = sdr.GetString("seccode");
+                                    newLine.Name = sdr.GetString("name");
+
+                                    newLine.Volume = sdr.GetDecimal("volume");
+
+                                    int checkForNull4 = sdr.GetOrdinal("m-11");
+                                    if (!sdr.IsDBNull(checkForNull4))
+                                    {
+                                        newLine.Jan = sdr.GetDecimal("m-11");
+                                    }
+
+                                    int checkForNull5 = sdr.GetOrdinal("m-10");
+                                    if (!sdr.IsDBNull(checkForNull5))
+                                    {
+                                        newLine.Feb = sdr.GetDecimal("m-10");
+                                    }
+
+                                    int checkForNull6 = sdr.GetOrdinal("m-09");
+                                    if (!sdr.IsDBNull(checkForNull6))
+                                    {
+                                        newLine.Mar = sdr.GetDecimal("m-09");
+                                    }
+
+                                    int checkForNull7 = sdr.GetOrdinal("m-08");
+                                    if (!sdr.IsDBNull(checkForNull7))
+                                    {
+                                        newLine.Apr = sdr.GetDecimal("m-08");
+                                    }
+
+                                    int checkForNull8 = sdr.GetOrdinal("m-07");
+                                    if (!sdr.IsDBNull(checkForNull8))
+                                    {
+                                        newLine.May = sdr.GetDecimal("m-07");
+                                    }
+
+                                    int checkForNull9 = sdr.GetOrdinal("m-06");
+                                    if (!sdr.IsDBNull(checkForNull9))
+                                    {
+                                        newLine.Jun = sdr.GetDecimal("m-06");
+                                    }
+
+                                    int checkForNull10 = sdr.GetOrdinal("m-05");
+                                    if (!sdr.IsDBNull(checkForNull10))
+                                    {
+                                        newLine.Jul = sdr.GetDecimal("m-05");
+                                    }
+
+                                    int checkForNull11 = sdr.GetOrdinal("m-04");
+                                    if (!sdr.IsDBNull(checkForNull11))
+                                    {
+                                        newLine.Aug = sdr.GetDecimal("m-04");
+                                    }
+
+                                    int checkForNull12 = sdr.GetOrdinal("m-03");
+                                    if (!sdr.IsDBNull(checkForNull12))
+                                    {
+                                        newLine.Sep = sdr.GetDecimal("m-03");
+                                    }
+
+                                    int checkForNull13 = sdr.GetOrdinal("m-02");
+                                    if (!sdr.IsDBNull(checkForNull13))
+                                    {
+                                        newLine.Okt = sdr.GetDecimal("m-02");
+                                    }
+
+                                    int checkForNull14 = sdr.GetOrdinal("m-01");
+                                    if (!sdr.IsDBNull(checkForNull14))
+                                    {
+                                        newLine.Nov = sdr.GetDecimal("m-01");
+                                    }
+
+                                    int checkForNull15 = sdr.GetOrdinal("m-00");
+                                    if (!sdr.IsDBNull(checkForNull15))
+                                    {
+                                        newLine.Dec = sdr.GetDecimal("m-00");
+                                    }
+
+                                    newLine.FullName = sdr.GetString("full_name");
+
+                                    result.Add(newLine);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+                                $"GetYearViewPage Exception!\r\n{ex.Message}");
+                        }
+                        finally
+                        {
+                            await con.CloseAsync();
+                        }
+                    }
+                }
+
+                return result;
             }
         }
     }
