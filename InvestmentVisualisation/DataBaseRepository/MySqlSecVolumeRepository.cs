@@ -5,6 +5,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Text;
 
 
 namespace DataBaseRepository
@@ -204,10 +205,11 @@ namespace DataBaseRepository
             }
             else
             {
-                string query = File.ReadAllText(filePath);
-                query = query.Replace("@year", year.ToString());
-                query = query.Replace("@prev_year", (year - 1).ToString());
-                query = query.Replace("@prev_prev_year", (year - 2).ToString());
+                StringBuilder queryStringBuilder = new StringBuilder(File.ReadAllText(filePath));
+                queryStringBuilder.Replace("@year", year.ToString());
+                queryStringBuilder.Replace("@prev_year", (year - 1).ToString());
+                queryStringBuilder.Replace("@prev_prev_year", (year - 2).ToString());
+                string query = queryStringBuilder.ToString();
 
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
                     $"GetSecVolumeLast3YearsDynamicByQueryName execute query \r\n{query}");

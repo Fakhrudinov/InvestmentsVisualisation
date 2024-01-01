@@ -35,7 +35,7 @@ namespace DataAbstraction.Models.YearView
         [Display(Name = "% увелич")]
         public decimal? VolPercent { get; set; }
 
-        [Display(Name = "Див: %")]
+        [Display(Name = "Див%")]
         public decimal? DivPercent { get; set; }
 
         public string FullName { get; set; }

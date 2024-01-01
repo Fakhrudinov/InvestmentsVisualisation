@@ -1,0 +1,1 @@
+﻿SELECT * FROM temp_last_year_view;

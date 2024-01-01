@@ -137,12 +137,12 @@ namespace InvestmentVisualisation.Controllers
                 ViewBag.DohodDivs = true;
             }
 
-            List<SecCodeAndDividentModel>? invLabDivs = _webRepository.GetDividentsTableFromInvLab();
-            SetDividentsToModel(invLabDivs, model, WebSites.InvLab);
-            if (invLabDivs is not null && invLabDivs.Count > 0)
-            {
-                ViewBag.InvLabDivs = true;
-            }
+            //List<SecCodeAndDividentModel>? invLabDivs = _webRepository.GetDividentsTableFromInvLab();
+            //SetDividentsToModel(invLabDivs, model, WebSites.InvLab);
+            //if (invLabDivs is not null && invLabDivs.Count > 0)
+            //{
+            //    ViewBag.InvLabDivs = true;
+            //}
 
             List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
             SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
@@ -303,12 +303,12 @@ namespace InvestmentVisualisation.Controllers
 
                 // надо ли что то возвращать вообще??? ______________________________________________________________
 
-                int? futInvLab = GetIntOrNullFromString(item.InvLabDividents, ref mask);
+                //int? futInvLab = GetIntOrNullFromString(item.InvLabDividents, ref mask);
                 int? futVsdelke = GetIntOrNullFromString(item.VsdelkeDividents, ref mask);
                 int? futDohod = GetIntOrNullFromString(item.DohodDividents, ref mask);
 
                 // all values > 7%
-                if (past > 10 && mask > 30)
+                if (past > 10 && mask > 20)
                 {
                     item.LineColor = "darkgreen; color: white";
                 }

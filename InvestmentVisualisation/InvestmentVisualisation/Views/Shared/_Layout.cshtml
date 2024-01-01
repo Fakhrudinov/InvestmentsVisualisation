@@ -136,6 +136,12 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
+                                <a asp-area="" asp-controller="YearView" asp-action="Last12Month" class="dropdown-item">
+                                   Последние 12 месяцев
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
                                 <a asp-area="" asp-controller="YearView" asp-action="Index" class="dropdown-item">
                                     Этот год с сортировкой по тикеру
                                 </a>
@@ -148,7 +154,9 @@
                             </li>
                             <li>
                                 <a asp-area="" asp-controller="YearView" asp-action="Index" asp-route-year="@prevYear" 
-                                class="dropdown-item">Предыдущий год</a>
+                                    class="dropdown-item">
+                                    Предыдущий год
+                            </a>
                             </li>
                             <li>
                                 <a asp-area="" asp-controller="YearView" asp-action="Index" asp-route-year="@prevPrevYear" 
