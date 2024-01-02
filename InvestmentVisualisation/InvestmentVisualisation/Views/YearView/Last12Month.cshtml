@@ -6,22 +6,22 @@
     <table class="table table-hover table-sm">
         <thead>
             <tr>
-                <th colspan="3" style="background-color:lightgrey;">
-                    1
+                <th colspan="3">
+                    
                 </th>
                 @if (DateTime.Now.Month < 12)
                 {
                     <th colspan="@(12 - DateTime.Now.Month)" style="background-color:lightcyan; text-align:center;
-                                                            border-top: 1px solid black;border-bottom: 1px solid black; border-left: 1px solid black;">
+                                                            border-top: 1px solid lightgray;border-bottom: 1px solid lightgray; border-left: 1px solid lightgray;">
                         @DateTime.Now.AddMonths(- DateTime.Now.Month).Year
                     </th>
                 }
                 <th colspan="@DateTime.Now.Month" 
-                    style="background-color:aquamarine; border: 1px solid black; text-align:center;">
+                    style="background-color:aquamarine; border: 1px solid lightgray; text-align:center;">
                     @DateTime.Now.Year
                 </th>
-                <th colspan="2" style="background-color:lightgrey;">
-                    1
+                <th colspan="2">
+                    
                 </th>
             </tr>
             <tr>

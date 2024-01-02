@@ -9,25 +9,6 @@ using Newtonsoft.Json;
 
 namespace InvestmentVisualisation.Controllers
 {
-    ////DataContract for Serializing Data - required to serve in JSON format
-    //[DataContract]
-    //public class DataPoint
-    //{
-    //    public DataPoint(string label, double y)
-    //    {
-    //        this.Label = label;
-    //        this.Y = y;
-    //    }
-
-    //    //Explicitly setting the name to be used while serializing to JSON.
-    //    [DataMember(Name = "label")]
-    //    public string Label = "";
-
-    //    //Explicitly setting the name to be used while serializing to JSON.
-    //    [DataMember(Name = "y")]
-    //    public Nullable<double> Y = null;
-    //}
-
     public class SecVolumeController : Controller
     {
         private readonly ILogger<SecVolumeController> _logger;
@@ -279,7 +260,7 @@ namespace InvestmentVisualisation.Controllers
             // color grade from high to low
             //  darkgreen
             //  green
-            //  springgreen // mediumseagreen
+            //   mediumseagreen
             //  lightgreen
 
             foreach (var item in model)
@@ -293,28 +274,29 @@ namespace InvestmentVisualisation.Controllers
                     {
                         past = past + 10;
                     }
+                    else
+                    {
+                        past = intValue;
+                    }
                 }
 
                 int mask = 0;
-                //00
-                //-x = is not null for any future = 03/0
-                //x- = is more than 7% for future = 30/0
-                //00
-
-                // надо ли что то возвращать вообще??? ______________________________________________________________
 
                 //int? futInvLab = GetIntOrNullFromString(item.InvLabDividents, ref mask);
                 int? futVsdelke = GetIntOrNullFromString(item.VsdelkeDividents, ref mask);
                 int? futDohod = GetIntOrNullFromString(item.DohodDividents, ref mask);
 
-                // all values > 7%
                 if (past > 10 && mask > 20)
                 {
                     item.LineColor = "darkgreen; color: white";
                 }
-                else
+                else if (past + futVsdelke + futDohod >= 20)
                 {
-
+                    item.LineColor = "green; color: white";
+                }
+                else if (past + futVsdelke + futDohod >= 19)
+                {
+                    item.LineColor = "lightgreen; color: black";
                 }
             }
         }
@@ -336,7 +318,7 @@ namespace InvestmentVisualisation.Controllers
                 }
             }
 
-            return 1;
+            return intValue;
         }
 
         private void RemoveEmptyPositionWithLowDivs(List<SecVolumeLast2YearsDynamicModel> model)

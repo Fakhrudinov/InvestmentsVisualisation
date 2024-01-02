@@ -7,10 +7,10 @@
 }
 
 <div class="container">
-<h3>HowTo create New Year data base extention</h3>
-    <h5>Таблица money_by_month</h5>
-    <p>Делать в январе - или меняй даты
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '2' );
+<h3>Добавление полей в базу данных при переходе на новый год</h3>
+    <p>Делать в январе - или меняй даты</p>
+    <h5>Таблица money_by_month - Тестовый контур</h5>
+    <p>INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '2' );
         <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '3');
         <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '4');
         <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '5');
@@ -23,21 +23,47 @@
         <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '12');
         <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@nextYear', '1');
         <br />
-        <br />call MoneyMonthRecalculate('@prevYear-12-01');
-        <br />call MoneyMonthRecalculate('@thisYear-01-01');
-        <br />
-        <br />
+        <br />call money_test.MoneyMonthRecalculate('@prevYear-12-01');
+        <br />call money_test.MoneyMonthRecalculate('@thisYear-01-01');
     </p>
-
-    <h5>Таблица sec_volume</h5>
+    <h5>Таблица sec_volume - Тестовый контур</h5>
     <p>
-        Делать в январе - или меняй даты
-        <br />ALTER TABLE `money_test`.`sec_volume`
+        ALTER TABLE `money_test`.`sec_volume`
         <br />ADD COLUMN `pieces_@thisYear` INT NULL DEFAULT NULL AFTER `volume_@prevYear`,
         <br />ADD COLUMN `av_price_@thisYear` DECIMAL(20,6) NULL DEFAULT NULL AFTER `pieces_@thisYear`,
         <br />ADD COLUMN `volume_@thisYear` DECIMAL(20,6) NULL DEFAULT NULL AFTER `av_price_@thisYear`;
         <br />
         <br />call money_test.SecVolumeFullRecalc('@thisYear');
+    </p>
+
+    <br />
+    <br />
+    <h5>Таблица money_by_month - Прод контур</h5>
+    <p>
+        INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '2' );
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '3');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '4');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '5');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '6');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '7');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '8');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '9');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '10');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '11');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '12');
+        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@nextYear', '1');
+        <br />
+        <br />call money.MoneyMonthRecalculate('@prevYear-12-01');
+        <br />call money.MoneyMonthRecalculate('@thisYear-01-01');
+    </p>
+    <h5>Таблица sec_volume - Прод контур</h5>
+    <p>
+        ALTER TABLE `money`.`sec_volume`
+        <br />ADD COLUMN `pieces_@thisYear` INT NULL DEFAULT NULL AFTER `volume_@prevYear`,
+        <br />ADD COLUMN `av_price_@thisYear` DECIMAL(20,6) NULL DEFAULT NULL AFTER `pieces_@thisYear`,
+        <br />ADD COLUMN `volume_@thisYear` DECIMAL(20,6) NULL DEFAULT NULL AFTER `av_price_@thisYear`;
+        <br />
+        <br />call money.SecVolumeFullRecalc('@thisYear');
     </p>
 
 </div>
