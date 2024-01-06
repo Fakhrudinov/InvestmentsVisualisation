@@ -125,6 +125,18 @@
     <None Update="SqlQueries\SecVolume\RecalculateSecVolumeForYear.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\WishList\DeleteWishBySecCode.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\WishList\AddNewWish.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\WishList\EditWishLevelBySecCode.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\WishList\GetFullWishList.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\YearView\CallFillViewShowLast12Month.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

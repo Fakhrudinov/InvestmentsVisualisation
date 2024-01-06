@@ -1,0 +1,82 @@
+﻿@using DataAbstraction.Models
+@using DataAbstraction.Models.BaseModels
+@using DataAbstraction.Models.WishList
+@model IEnumerable<WishListItemModel>
+@{
+    List<StaticSecCode> secCodesList = new List<StaticSecCode>(StaticData.SecCodes.GetRange(1, StaticData.SecCodes.Count - 1));
+}
+
+<div class="container">
+
+    <h3>Wish list</h3>
+
+    <div class="row">
+        <div class="col-md-5">
+
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.SecCode)
+                        </th>
+                        <th width="160">
+                            @* @Html.DisplayNameFor(model => model.Level) *@
+                            @* change level ᚏ ᚎ ᚍ ᚌ ᚋ   █ ▉ ▊ ▋ ▌ ▍ ▎ ▏*@
+                        </th>
+                        <th width="80">
+                            @* del *@
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.SecCode)
+                            </td>
+                            <td align="right" style="text-align:right;">
+                                <form method="post" action="/WishList/EditWishLevel">
+                                    <div class="input-group input-group-sm ">
+                                        <input name="seccode" value="@item.SecCode" hidden>
+                                        <input type="number" class="form-control" name="level" min="1" max="5" value="@item.Level">
+                                        <input type="submit" class="btn btn-outline-secondary" value="Edit Level" />
+                                    </div>
+                                </form>                                
+                            </td>
+                            <td>
+                                @Html.ActionLink(
+                                    "Delete", 
+                                    "Delete", 
+                                    new { seccode = item.SecCode },
+                                         new { @class = "btn btn-outline-danger btn-sm" })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+         <div class="col-md-1">
+            
+        </div>
+        <div class="col-md-4">
+            <h5 style="text-align:center">Добавить в Wish list</h5>
+
+            <form method="post" action="/WishList/CreateNewWish">
+                <div class="input-group">
+                    @Html.DropDownList("seccode", new SelectList(@secCodesList, "SecCode", "SecCode"),
+                             new
+                             {
+                                 @class = "form-select"
+                             })
+                    <input type="number" style="width: 50px; border: 1px solid gray" name="level" min="1" max="5" value="1">
+                    <input type="submit" class="btn btn-primary" value="Добавить" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+</div>

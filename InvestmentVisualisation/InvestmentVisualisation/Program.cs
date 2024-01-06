@@ -14,6 +14,7 @@ builder.Services.AddTransient<IMySqlMoneyRepository, MySqlMoneyRepository>();
 builder.Services.AddTransient<IMySqlYearViewRepository, MySqlYearViewRepository>();
 builder.Services.AddTransient<IMySqlSecCodesRepository, MySqlSecCodesRepository>();
 builder.Services.AddTransient<IMySqlSecVolumeRepository, MySqlSecVolumeRepository>();
+builder.Services.AddTransient<IMySqlWishListRepository, MySqlWishListRepository>();
 
 builder.Services.AddTransient<IWebDividents, WebDividents>();
 
@@ -49,8 +50,8 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
-    //pattern: "{controller=YearView}/{action=Last12Month}");
+    //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
+    pattern: "{controller=WishList}/{action=WishList}");
     //pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
 
 app.Run();
