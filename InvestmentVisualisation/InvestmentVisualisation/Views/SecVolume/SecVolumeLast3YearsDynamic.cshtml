@@ -1,8 +1,11 @@
-﻿@model IEnumerable<DataAbstraction.Models.SecVolume.SecVolumeLast2YearsDynamicModel>
+﻿@using DataAbstraction.Models.WishList
+@using System.Text
+@model IEnumerable<DataAbstraction.Models.SecVolume.SecVolumeLast2YearsDynamicModel>
 
 @{
     int pp = ViewBag.year - 2;
-    int p = ViewBag.year - 1;    
+    int p = ViewBag.year - 1;
+    List<WishListItemModel> wishList = ViewBag.WishList;
 
     ViewData["Title"] = "SecVolume volume grows table";
 }
@@ -14,59 +17,55 @@
             <tr>
                 <th rowspan="2" style="border-left:black 1px solid; border-top:black 1px solid; border-bottom:black 1px solid;">
                     @*тикер*@
-                    @{
-                        if (ViewBag.SortMode == "byTiker")
-                        {
-                            <div>
-                                тикер<span style="color:red;">&#9660;</span>
-                            </div>
-                        }
-                        else
-                        {
-                            <div>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
-                                    asp-route-sortMode="byTiker" style="text-decoration: none">
-                                    тикер<span style="color:red;">&#9661;</span>
-                                </a>
-                            </div>
-                        }
+                    @if (ViewBag.SortMode == "byTiker")
+                    {
+                        <div>
+                            тикер<span style="color:red;">&#9660;</span>
+                        </div>
                     }
+                    else
+                    {
+                        <div>
+                            <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                asp-route-sortMode="byTiker" style="text-decoration: none">
+                                тикер<span style="color:red;">&#9661;</span>
+                            </a>
+                        </div>
+                    }
+
                 </th>
                 <th rowspan="2" style="border-top:black 1px solid; border-bottom:black 1px solid;">имя</th>
                 <th class="border border-dark border-bottom-0" style="text-align:center;">
                     @pp
                 </th>
                 <th class="border border-dark border-bottom-0" style="text-align:center;">@p</th>
-                <th colspan="3" class="border border-dark border-bottom-0" style="text-align:center;">@ViewBag.year</th>
-                @{
-                    if (ViewBag.SmartLab == true)
-                    {
-                        <th class="border border-dark border-bottom-0" style="text-align:center;">
-                            <a href="https://smart-lab.ru/dividends/yield/" target="_blank">SmLab</a>
+                <th colspan="3" class="border border-dark border-bottom-0" style="text-align:center;">
+                    @ViewBag.year
+                </th>
+                <th class="border border-dark border-bottom-0" style="text-align:center; width:4.8em;">
+                    @* wish top *@
+                </th>
+                @if (ViewBag.SmartLab == true)
+                {
+                    <th class="border border-dark border-bottom-0" style="text-align:center;">
+                        <a href="https://smart-lab.ru/dividends/yield/" target="_blank">SmLab</a>
 
-                        </th>
-                    }
-                    // if (ViewBag.InvLabDivs == true)
-                    // {
-                    //     <th class="border border-dark border-bottom-0" style="text-align:center;">
-                    //         <a href="https://invlab.ru/akcii/rossiyskie-dividendnye/" target="_blank">InvLab</a>
-
-                    //     </th>
-                    // }
-                    if (ViewBag.Vsdelke == true)
-                    {
-                        <th class="border border-dark border-bottom-0" style="text-align:center;">
-                            <a href="https://vsdelke.ru/dividendy/" target="_blank">VSdelke</a>
-
-                        </th>
-                    }
-                    if (ViewBag.DohodDivs == true)
-                    {
-                        <th colspan="2" class="border border-dark border-bottom-0" style="text-align:center;">
-                            <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
-                        </th>
-                    }
+                    </th>
                 }
+                @if (ViewBag.Vsdelke == true)
+                {
+                    <th class="border border-dark border-bottom-0" style="text-align:center;">
+                        <a href="https://vsdelke.ru/dividendy/" target="_blank">VSdelke</a>
+
+                    </th>
+                }
+                @if (ViewBag.DohodDivs == true)
+                {
+                    <th colspan="2" class="border border-dark border-bottom-0" style="text-align:center;">
+                        <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
+                    </th>
+                }
+
             </tr>
             <tr>
                 <th class="border border-dark border-top-0" style="text-align:center;">
@@ -84,116 +83,116 @@
                 <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
                     @* объем*@
 
-                    @{
-                        if (ViewBag.SortMode == "byVolume")
+                    @if (ViewBag.SortMode == "byVolume")
+                    {
+                        <div>
+                            Vol<span style="color:red;">&#9660;</span>
+                        </div>
+
+                    }
+                    else
+                    {
+                        <div>
+                            <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                asp-route-sortMode="byVolume" style="text-decoration: none">
+                                Vol<span style="color:red;">&#9661;</span>
+                            </a>
+                        </div>
+                    }
+                </th>
+                <th style="text-align:center;">
+                    Wish
+                </th>
+
+                @if (ViewBag.SmartLab == true)
+                {
+                    <th class="border border-dark border-top-0" style="text-align:center;">
+                        prev
+                    </th>
+                }
+                @if (ViewBag.Vsdelke == true)
+                {
+                    <th class="border border-dark border-top-0" style="text-align:center;">
+                        future
+                    </th>
+                }
+                @if (ViewBag.DohodDivs == true)
+                {
+                    <th style="text-align:right;">
+                        future
+                    </th>
+                    <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                        @*Даты*@
+
+                        @if (ViewBag.SortMode == "byTime")
                         {
                             <div>
-                                Vol<span style="color:red;">&#9660;</span>
+                                Даты<span style="color:red;">&#9660;</span>
                             </div>
-
                         }
                         else
                         {
                             <div>
                                 <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
-                                    asp-route-sortMode="byVolume" style="text-decoration: none">
-                                    Vol<span style="color:red;">&#9661;</span>
+                                    asp-route-sortMode="byTime" style="text-decoration: none">
+                                    Даты<span style="color:red;">&#9661;</span>
                                 </a>
                             </div>
                         }
-                    }
-
-@*                    <div class="col-sm-12 col-md-12 form-inline">
-                        Vol<a href="##" style="color:red; text-decoration:none;">&#9660;</a>
-                    </div>*@
-                    
-                </th>
-                @{
-                    if (ViewBag.SmartLab == true)
-                    {
-                        <th class="border border-dark border-top-0" style="text-align:center;">
-                            prev
-                        </th>
-                    }
-                    // if (ViewBag.InvLabDivs == true)
-                    // {
-                    //     <th class="border border-dark border-top-0" style="text-align:center;">
-                    //         future
-                    //     </th>
-                    // }
-                    if (ViewBag.Vsdelke == true)
-                    {
-                        <th class="border border-dark border-top-0" style="text-align:center;">
-                            future
-                        </th>
-                    }
-                    if (ViewBag.DohodDivs == true)
-                    {
-                        <th style="text-align:right;">
-                            future
-                        </th>
-                        <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            @*Даты*@
-
-                            @{
-                                if (ViewBag.SortMode == "byTime")
-                                {
-                                    <div>
-                                        Даты<span style="color:red;">&#9660;</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div>
-                                        <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
-                                            asp-route-sortMode="byTime" style="text-decoration: none">
-                                            Даты<span style="color:red;">&#9661;</span>
-                                        </a>
-                                    </div>
-                                }
-                            }
-                        </th>
-                    }
+                    </th>
                 }
-
             </tr>
         </thead>
         <tbody>
-    @foreach (var item in Model) {
-            <tr>
-                <td style="border-left-color:black; border-left-width: 1px;">
-                    @Html.DisplayFor(modelItem => item.SecCode)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                    <td style="
-                            text-align:right;
-                            border-right-color:black;
-                            border-right-width: 1px;
-                            border-left-color:black; 
-                            border-left-width: 1px;">
-                    @Html.DisplayFor(modelItem => item.PreviousPreviousYearPieces)
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.PreviousYearPieces)
-                </td>
-                    <td style="
-                            text-align:right;
-                            border-left-color:black; 
-                            border-left-width: 1px; 
-                            background-color: @(@item.LastYearChanges > 0 ? "lightgreen" : "")">
-                    @Html.DisplayFor(modelItem => item.LastYearChanges)
-                    %   
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.LastYearPieces)
-                </td>
-                <td style="text-align:right;border-right-color:black; border-right-width: 1px;">
-                    @Html.DisplayFor(modelItem => item.LastYearVolume)
-                </td>
-                    @{
-                    if (ViewBag.SmartLab == true)
+            @foreach (var item in Model) 
+            {
+                <tr>
+                    <td style="border-left-color:black; border-left-width: 1px;">
+                        @Html.DisplayFor(modelItem => item.SecCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                        <td style="
+                                text-align:right;
+                                border-right-color:black;
+                                border-right-width: 1px;
+                                border-left-color:black; 
+                                border-left-width: 1px;">
+                        @Html.DisplayFor(modelItem => item.PreviousPreviousYearPieces)
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.PreviousYearPieces)
+                    </td>
+                        <td style="
+                                text-align:right;
+                                border-left-color:black; 
+                                border-left-width: 1px; 
+                                background-color: @(@item.LastYearChanges > 0 ? "lightgreen" : "")">
+                        @Html.DisplayFor(modelItem => item.LastYearChanges)
+                        %   
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.LastYearPieces)
+                    </td>
+                    <td style="text-align:right;border-right-color:black; border-right-width: 1px;">
+                        @Html.DisplayFor(modelItem => item.LastYearVolume)
+                    </td>
+                    <td style="border-right-color:black; border-right-width: 1px;">
+                        <div style="color:darkgreen;">
+                            @if (wishList.Find(x => x.SecCode.Equals(item.SecCode)) is not null)
+                            {
+                                StringBuilder level = new StringBuilder(5); 
+                                @for (int i = 0; i<wishList.Find(x => x.SecCode.Equals(item.SecCode)).Level; i++)
+                                {
+                                    level.Append("▉");
+                                }
+                                <span>@level</span>
+                            }
+                        </div>
+                    </td>
+
+                    @if (ViewBag.SmartLab == true)
                     {
                         string tiker = item.SecCode.Substring(0, 4);
                         string link = "https://smart-lab.ru/q/" + tiker + "/dividend/";
@@ -202,7 +201,8 @@
                                     border-right-width: 1px;
                                     text-align:right; 
                                     background-color:@item.LineColor;">
-                            <a href="@link" target="_blank" style="text-decoration: none;background-color:@item.LineColor;">
+                            <a href="@link" target="_blank" style=" text-decoration: none;
+                                                                    background-color:@item.LineColor;">
                                 @if (item.SmartLabDividents is not null)
                                 {
                                     <div style="">
@@ -218,17 +218,8 @@
                             </a>
                         </td>                            
                     }
-                    // if (ViewBag.InvLabDivs == true)
-                    // {
-                    //     <td style="
-                    //                 border-right-color:black; 
-                    //                 border-right-width: 1px;
-                    //                 text-align:right; 
-                    //                 background-color:@item.LineColor;">
-                    //         @Html.DisplayFor(modelItem => item.InvLabDividents)
-                    //     </td>
-                    // }
-                    if (ViewBag.Vsdelke == true)
+
+                    @if (ViewBag.Vsdelke == true)
                     {
                         <td style="
                                     border-right-color:black; 
@@ -238,7 +229,7 @@
                             @Html.DisplayFor(modelItem => item.VsdelkeDividents)
                         </td>
                     }
-                    if (ViewBag.DohodDivs == true)
+                    @if (ViewBag.DohodDivs == true)
                     {
                         string link = "https://www.dohod.ru/ik/analytics/dividend/" + item.SecCode.ToLower();
                         <td style="
@@ -262,38 +253,37 @@
                             </a>
                         </td>
                         <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
-                            @{
-                                if (item.NextDivDate > DateTime.MinValue)
+                            @if (item.NextDivDate > DateTime.MinValue)
+                            {
+                                string txtColor = "black";
+                                string txtWeight = "normal";
+                                if (item.NextDivDate <= DateTime.Now.AddMonths(4))
                                 {
-                                    string txtColor = "black";
-                                    string txtWeight = "normal";
-                                    if (item.NextDivDate <= DateTime.Now.AddMonths(4))
-                                    {
-                                        txtColor = "darkred";
-                                    }
-
-                                    if (item.NextDivDate <= DateTime.Now.AddMonths(3))
-                                    {
-                                        txtColor = "red";
-                                    }
-                                        
-                                    if (item.NextDivDate <= DateTime.Now.AddMonths(2))
-                                    {
-                                        txtColor = "orange";
-                                    }
-                                        
-                                    if (item.NextDivDate <= DateTime.Now.AddMonths(1))
-                                    {
-                                        txtWeight = "bold";
-                                    }
-                                    <span style="font-weight: @txtWeight; color: @txtColor; ">@Html.DisplayFor(modelItem => item.NextDivDate)</span>
+                                    txtColor = "darkred";
                                 }
-                            }                                
+
+                                if (item.NextDivDate <= DateTime.Now.AddMonths(3))
+                                {
+                                    txtColor = "red";
+                                }
+                                        
+                                if (item.NextDivDate <= DateTime.Now.AddMonths(2))
+                                {
+                                    txtColor = "orange";
+                                }
+                                        
+                                if (item.NextDivDate <= DateTime.Now.AddMonths(1))
+                                {
+                                    txtWeight = "bold";
+                                }
+                                <span style="font-weight: @txtWeight; color: @txtColor;">
+                                    @Html.DisplayFor(modelItem => item.NextDivDate)
+                                </span>
+                            }                              
                         </td>
                     }
-                }
-            </tr>
-    }
+                </tr>
+            }
         </tbody>
     </table>
 </div>

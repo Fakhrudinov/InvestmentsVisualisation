@@ -1,0 +1,1 @@
+﻿SELECT * FROM wish_list;

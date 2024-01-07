@@ -174,7 +174,9 @@
 
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
-                                    @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" ? "active" : "")"
+                                    @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" || 
+                        ViewContext.RouteData.Values["controller"].ToString() == "WishList"
+                        ? "active" : "")"
                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Инструменты
                         </button>
@@ -187,6 +189,12 @@
                             <li>
                                 <a asp-controller="SecCodes" asp-action="Create" class="dropdown-item">
                                     Добавить инструмент
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a asp-controller="WishList" asp-action="WishList" class="dropdown-item">
+                                    Показать Wish list
                                 </a>
                             </li>
                         </ul>

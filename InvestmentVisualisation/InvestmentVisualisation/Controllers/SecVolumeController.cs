@@ -16,6 +16,7 @@ namespace InvestmentVisualisation.Controllers
         private int _itemsAtPage;
         private int _minimumYear;
         private IWebDividents _webRepository;
+        private IMySqlWishListRepository _wishListRepository;
 
         private enum WebSites
         {
@@ -29,13 +30,15 @@ namespace InvestmentVisualisation.Controllers
             ILogger<SecVolumeController> logger,
             IMySqlSecVolumeRepository repository,
             IOptions<PaginationSettings> paginationSettings,
-            IWebDividents webRepository)
+            IWebDividents webRepository,
+            IMySqlWishListRepository wishListRepository)
         {
             _logger = logger;
             _repository = repository;
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
             _minimumYear = paginationSettings.Value.SecVolumeMinimumYear;
             _webRepository = webRepository;
+            _wishListRepository = wishListRepository;
         }
 
         public async Task<IActionResult> Index(int page = 1, int year = 0)
@@ -110,6 +113,10 @@ namespace InvestmentVisualisation.Controllers
 
             CalculateChangesPercentsForList(model);
 
+            // get wish list
+            ViewBag.WishList = await _wishListRepository.GetFullWishList();//List<WishListItemModel> 
+
+            // get web site data
             DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod();
             if (dohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
             {
@@ -117,13 +124,6 @@ namespace InvestmentVisualisation.Controllers
                 SetDividentDatesToModel(dohodDivs.DohodDates, model);
                 ViewBag.DohodDivs = true;
             }
-
-            //List<SecCodeAndDividentModel>? invLabDivs = _webRepository.GetDividentsTableFromInvLab();
-            //SetDividentsToModel(invLabDivs, model, WebSites.InvLab);
-            //if (invLabDivs is not null && invLabDivs.Count > 0)
-            //{
-            //    ViewBag.InvLabDivs = true;
-            //}
 
             List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
             SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
