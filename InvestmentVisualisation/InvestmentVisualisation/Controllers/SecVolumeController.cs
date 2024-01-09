@@ -251,8 +251,10 @@ namespace InvestmentVisualisation.Controllers
 
 			ViewBag.ChartData = JsonConvert.SerializeObject(chartItems);
 			ViewBag.ChartItemsCount = chartItems.Count;
+            ViewBag.MaximumOnChart = Decimal.ToInt16(chartItems[chartItems.Count - 1].Y) + 1;
 
-			return View();
+
+            return View();
 		}
 
         private void CalculateColorDependingByDivsValues(List<SecVolumeLast2YearsDynamicModel> model)
