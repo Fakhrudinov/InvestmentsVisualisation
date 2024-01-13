@@ -4,9 +4,9 @@ namespace DataAbstraction.Interfaces
 {
     public interface IMySqlMoneyRepository
     {
-        void FillFreeMoney();
-        Task<List<MoneyModel>> GetMoneyLastYearPage();
-        Task<List<MoneyModel>> GetMoneyYearPage(int year);
-        Task RecalculateMoney(string v);
+        void FillFreeMoney(CancellationToken cancellationToken);
+        Task<List<MoneyModel>> GetMoneyLastYearPage(CancellationToken cancellationToken);
+        Task<List<MoneyModel>> GetMoneyYearPage(CancellationToken cancellationToken, int year);
+        Task RecalculateMoney(CancellationToken cancellationToken, string v);
     }
 }

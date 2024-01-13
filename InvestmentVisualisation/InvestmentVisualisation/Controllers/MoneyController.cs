@@ -15,7 +15,10 @@ namespace InvestmentVisualisation.Controllers
         private IMySqlMoneyRepository _repository;
         private int _minimumYear;
 
-        public MoneyController(ILogger<MoneyController> logger, IMySqlMoneyRepository repository, IOptions<PaginationSettings> paginationSettings)
+        public MoneyController(
+            ILogger<MoneyController> logger, 
+            IMySqlMoneyRepository repository, 
+            IOptions<PaginationSettings> paginationSettings)
         {
             _logger = logger;
             _repository = repository;
@@ -35,7 +38,7 @@ namespace InvestmentVisualisation.Controllers
         }
 
 
-        public async Task<IActionResult> Index(int year = 0)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Index called, year={year}");
 
@@ -44,11 +47,11 @@ namespace InvestmentVisualisation.Controllers
             List<MoneyModel> moneyList = new List<MoneyModel>();
             if (year == 0)
             {
-                moneyList = await _repository.GetMoneyLastYearPage();
+                moneyList = await _repository.GetMoneyLastYearPage(cancellationToken);
             }
             else
             {
-                moneyList = await _repository.GetMoneyYearPage(year);
+                moneyList = await _repository.GetMoneyYearPage(cancellationToken, year);
             }
 
             List<int> objSt = new List<int>();
@@ -61,20 +64,20 @@ namespace InvestmentVisualisation.Controllers
 
             return View(moneyList);
         }
-        public async Task<IActionResult> Recalculate(int year = 0, int month = 0)
+        public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0, int month = 0)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Recalculate called, " +
                 $"year={year} month={month}");
 
             if (year >= _minimumYear && (month >= 1 && month <= 12))
             {
-                await _repository.RecalculateMoney($"{year}-{month}-01");
+                await _repository.RecalculateMoney(cancellationToken, $"{year}-{month}-01");
             }
 
             // если пересчет за последний месяц - обновить значение в layout.
             if (year == DateTime.Now.Year && month == DateTime.Now.Month)
             {
-                _repository.FillFreeMoney();
+                _repository.FillFreeMoney(cancellationToken);
             }
 
             return RedirectToAction("Index");

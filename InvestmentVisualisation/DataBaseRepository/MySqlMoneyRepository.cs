@@ -30,33 +30,38 @@ namespace DataBaseRepository
             _commonRepo=commonRepo;
         }
 
-        public async Task<List<MoneyModel>> GetMoneyLastYearPage()
+        public async Task<List<MoneyModel>> GetMoneyLastYearPage(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository GetMoneyLastYearPage start");            
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetMoneyLastYearPage start");            
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetMoneyLastYearPage.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return _result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository GetMoneyLastYearPage execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                    $"GetMoneyLastYearPage execute query \r\n{query}");
 
-                return await GetMoneyPageByQuery(query);
+                return await GetMoneyPageByQuery(cancellationToken, query);
             }
         }
 
-        public async Task<List<MoneyModel>> GetMoneyYearPage(int year)
+        public async Task<List<MoneyModel>> GetMoneyYearPage(CancellationToken cancellationToken, int year)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository GetMoneyYearPage {year} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetMoneyYearPage {year} start");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetMoneyYearPage.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return _result;
             }
             else
@@ -65,13 +70,14 @@ namespace DataBaseRepository
 
                 query = query.Replace("@year", year.ToString());
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository GetMoneyYearPage {year} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                    $"GetMoneyYearPage {year} execute query \r\n{query}");
 
-                return await GetMoneyPageByQuery(query);
+                return await GetMoneyPageByQuery(cancellationToken, query);
             }
         }
 
-        private async Task<List<MoneyModel>> GetMoneyPageByQuery(string query)
+        private async Task<List<MoneyModel>> GetMoneyPageByQuery(CancellationToken cancellationToken, string query)
         {
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
@@ -81,11 +87,11 @@ namespace DataBaseRepository
 
                     try
                     {
-                        await con.OpenAsync();
+                        await con.OpenAsync(cancellationToken);
 
-                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                         {
-                            while (await sdr.ReadAsync())
+                            while (await sdr.ReadAsync(cancellationToken))
                             {
                                 MoneyModel newMoney = new MoneyModel();
 
@@ -140,8 +146,8 @@ namespace DataBaseRepository
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository GetMoneyLastYearPage Exception!" +
-                            $"\r\n{ex.Message}");
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                            $"GetMoneyLastYearPage Exception!\r\n{ex.Message}");
                     }
                     finally
                     {
@@ -153,20 +159,23 @@ namespace DataBaseRepository
             return _result;
         }
 
-        public async Task RecalculateMoney(string data)
+        public async Task RecalculateMoney(CancellationToken cancellationToken, string data)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository RecalculateMoney {data} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"RecalculateMoney {data} start");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "RecalculateMoney.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository RecalculateMoney {data} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                    $"RecalculateMoney {data} execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -178,15 +187,16 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
-                            await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository RecalculateMoney executed");
+                            await con.OpenAsync(cancellationToken);
+                            await cmd.ExecuteNonQueryAsync(cancellationToken);
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                                $"RecalculateMoney executed");
 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository RecalculateMoney Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                                $"RecalculateMoney Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -197,7 +207,7 @@ namespace DataBaseRepository
             }
         }
 
-        public void FillFreeMoney()
+        public void FillFreeMoney(CancellationToken cancellationToken)
         {
             _commonRepo.FillFreeMoney();
         }
