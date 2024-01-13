@@ -29,9 +29,10 @@ namespace InvestmentVisualisation.Controllers
             _secCodesRepo = secCodesRepo;
         }
 
-        public async Task<IActionResult> Incoming(int page = 1, string secCode = "")
+        public async Task<IActionResult> Incoming(CancellationToken cancellationToken, int page = 1, string secCode = "")
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Incoming called, page={page} secCode={secCode}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET " +
+                $"Incoming called, page={page} secCode={secCode}");
             //https://localhost:7226/Incoming/Incoming?page=3
 
             int count = 0;
@@ -56,11 +57,13 @@ namespace InvestmentVisualisation.Controllers
             if (secCode.Length > 0)
             {
                 ViewBag.secCode = secCode;
-                incomingWithPaginations.Incomings = await _repository.GetPageFromIncomingSpecificSecCode(secCode, _itemsAtPage, (page - 1) * _itemsAtPage);
+                incomingWithPaginations.Incomings = await _repository
+                    .GetPageFromIncomingSpecificSecCode(cancellationToken, secCode, _itemsAtPage, (page - 1) * _itemsAtPage);
             }
             else
             {
-                incomingWithPaginations.Incomings = await _repository.GetPageFromIncoming(_itemsAtPage, (page - 1) * _itemsAtPage);
+                incomingWithPaginations.Incomings = await _repository
+                    .GetPageFromIncoming(cancellationToken, _itemsAtPage, (page - 1) * _itemsAtPage);
             }
 
             return View(incomingWithPaginations);
@@ -89,9 +92,10 @@ namespace InvestmentVisualisation.Controllers
             return View("CreateIncoming", model);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateFromText(string text)
+        public async Task<IActionResult> CreateFromText(CancellationToken cancellationToken, string text)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText called, text={text}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                $"CreateFromText called, text={text}");
 
             // /t = 5 штук . может быть и 6. isin искать в 5й или 6й
             // Тип / Дата / Зачислено / Списано / Примеч / Примеч
@@ -111,7 +115,8 @@ namespace InvestmentVisualisation.Controllers
             string[] textSplitted = text.Split("\t");
             if (textSplitted.Length < 3)
             {
-                ViewData["Message"] = "Чтение строки не удалось, получено менее 3 элементов (2х табуляций-разделителей) в строке: " + text;
+                ViewData["Message"] = "Чтение строки не удалось, " +
+                    "получено менее 3 элементов (2х табуляций-разделителей) в строке: " + text;
                 return View("CreateIncoming");
             }
 
@@ -119,43 +124,51 @@ namespace InvestmentVisualisation.Controllers
             // тип операции
             if (textSplitted[0].Contains("Выплата дивидендов") || textSplitted[0].Contains("Выплата процентного дохода"))
             {
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=1 by 'Выплата дивидендов' ");
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                    $"CreateFromText set category=1 by 'Выплата дивидендов' ");
                 model.Category = 1;
             }
             else if (textSplitted[0].Contains("Оборот по погашению"))
             {
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=2 by 'Оборот по погашению' ");
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                    $"CreateFromText set category=2 by 'Оборот по погашению' ");
                 model.Category = 2;
             }
             else if (textSplitted[0].Contains("Поступление ДС клиента"))
             {
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=0 seccode=0 by 'Поступление ДС клиента' ");
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                    $"CreateFromText set category=0 seccode=0 by 'Поступление ДС клиента' ");
                 model.Category = 0;
                 model.SecCode = "0";
             }
             else if (textSplitted[0].Contains("Депозитарная комиссия"))
             {
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set category=3 seccode=0 by 'Депозитарная комиссия' ");
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                    $"CreateFromText set category=3 seccode=0 by 'Депозитарная комиссия' ");
                 model.Category = 3;
                 model.SecCode = "0";
             }
 
             // дата 
             string[] dataSplitted = textSplitted[1].Split('.');
-            string dateString = $"{dataSplitted[2]}-{dataSplitted[1]}-{dataSplitted[0]} {DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}";
+            string dateString = $"{dataSplitted[2]}-{dataSplitted[1]}-{dataSplitted[0]} " +
+                $"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}";
             model.Date = DateTime.Parse(dateString);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set {model.Date}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                $"CreateFromText set {model.Date}");
 
             //деньги
             if (textSplitted[2].Length > 0 && !textSplitted[2].Equals("0.00"))
             {
                 model.Value = textSplitted[2];
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set {model.Value} by textSplitted[2]");
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                    $"CreateFromText set {model.Value} by textSplitted[2]");
             }
             else if (textSplitted[3].Length > 0 && !textSplitted[3].Equals("0.00"))
             {
                 model.Value = textSplitted[3];
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText set {model.Value} by textSplitted[3]");
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                    $"CreateFromText set {model.Value} by textSplitted[3]");
             }
             model.Value = model.Value.Replace(",", "") ;
 
@@ -164,19 +177,22 @@ namespace InvestmentVisualisation.Controllers
             {
                 if (model.Category == 2) // тут нет ISIN, надо запрашивать последний добавленный incoming и брать seccode оттуда 
                 {
-                    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText request last incoming. Reason: Category == 2");
-                    model.SecCode = await _repository.GetSecCodeFromLastRecord();
+                    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                        $"CreateFromText request last incoming. Reason: Category == 2");
+                    model.SecCode = await _repository.GetSecCodeFromLastRecord(cancellationToken);
                 }
                 else // попробуем найти заполненный ISIN 
                 {
                     if (textSplitted.Length >=4 && textSplitted[4].Length > 0 && textSplitted[4].Contains("ISIN-"))
                     {
-                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText try set SecCode by {textSplitted[4]}");
+                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                            $"CreateFromText try set SecCode by {textSplitted[4]}");
                         model.SecCode = await GetSecCodeByISIN(textSplitted[4]);
                     }
                     if (textSplitted.Length >=5 && textSplitted[5].Length > 0 && textSplitted[5].Contains("ISIN-"))
                     {
-                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost CreateFromText try set SecCode by {textSplitted[5]}");
+                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
+                            $"CreateFromText try set SecCode by {textSplitted[5]}");
                         model.SecCode = await GetSecCodeByISIN(textSplitted[5]);
                     }
 
@@ -204,22 +220,25 @@ namespace InvestmentVisualisation.Controllers
             isin = isin.Substring(0, 12);
 
             string secCode = await _secCodesRepo.GetSecCodeByISIN(isin);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GetSecCodeByISIN получили из репозитория={secCode}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GetSecCodeByISIN " +
+                $"получили из репозитория={secCode}");
             return secCode;
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateIncoming(CreateIncomingModel newIncoming)
+        public async Task<IActionResult> CreateIncoming(CancellationToken cancellationToken, CreateIncomingModel newIncoming)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController POST CreateIncoming called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController POST " +
+                $"CreateIncoming called");
 
             if (!newIncoming.SecCode.Equals("0") && newIncoming.Category == 0)
             {
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController CreateIncoming error " +
                     $"- 'Зачисление денег' невозможно для secCode {newIncoming.SecCode}");
 
-                ViewData["Message"] = $"'Зачисление денег' невозможно для {newIncoming.SecCode}. Используй Дивиденты или досрочное погашение";
+                ViewData["Message"] = $"'Зачисление денег' невозможно для {newIncoming.SecCode}. " +
+                    $"Используй Дивиденты или досрочное погашение";
 
                 return View();
             }
@@ -239,12 +258,14 @@ namespace InvestmentVisualisation.Controllers
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController CreateIncoming error " +
                     $"- 'Дивиденды' недопустимы для денег");
 
-                ViewData["Message"] = $"'Дивиденды' недопустимы для денег. Для начисления денег от оброкера на ваши деньги - используйте досрочное погашение.";
+                ViewData["Message"] = $"'Дивиденды' недопустимы для денег. " +
+                    $"Для начисления денег от оброкера на ваши деньги - используйте досрочное погашение.";
 
                 return View();
             }
 
-            newIncoming.SecBoard = StaticData.SecCodes[StaticData.SecCodes.FindIndex(x => x.SecCode == newIncoming.SecCode)].SecBoard;
+            newIncoming.SecBoard = StaticData
+                .SecCodes[StaticData.SecCodes.FindIndex(x => x.SecCode == newIncoming.SecCode)].SecBoard;
 
             newIncoming.Value = newIncoming.Value.Replace(',', '.');
             if (newIncoming.Comission is not null)
@@ -252,10 +273,10 @@ namespace InvestmentVisualisation.Controllers
                 newIncoming.Comission = newIncoming.Comission.Replace(',', '.');
             }
 
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController POST CreateIncoming validation complete, " +
-                $"try create at repository");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController POST " +
+                $"CreateIncoming validation complete, try create at repository");
 
-            string result = await _repository.CreateNewIncoming(newIncoming);
+            string result = await _repository.CreateNewIncoming(cancellationToken, newIncoming);
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Добавление не удалось. \r\n{result}";
@@ -265,18 +286,18 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Incoming");
         }
 
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Edit id={id} called");
 
-            IncomingModel editedItem = await _repository.GetSingleIncomingById(id);
+            IncomingModel editedItem = await _repository.GetSingleIncomingById(cancellationToken, id);
 
             return View(editedItem);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(IncomingModel newIncoming)
+        public async Task<IActionResult> Edit(CancellationToken cancellationToken, IncomingModel newIncoming)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost Edit called");
 
@@ -286,7 +307,7 @@ namespace InvestmentVisualisation.Controllers
                 newIncoming.Comission = newIncoming.Comission.Replace(',', '.');
             }
 
-            string result = await _repository.EditSingleIncoming(newIncoming);
+            string result = await _repository.EditSingleIncoming(cancellationToken, newIncoming);
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Редактирование не удалось.\r\n{result}";
@@ -296,25 +317,27 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Incoming");
         }
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Delete id={id} called");
 
-            IncomingModel deleteItem = await _repository.GetSingleIncomingById(id);
+            IncomingModel deleteItem = await _repository.GetSingleIncomingById(cancellationToken, id);
 
-            ViewData["SecBoard"] = @StaticData.SecBoards[StaticData.SecBoards.FindIndex(secb => secb.Id == deleteItem.SecBoard)].Name;
-            ViewData["Category"] = @StaticData.Categories[StaticData.Categories.FindIndex(secb => secb.Id == deleteItem.Category)].Name;
+            ViewData["SecBoard"] = @StaticData
+                .SecBoards[StaticData.SecBoards.FindIndex(secb => secb.Id == deleteItem.SecBoard)].Name;
+            ViewData["Category"] = @StaticData
+                .Categories[StaticData.Categories.FindIndex(secb => secb.Id == deleteItem.Category)].Name;
 
             return View(deleteItem);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(IncomingModel deleteIncoming)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, IncomingModel deleteIncoming)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost Delete called");
 
-            string result = await _repository.DeleteSingleIncoming(deleteIncoming.Id);
+            string result = await _repository.DeleteSingleIncoming(cancellationToken, deleteIncoming.Id);
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Удаление не удалось.\r\n{result}";
