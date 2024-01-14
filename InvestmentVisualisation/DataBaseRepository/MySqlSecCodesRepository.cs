@@ -35,23 +35,32 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<List<SecCodeInfo>> GetPageFromSecCodes(int itemsAtPage, int pageNumber)
+        public async Task<List<SecCodeInfo>> GetPageFromSecCodes(
+            CancellationToken cancellationToken, 
+            int itemsAtPage, 
+            int pageNumber)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetPageFromSecCodes start " +
-                $"with itemsAtPage={itemsAtPage} page={pageNumber}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                $"GetPageFromSecCodes start with itemsAtPage={itemsAtPage} page={pageNumber}");
 
             List<SecCodeInfo> result = new List<SecCodeInfo>();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "GetPageFromSecCodes.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecCodes", 
+                "GetPageFromSecCodes.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetPageFromSecCodes execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                    $"GetPageFromSecCodes execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -64,11 +73,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     SecCodeInfo secCode = new SecCodeInfo();
 
@@ -91,8 +100,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetPageFromSecCodes Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"GetPageFromSecCodes Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -105,12 +114,17 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<int> GetSecCodesCount()
+        public async Task<int> GetSecCodesCount(CancellationToken cancellationToken)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "GetSecCodesCount.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecCodes", 
+                "GetSecCodesCount.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return 0;
             }
             else
@@ -120,15 +134,21 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<string> CreateNewSecCode(SecCodeInfo model)
+        public async Task<string> CreateNewSecCode(CancellationToken cancellationToken, SecCodeInfo model)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository CreateNewSecCode start, newModel is\r\n" +
-                $"{model.SecCode} {model.Name} SecBoard={model.SecBoard} ISIN={model.ISIN} {model.FullName} ExpiredDate={model.ExpiredDate}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                $"CreateNewSecCode start, newModel is\r\n{model.SecCode} {model.Name} SecBoard={model.SecBoard} " +
+                $"ISIN={model.ISIN} {model.FullName} ExpiredDate={model.ExpiredDate}");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "CreateNewSecCode.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecCodes", 
+                "CreateNewSecCode.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return "MySqlRepository Error! File with SQL script not found at " + filePath;
             }
             else
@@ -141,7 +161,8 @@ namespace DataBaseRepository
                     query = query.Replace(", @expired_date", "");
                 }
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository CreateNewSecCode execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                    $"CreateNewSecCode execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -163,20 +184,20 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
                             //Return Int32 Number of rows affected
-                            var insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository CreateNewSecCode execution " +
-                                $"affected {insertResult} lines");
+                            int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"CreateNewSecCode execution affected {insertResult} lines");
 
                             return insertResult.ToString();
 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository CreateNewSecCode Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"CreateNewSecCode Exception!\r\n{ex.Message}");
                             return ex.Message;
                         }
                         finally
@@ -193,22 +214,29 @@ namespace DataBaseRepository
 
         }
 
-        public async Task<string> EditSingleSecCode(SecCodeInfo model)
+        public async Task<string> EditSingleSecCode(CancellationToken cancellationToken, SecCodeInfo model)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository EditSingleSecCode start, newModel is\r\n" +
-                $"{model.SecCode} {model.Name} SecBoard={model.SecBoard} ISIN={model.ISIN} {model.FullName} ExpiredDate={model.ExpiredDate}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                $"EditSingleSecCode start, newModel is\r\n{model.SecCode} {model.Name} SecBoard={model.SecBoard} " +
+                $"ISIN={model.ISIN} {model.FullName} ExpiredDate={model.ExpiredDate}");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "EditSingleSecCode.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecCodes", 
+                "EditSingleSecCode.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return "MySqlRepository Error! File with SQL script not found at " + filePath;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository EditSingleSecCode execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                    $"EditSingleSecCode execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -232,23 +260,21 @@ namespace DataBaseRepository
                             cmd.Parameters.AddWithValue("@expired_date", null);
                         }
 
-
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
                             //Return Int32 Number of rows affected
-                            int insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository EditSingleSecCode execution " +
-                                $"affected {insertResult} lines");
+                            int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"EditSingleSecCode execution affected {insertResult} lines");
 
                             return insertResult.ToString();
-
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository EditSingleSecCode Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"EditSingleSecCode Exception!\r\n{ex.Message}");
                             return ex.Message;
                         }
                         finally
@@ -260,23 +286,30 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<SecCodeInfo> GetSingleSecCodeBySecCode(string secCode)
+        public async Task<SecCodeInfo> GetSingleSecCodeBySecCode(CancellationToken cancellationToken, string secCode)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSingleSecCodeBySecCode={secCode} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                $"GetSingleSecCodeBySecCode={secCode} start");
 
             SecCodeInfo result = new SecCodeInfo();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "GetSingleSecCodeBySecCode.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecCodes", 
+                "GetSingleSecCodeBySecCode.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
 
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSingleSecCodeBySecCode={secCode} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                    $"GetSingleSecCodeBySecCode={secCode} execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -287,11 +320,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     result.SecCode = sdr.GetString("seccode");
                                     result.SecBoard = sdr.GetInt32("secboard");
@@ -309,8 +342,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSingleSecCodeBySecCode={secCode} Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"GetSingleSecCodeBySecCode={secCode} Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -323,21 +356,23 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<string> GetSecCodeByISIN(string isin)
+        public async Task<string> GetSecCodeByISIN(CancellationToken cancellationToken, string isin)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSecCodeByISIN start " +
-                $"with isin={isin}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                $"GetSecCodeByISIN start with isin={isin}");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecCodes", "GetSecCodeByISIN.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return "CommonRepository Error! File with SQL script not found at " + filePath;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSecCodeByISIN execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                    $"GetSecCodeByISIN execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -348,14 +383,14 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            return (string)await cmd.ExecuteScalarAsync();
+                            return (string)await cmd.ExecuteScalarAsync(cancellationToken);
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository GetSecCodeByISIN Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+                                $"GetSecCodeByISIN Exception!\r\n{ex.Message}");
                             return $"GetPageFromIncoming Exception! {ex.Message}";
                         }
                         finally
@@ -367,7 +402,7 @@ namespace DataBaseRepository
             }
         }
 
-        public void RenewStaticSecCodesList()
+        public void RenewStaticSecCodesList(CancellationToken cancellationToken)
         {
             // сначала очистим List
             StaticData.SecCodes.Clear();
