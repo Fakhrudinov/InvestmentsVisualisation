@@ -21,7 +21,6 @@ namespace InvestmentVisualisation.Controllers
         private enum WebSites
         {
             SmartLab = 0,
-            InvLab = 1,
             Dohod = 2,
             Vsdelke = 3
         }
@@ -41,18 +40,20 @@ namespace InvestmentVisualisation.Controllers
             _wishListRepository = wishListRepository;
         }
 
-        public async Task<IActionResult> Index(int page = 1, int year = 0)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, int year = 0)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET Index called, page={page} year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController " +
+                $"GET Index called, page={page} year={year}");
 
             if (year == 0 || year < _minimumYear || year > DateTime.Now.Year)
             {
                 year = DateTime.Now.Year;
             }
 
-            int count = await _repository.GetSecVolumeCountForYear(year);
+            int count = await _repository.GetSecVolumeCountForYear(cancellationToken, year);
 
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController SecVolumes table for year={year} size={count}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController " +
+                $"SecVolumes table for year={year} size={count}");
 
             SecVolumesWithPaginations secVolumesWithPaginations = new SecVolumesWithPaginations();
 
@@ -61,7 +62,8 @@ namespace InvestmentVisualisation.Controllers
                 page,
                 _itemsAtPage);
 
-            secVolumesWithPaginations.SecVolumes = await _repository.GetSecVolumePageForYear(_itemsAtPage, (page - 1) * _itemsAtPage, year);
+            secVolumesWithPaginations.SecVolumes = await _repository
+                .GetSecVolumePageForYear(cancellationToken, _itemsAtPage, (page - 1) * _itemsAtPage, year);
             ViewBag.year = year;
 
             List<int> objSt = new List<int>();
@@ -75,14 +77,14 @@ namespace InvestmentVisualisation.Controllers
             return View(secVolumesWithPaginations);
         }
 
-        public async Task<IActionResult> Recalculate(int year = 0)
+        public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET Recalculate called, " +
-                $"year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET " +
+                $"Recalculate called, year={year}");
 
             if (year >= _minimumYear && year <= DateTime.Now.Year)
             {
-                await _repository.RecalculateSecVolumeForYear(year);
+                await _repository.RecalculateSecVolumeForYear(cancellationToken, year);
             }
             else
             {
@@ -92,7 +94,9 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Index", new { year = year });
         }
 
-        public async Task<IActionResult> SecVolumeLast3YearsDynamic(string sortMode = "byTiker")
+        public async Task<IActionResult> SecVolumeLast3YearsDynamic(
+            CancellationToken cancellationToken, 
+            string sortMode = "byTiker")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET " +
                 $"SecVolumeLast3YearsDynamic called, sortMode={sortMode}");
@@ -104,20 +108,20 @@ namespace InvestmentVisualisation.Controllers
 
             if (sortMode.Equals("byVolume"))
             {
-                model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(DateTime.Now.Year);
+                model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(cancellationToken, DateTime.Now.Year);
             }
             else
             {
-                model = await _repository.GetSecVolumeLast3YearsDynamic(DateTime.Now.Year);
+                model = await _repository.GetSecVolumeLast3YearsDynamic(cancellationToken, DateTime.Now.Year);
             }
 
             CalculateChangesPercentsForList(model);
 
-            // get wish list
-            ViewBag.WishList = await _wishListRepository.GetFullWishList();//List<WishListItemModel> 
+            // get wish List<WishListItemModel> 
+            ViewBag.WishList = await _wishListRepository.GetFullWishList(cancellationToken);
 
             // get web site data
-            DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod();
+            DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod(cancellationToken);
             if (dohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
             {
                 SetDividentsToModel(dohodDivs.DohodDivs, model, WebSites.Dohod);
@@ -125,14 +129,14 @@ namespace InvestmentVisualisation.Controllers
                 ViewBag.DohodDivs = true;
             }
 
-            List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab();
+            List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab(cancellationToken);
             SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
             if (smartLabDivs is not null && smartLabDivs.Count > 0)
             {
                 ViewBag.SmartLab = true;
             }
 
-            List<SecCodeAndDividentModel>? vsdelkeDivs = _webRepository.GetDividentsTableFromVsdelke();
+            List<SecCodeAndDividentModel>? vsdelkeDivs = _webRepository.GetDividentsTableFromVsdelke(cancellationToken);
             SetDividentsToModel(vsdelkeDivs, model, WebSites.Vsdelke);
             if (vsdelkeDivs is not null && vsdelkeDivs.Count > 0)
             {
@@ -168,7 +172,7 @@ namespace InvestmentVisualisation.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> VolumeChart()
+        public async Task<IActionResult> VolumeChart(CancellationToken cancellationToken)
         {
 			// get dat from DB
 			// (summ all volumes) / 100 = 1%
@@ -177,7 +181,7 @@ namespace InvestmentVisualisation.Controllers
 			// summ AO and AP
 			// sort data
 
-			List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData();
+			List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData(cancellationToken);
 
             // calculate 1%
             decimal totalVolume = 0;
@@ -253,7 +257,6 @@ namespace InvestmentVisualisation.Controllers
 			ViewBag.ChartItemsCount = chartItems.Count;
             ViewBag.MaximumOnChart = Decimal.ToInt16(chartItems[chartItems.Count - 1].Y) + 1;
 
-
             return View();
 		}
 
@@ -262,7 +265,7 @@ namespace InvestmentVisualisation.Controllers
             // color grade from high to low
             //  darkgreen
             //  green
-            //   mediumseagreen
+            //  mediumseagreen
             //  lightgreen
 
             foreach (var item in model)
@@ -284,7 +287,6 @@ namespace InvestmentVisualisation.Controllers
 
                 int mask = 0;
 
-                //int? futInvLab = GetIntOrNullFromString(item.InvLabDividents, ref mask);
                 int? futVsdelke = GetIntOrNullFromString(item.VsdelkeDividents, ref mask);
                 int? futDohod = GetIntOrNullFromString(item.DohodDividents, ref mask);
 
@@ -340,9 +342,8 @@ namespace InvestmentVisualisation.Controllers
                 bool smartLabDividents = IsItBiggerThenFive(model[i].SmartLabDividents);
                 bool dohodDividents = IsItBiggerThenFive(model[i].DohodDividents);
                 bool vsdelkeDividents = IsItBiggerThenFive(model[i].VsdelkeDividents);
-                bool invLabDividents = IsItBiggerThenFive(model[i].InvLabDividents);
 
-                if (!smartLabDividents && !dohodDividents && !vsdelkeDividents && !invLabDividents)
+                if (!smartLabDividents && !dohodDividents && !vsdelkeDividents)
                 {
                     model.RemoveAt(i);
                 }
@@ -366,7 +367,9 @@ namespace InvestmentVisualisation.Controllers
             return true;
         }
 
-        private void SetDividentDatesToModel(List<SecCodeAndTimeToCutOffModel>? dohodDates, List<SecVolumeLast2YearsDynamicModel> model)
+        private void SetDividentDatesToModel(
+            List<SecCodeAndTimeToCutOffModel>? dohodDates, 
+            List<SecVolumeLast2YearsDynamicModel> model)
         {
             foreach (SecCodeAndTimeToCutOffModel smDivDate in dohodDates)
             {
@@ -383,7 +386,10 @@ namespace InvestmentVisualisation.Controllers
                 else
                 {
                     // добавим в модель недостающий seccode
-                    SecVolumeLast2YearsDynamicModel newModel = new SecVolumeLast2YearsDynamicModel { SecCode = smDivDate.SecCode };
+                    SecVolumeLast2YearsDynamicModel newModel = new SecVolumeLast2YearsDynamicModel 
+                    { 
+                        SecCode = smDivDate.SecCode 
+                    };
                     newModel.NextDivDate = smDivDate.Date;
 
                     model.Add(newModel);
@@ -391,7 +397,10 @@ namespace InvestmentVisualisation.Controllers
             }
         }
 
-        private void SetDividentsToModel(List<SecCodeAndDividentModel> ? dividents, List<SecVolumeLast2YearsDynamicModel> model, WebSites webSite)
+        private void SetDividentsToModel(
+            List<SecCodeAndDividentModel> ? dividents, 
+            List<SecVolumeLast2YearsDynamicModel> model, 
+            WebSites webSite)
         {
             if (dividents is not null)
             {
@@ -409,10 +418,6 @@ namespace InvestmentVisualisation.Controllers
                         {
                             model[index].SmartLabDividents = smDiv.Divident;
                         }
-                        else if (webSite == WebSites.InvLab)
-                        {
-                            model[index].InvLabDividents = smDiv.Divident;
-                        }
                         else if (webSite == WebSites.Dohod)
                         {
                             model[index].DohodDividents = smDiv.Divident;
@@ -425,14 +430,13 @@ namespace InvestmentVisualisation.Controllers
                     else
                     {
                         // добавим в модель недостающий seccode
-                        SecVolumeLast2YearsDynamicModel newModel = new SecVolumeLast2YearsDynamicModel { SecCode = smDiv.SecCode };
+                        SecVolumeLast2YearsDynamicModel newModel = new SecVolumeLast2YearsDynamicModel 
+                        { 
+                            SecCode = smDiv.SecCode 
+                        };
                         if (webSite == WebSites.SmartLab)
                         {
                             newModel.SmartLabDividents = smDiv.Divident;
-                        }
-                        else if(webSite == WebSites.InvLab)
-                        {
-                            newModel.InvLabDividents = smDiv.Divident;
                         }
                         else if(webSite == WebSites.Dohod)
                         {

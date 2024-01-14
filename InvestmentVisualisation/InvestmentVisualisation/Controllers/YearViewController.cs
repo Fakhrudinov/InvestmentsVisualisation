@@ -25,7 +25,7 @@ namespace InvestmentVisualisation.Controllers
             _secVolumeRepository = secVolumeRepository;
         }
 
-        public async Task<IActionResult> Index(int year = 0, bool sortedByVolume = false)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0, bool sortedByVolume = false)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController GET Index called, year={year}");
 
@@ -38,7 +38,7 @@ namespace InvestmentVisualisation.Controllers
             else
             {
                 // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
-                await _secVolumeRepository.RecalculateSecVolumeForYear(currentYear);
+                await _secVolumeRepository.RecalculateSecVolumeForYear(cancellationToken, currentYear);
                 await _repository.RecalculateYearView(currentYear, sortedByVolume);
                 year = currentYear;
             }

@@ -21,7 +21,6 @@ namespace DataAbstraction.Models.SecVolume
         public decimal LastYearVolume { get; set; }
 
         public string ? SmartLabDividents { get; set; }
-        public string? InvLabDividents { get; set; }
         public string? DohodDividents { get; set; }
         public string? VsdelkeDividents { get; set; }
 

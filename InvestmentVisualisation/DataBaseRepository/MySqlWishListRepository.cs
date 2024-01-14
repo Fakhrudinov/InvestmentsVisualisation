@@ -40,13 +40,18 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<List<WishListItemModel>> GetFullWishList()
+        public async Task<List<WishListItemModel>> GetFullWishList(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository GetFullWishList start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
+                $"GetFullWishList start");
 
             List<WishListItemModel> result = new List<WishListItemModel>();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "WishList", "GetFullWishList.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "WishList", 
+                "GetFullWishList.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
@@ -66,11 +71,11 @@ namespace DataBaseRepository
 
                     try
                     {
-                        await con.OpenAsync();
+                        await con.OpenAsync(cancellationToken);
 
-                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                         {
-                            while (await sdr.ReadAsync())
+                            while (await sdr.ReadAsync(cancellationToken))
                             {
                                 WishListItemModel newWishItem = new WishListItemModel();
 
@@ -101,12 +106,16 @@ namespace DataBaseRepository
         }
 
 
-        public async Task DeleteWishBySecCode(string seccode)
+        public async Task DeleteWishBySecCode(CancellationToken cancellationToken, string seccode)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository DeleteWishBySecCode " +
-                $"seccode={seccode} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
+                $"DeleteWishBySecCode seccode={seccode} start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "WishList", "DeleteWishBySecCode.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "WishList", 
+                "DeleteWishBySecCode.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
@@ -123,7 +132,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task AddNewWish(string seccode, int level)
+        public async Task AddNewWish(CancellationToken cancellationToken, string seccode, int level)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository AddNewWish " +
                 $"seccode={seccode} level={level} start");
@@ -147,13 +156,17 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task EditWishLevel(string seccode, int level)
+        public async Task EditWishLevel(CancellationToken cancellationToken, string seccode, int level)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository EditWishLevel " +
                 $"seccode={seccode} level={level} start");
             //UPDATE `money_test`.`wish_list` SET `wish_level` = '3' WHERE (`seccode` = 'MGNT');
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "WishList", "EditWishLevelBySecCode.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "WishList", 
+                "EditWishLevelBySecCode.sql");
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +

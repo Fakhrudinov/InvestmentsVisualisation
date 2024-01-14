@@ -23,8 +23,6 @@ builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection(
 
 builder.Services
     .Configure<WebDiviPageSettings>("SmLab", builder.Configuration.GetSection("WebPageDividentInfo:SmartLabDiviPageSettings"));
-//builder.Services
-//    .Configure<WebDiviPageSettings>("InvLab", builder.Configuration.GetSection("WebPageDividentInfo:InvLabDiviPageSettings"));
 builder.Services
     .Configure<WebDiviPageSettings>("Dohod", builder.Configuration.GetSection("WebPageDividentInfo:DohodDiviPageSettings"));
 builder.Services
