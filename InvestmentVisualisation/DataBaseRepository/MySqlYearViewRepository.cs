@@ -120,7 +120,6 @@ namespace DataBaseRepository
                                         newLine.Aug = sdr.GetDecimal("aug");
                                     }
 
-
                                     int checkForNull12 = sdr.GetOrdinal("sep");
                                     if (!sdr.IsDBNull(checkForNull12))
                                     {

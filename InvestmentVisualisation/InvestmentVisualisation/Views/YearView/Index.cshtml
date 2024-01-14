@@ -3,11 +3,9 @@
     <h3>Сводная таблица дивидентов за @ViewBag.year год</h3>
 <table class="table table-hover table-sm">
     <thead>
-        <!-- style="position: sticky; top: 45px;background: white;"-->
         <tr>
             <th>
                 @*@Html.DisplayNameFor(model => model.SecCode)*@
-
                 @{
                     if (ViewBag.SortedByVolume is true)
                     {
@@ -30,12 +28,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
-        <!--<th>
-                @Html.DisplayNameFor(model => model.Pieces)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AvPrice)
-            </th>-->
             <th style="text-align: center;">
                 @*@Html.DisplayNameFor(model => model.Volume)*@
                 @{
@@ -51,7 +43,6 @@
                         @Html.DisplayNameFor(model => model.Volume)<span style="color:red;">&#9660;</span>
                     }
                 }
-
             </th>
             <th style="text-align: center;">
                 @Html.DisplayNameFor(model => model.VolPercent)
@@ -110,12 +101,6 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Name)
                 </td>
-                <!--<td>
-                    @Html.DisplayFor(modelItem => item.Pieces)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.AvPrice)
-                </td>-->
                 <td style="text-align: right;">
                     @Html.DisplayFor(modelItem => item.Volume)
                 </td>
