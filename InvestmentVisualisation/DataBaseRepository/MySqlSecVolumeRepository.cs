@@ -65,7 +65,7 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@name", "pieces_" + year);
 
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 

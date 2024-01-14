@@ -52,7 +52,7 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 
@@ -392,7 +392,7 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@id", id.ToString());
 
-                return await _commonRepo.DeleteSingleRecordByQuery(query);
+                return await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
             }
         }
 
@@ -414,7 +414,7 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@secCode", secCode);
 
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 

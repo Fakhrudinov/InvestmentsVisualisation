@@ -5,6 +5,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Threading;
 
 namespace DataBaseRepository
 {
@@ -51,7 +52,7 @@ namespace DataBaseRepository
         }
 
 
-        public async Task<int> GetIncomingCount()
+        public async Task<int> GetIncomingCount(CancellationToken cancellationToken)
         {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetIncomingCount.sql");
             if (!File.Exists(filePath))
@@ -63,7 +64,7 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 
@@ -387,7 +388,7 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@id", id.ToString());
 
-                return await _commonRepo.DeleteSingleRecordByQuery(query);
+                return await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
             }
         }
 
@@ -440,7 +441,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<int> GetIncomingSpecificSecCodeCount(string secCode)
+        public async Task<int> GetIncomingSpecificSecCodeCount(CancellationToken cancellationToken, string secCode)
         {
             string filePath = Path.Combine(
                 Directory.GetCurrentDirectory(), 
@@ -458,7 +459,7 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@secCode", secCode);
 
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 

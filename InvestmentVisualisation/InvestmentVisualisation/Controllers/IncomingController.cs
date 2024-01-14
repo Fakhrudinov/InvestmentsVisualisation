@@ -38,11 +38,11 @@ namespace InvestmentVisualisation.Controllers
             int count = 0;
             if (secCode.Length > 0)
             {
-                count = await _repository.GetIncomingSpecificSecCodeCount(secCode);
+                count = await _repository.GetIncomingSpecificSecCodeCount(cancellationToken, secCode);
             }
             else
             {
-                count = await _repository.GetIncomingCount();
+                count = await _repository.GetIncomingCount(cancellationToken);
             }
 
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController Incoming table size={count}");

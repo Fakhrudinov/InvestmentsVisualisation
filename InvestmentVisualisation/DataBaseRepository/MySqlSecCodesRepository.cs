@@ -130,7 +130,7 @@ namespace DataBaseRepository
             else
             {
                 string query = File.ReadAllText(filePath);
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 

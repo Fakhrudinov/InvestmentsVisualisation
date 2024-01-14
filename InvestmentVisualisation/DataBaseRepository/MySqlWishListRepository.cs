@@ -128,7 +128,7 @@ namespace DataBaseRepository
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                     $"DeleteWishBySecCode execute query\r\n{query}");
 
-                string result = await _commonRepo.DeleteSingleRecordByQuery(query);
+                string result = await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
             }
         }
 
@@ -152,7 +152,7 @@ namespace DataBaseRepository
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                     $"AddNewWish execute query\r\n{query}");
 
-                string result = await _commonRepo.DeleteSingleRecordByQuery(query);
+                string result = await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
             }
         }
 
@@ -180,7 +180,7 @@ namespace DataBaseRepository
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                     $"EditWishLevel execute query\r\n{query}");
 
-                string result = await _commonRepo.DeleteSingleRecordByQuery(query);
+                string result = await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
             }
         }
     }
