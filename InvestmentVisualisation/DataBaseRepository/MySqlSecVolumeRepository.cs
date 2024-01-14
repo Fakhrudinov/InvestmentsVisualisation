@@ -47,12 +47,17 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<int> GetSecVolumeCountForYear(int year)
+        public async Task<int> GetSecVolumeCountForYear(CancellationToken cancellationToken, int year)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecVolume", "GetSecVolumeCountForYear.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecVolume", 
+                "GetSecVolumeCountForYear.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return 0;
             }
             else
@@ -60,21 +65,30 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@name", "pieces_" + year);
 
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 
-        public async Task<List<SecVolumeModel>> GetSecVolumePageForYear(int itemsAtPage, int pageNumber, int year)
+        public async Task<List<SecVolumeModel>> GetSecVolumePageForYear(
+            CancellationToken cancellationToken, 
+            int itemsAtPage, 
+            int pageNumber, 
+            int year)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumePageForYear start " +
-                $"with itemsAtPage={itemsAtPage} page={pageNumber} year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                $"GetSecVolumePageForYear start with itemsAtPage={itemsAtPage} page={pageNumber} year={year}");
 
             List<SecVolumeModel> result = new List<SecVolumeModel>();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecVolume", "GetSecVolumePageForYear.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecVolume", 
+                "GetSecVolumePageForYear.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return result;
             }
             else
@@ -82,7 +96,8 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@year", year.ToString());
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumePageForYear execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                    $"GetSecVolumePageForYear execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -95,17 +110,16 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     SecVolumeModel model = new SecVolumeModel();
 
                                     model.SecCode = sdr.GetString("seccode");
                                     model.SecBoard = sdr.GetInt32("secboard");
-
                                     model.Pieces = sdr.GetInt32("pieces_" + year);
                                     model.AvPrice = sdr.GetDecimal("av_price_" + year);
                                     model.Volume = sdr.GetDecimal("volume_" + year);
@@ -116,8 +130,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetSecVolumePageForYear Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                                $"GetSecVolumePageForYear Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -130,20 +144,27 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task RecalculateSecVolumeForYear(int year)
+        public async Task RecalculateSecVolumeForYear(CancellationToken cancellationToken, int year)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository RecalculateSecVolumeForYear {year} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                $"RecalculateSecVolumeForYear {year} start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "SecVolume", "RecalculateSecVolumeForYear.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "SecVolume", 
+                "RecalculateSecVolumeForYear.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository RecalculateSecVolumeForYear {year} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                    $"RecalculateSecVolumeForYear {year} execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -155,15 +176,16 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
-                            await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository RecalculateSecVolumeForYear executed");
+                            await con.OpenAsync(cancellationToken);
+                            await cmd.ExecuteNonQueryAsync(cancellationToken);
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                                $"RecalculateSecVolumeForYear executed");
 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository RecalculateSecVolumeForYear Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                                $"RecalculateSecVolumeForYear Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -174,21 +196,34 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(int year)
+        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(
+            CancellationToken cancellationToken, 
+            int year)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
                 $"GetSecVolumeLast3YearsDynamic start with year={year}");
 
-            return await GetSecVolumeLast3YearsDynamicByQueryName("GetSecVolumeLast3YearsDynamic.sql", year);
+            return await GetSecVolumeLast3YearsDynamicByQueryName(
+                cancellationToken, 
+                "GetSecVolumeLast3YearsDynamic.sql", 
+                year);
         }
-        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicSortedByVolume(int year)
+        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicSortedByVolume(
+            CancellationToken cancellationToken, 
+            int year)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
                 $"GetSecVolumeLast3YearsDynamicSortedByVolume start with year={year}");
 
-            return await GetSecVolumeLast3YearsDynamicByQueryName("GetSecVolumeLast3YearsDynamicSortedByVolume.sql", year);
+            return await GetSecVolumeLast3YearsDynamicByQueryName(
+                cancellationToken, 
+                "GetSecVolumeLast3YearsDynamicSortedByVolume.sql", 
+                year);
         }
-        private async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicByQueryName(string queryName, int year)
+        private async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicByQueryName(
+            CancellationToken cancellationToken,
+            string queryName, 
+            int year)
         {
             List<SecVolumeLast2YearsDynamicModel> result = new List<SecVolumeLast2YearsDynamicModel>();
 
@@ -222,11 +257,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     SecVolumeLast2YearsDynamicModel model = new SecVolumeLast2YearsDynamicModel();
 
@@ -269,11 +304,11 @@ namespace DataBaseRepository
 
         }
 
-		public async Task<List<ChartItemModel>> GetVolumeChartData()
+		public async Task<List<ChartItemModel>> GetVolumeChartData(CancellationToken cancellationToken)
 		{
 			int year = DateTime.Now.Year;
-			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository GetVolumeChartData" +
-                $" with year = {year} ");
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                $"GetVolumeChartData with year = {year} ");
 
 			List<ChartItemModel> result = new List<ChartItemModel>();
 
@@ -304,11 +339,11 @@ namespace DataBaseRepository
 
 						try
 						{
-							await con.OpenAsync();
+							await con.OpenAsync(cancellationToken);
 
-							using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+							using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
 							{
-								while (await sdr.ReadAsync())
+								while (await sdr.ReadAsync(cancellationToken))
 								{
 									ChartItemModel model = new ChartItemModel
                                         (

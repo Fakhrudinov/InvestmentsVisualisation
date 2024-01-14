@@ -17,11 +17,11 @@ namespace InvestmentVisualisation.Controllers
             _repository = repository;
         }
 
-        public async Task<IActionResult> WishList()
+        public async Task<IActionResult> WishList(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController WishList called");
 
-            List<WishListItemModel> result = await _repository.GetFullWishList();
+            List<WishListItemModel> result = await _repository.GetFullWishList(cancellationToken);
 
             //create seccodes list for new wishes - remove all already used seccodes
             List<StaticSecCode> secCodesList = new List<StaticSecCode>(StaticData.SecCodes
@@ -38,34 +38,34 @@ namespace InvestmentVisualisation.Controllers
             return View(result);
         }
 
-        public async Task<IActionResult> Delete(string seccode)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, string seccode)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController Delete " +
                 $"seccode={seccode} called");
 
-            await _repository.DeleteWishBySecCode(seccode);
+            await _repository.DeleteWishBySecCode(cancellationToken, seccode);
 
             return RedirectToAction("WishList");
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNewWish(string seccode, int level)
+        public async Task<IActionResult> CreateNewWish(CancellationToken cancellationToken, string seccode, int level)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController CreateNewWish " +
                 $"seccode={seccode} level={level} called");
 
-            await _repository.AddNewWish(seccode, level);
+            await _repository.AddNewWish(cancellationToken, seccode, level);
 
             return RedirectToAction("WishList");
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditWishLevel(string seccode, int level)
+        public async Task<IActionResult> EditWishLevel(CancellationToken cancellationToken, string seccode, int level)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController EditWishLevel " +
                 $"seccode={seccode} level={level} called");
 
-            await _repository.EditWishLevel(seccode, level);
+            await _repository.EditWishLevel(cancellationToken, seccode, level);
 
             return RedirectToAction("WishList");
         }

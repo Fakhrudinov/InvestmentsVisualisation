@@ -4,7 +4,7 @@ using DataAbstraction.Interfaces;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.Deals;
-using DataAbstraction.Models.Incoming;
+using System.Threading;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -28,18 +28,19 @@ namespace InvestmentVisualisation.Controllers
         }
 
 
-        public async Task<IActionResult> Deals(int page = 1, string secCode = "")
+        public async Task<IActionResult> Deals(CancellationToken cancellationToken, int page = 1, string secCode = "")
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Deals called, page={page} secCode={secCode}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
+                $"Deals called, page={page} secCode={secCode}");
 
             int count = 0;
             if (secCode.Length > 0)
             {
-                count = await _repository.GetDealsSpecificSecCodeCount(secCode);
+                count = await _repository.GetDealsSpecificSecCodeCount(cancellationToken, secCode);
             }
             else
             {
-                count = await _repository.GetDealsCount();
+                count = await _repository.GetDealsCount(cancellationToken);
             }
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Deals table size={count}");
 
@@ -53,11 +54,13 @@ namespace InvestmentVisualisation.Controllers
             if (secCode.Length > 0)
             {
                 ViewBag.secCode = secCode;
-                dealsWithPaginations.Deals = await _repository.GetPageFromDealsSpecificSecCode(secCode, _itemsAtPage, (page - 1) * _itemsAtPage);
+                dealsWithPaginations.Deals = await _repository
+                    .GetPageFromDealsSpecificSecCode(cancellationToken, secCode, _itemsAtPage, (page - 1) * _itemsAtPage);
             }
             else
             {
-                dealsWithPaginations.Deals = await _repository.GetPageFromDeals(_itemsAtPage, (page - 1) * _itemsAtPage);
+                dealsWithPaginations.Deals = await _repository
+                    .GetPageFromDeals(cancellationToken, _itemsAtPage, (page - 1) * _itemsAtPage);
             }            
 
             return View(dealsWithPaginations);
@@ -85,9 +88,10 @@ namespace InvestmentVisualisation.Controllers
             return View("Create", model);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateFromText(string text)
+        public async Task<IActionResult> CreateFromText(CancellationToken cancellationToken, string text)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText called, text={text}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText called, text={text}");
 
             //"7318187850\t34614262505\tПокупка ЦБ на бирже\t15.02.2023 10:40:43\tБанк СПб, ПАО ао03, 10300436B\tRU0009100945\t1.00\t50.00\t112.07\tRUB\t5,603.50\t0.00\tRUB\t0.00\t0.95\t0.00\t17.02.2023\t17.02.2023\tПАО Московская Биржа"
             //"Покупка ЦБ на бирже\t15.02.2023 10:53:59\tСелигдар, ПАО ао01, 1-01-32694-F\tRU000A0JPR50\t1.00\t100.00\t46.83\tRUB\t4,683.00\t0.00\tRUB\t0.00\t0.80\t0.0"
@@ -101,7 +105,8 @@ namespace InvestmentVisualisation.Controllers
             string[] textSplitted = text.Split("\t");
             if (textSplitted.Length < 13)
             {
-                ViewData["Message"] = "Чтение строки не удалось, получено менее 13 элементов (12х табуляций-разделителей) в строке: " + text;
+                ViewData["Message"] = "Чтение строки не удалось, " +
+                    "получено менее 13 элементов (12х табуляций-разделителей) в строке: " + text;
                 return View("Create");
             }
 
@@ -131,18 +136,21 @@ namespace InvestmentVisualisation.Controllers
             //string dateString = $"{dataSplitted[2]}-{dataSplitted[1]}-{dataSplitted[0]} {DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}";
             //model.Date = DateTime.Parse(dateString);
             model.Date = DateTime.Parse(textSplitted[startPointer + 1]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set date={model.Date}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText set date={model.Date}");
 
             // количество // 60,000.00
             //string rawPieces = textSplitted[startPointer + 5]; 
             string pieces = textSplitted[startPointer + 5].Split('.').First();
             model.Pieces = Int32.Parse(pieces.Replace(",", ""));
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set Pieces={model.Pieces}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText set Pieces={model.Pieces}");
 
             // цена // 4,583.5 или 0.08708
             //string rawPrice = textSplitted[startPointer + 6];
             model.AvPrice = CleanString(textSplitted[startPointer + 6]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set AvPrice={model.AvPrice}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText set AvPrice={model.AvPrice}");
 
             //комиссия = комиссия биржи + комиссия брокера 1.79	0.24
             //string rawMoexComiss = textSplitted[startPointer + 11];
@@ -150,7 +158,8 @@ namespace InvestmentVisualisation.Controllers
             string moexComiss = CleanString(textSplitted[startPointer + 11]);
             string brokComiss = CleanString(textSplitted[startPointer + 12]);
             model.Comission = (decimal.Parse(moexComiss) + decimal.Parse(brokComiss)).ToString();
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set Comission={model.Comission} from {moexComiss} + {brokComiss}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText set Comission={model.Comission} from {moexComiss} + {brokComiss}");
 
             // nkd // 289.20
             //string rawNkd = textSplitted[startPointer + 9];
@@ -159,11 +168,12 @@ namespace InvestmentVisualisation.Controllers
             {
                 model.NKD = nkd;
             }
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set NKD={model.NKD}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText set NKD={model.NKD}");
 
             // тикер
             //string rawIsin = textSplitted[startPointer + 3];
-            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(textSplitted[startPointer + 3]);
+            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из репозитория={rawSecCode}");
             //проверить, что нам прислали действительно seccode а не ошибку
             if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет
@@ -176,14 +186,15 @@ namespace InvestmentVisualisation.Controllers
             {
                 model.SecCode = rawSecCode;
             }
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost CreateFromText set SecCode={model.SecCode}");
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateFromText set SecCode={model.SecCode}");
 
             return View("Create", model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateDealsModel model)
+        public async Task<IActionResult> Create(CancellationToken cancellationToken, CreateDealsModel model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST Create called");
 
@@ -217,7 +228,7 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST Create validation complete, " +
                 $"try create at repository");
 
-            string result = await _repository.CreateNewDeal(model);
+            string result = await _repository.CreateNewDeal(cancellationToken, model);
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Добавление не удалось. \r\n{result}";
@@ -227,17 +238,17 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Deals");
         }
 
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Edit id={id} called");
 
-            DealModel editedItem = await _repository.GetSingleDealById(id);
+            DealModel editedItem = await _repository.GetSingleDealById(cancellationToken, id);
 
             return View(editedItem);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(DealModel model)
+        public async Task<IActionResult> Edit(CancellationToken cancellationToken, DealModel model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost Edit called");
 
@@ -251,7 +262,7 @@ namespace InvestmentVisualisation.Controllers
                 model.NKD = model.NKD.Replace(',', '.');
             }
 
-            string result = await _repository.EditSingleDeal(model);
+            string result = await _repository.EditSingleDeal(cancellationToken, model);
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Редактирование не удалось.\r\n{result}";
@@ -261,23 +272,24 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Deals");
         }
 
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Delete id={id} called");
 
-            DealModel deleteItem = await _repository.GetSingleDealById(id);
+            DealModel deleteItem = await _repository.GetSingleDealById(cancellationToken, id);
 
-            ViewData["SecBoard"] = @StaticData.SecBoards[StaticData.SecBoards.FindIndex(secb => secb.Id == deleteItem.SecBoard)].Name;
+            ViewData["SecBoard"] = @StaticData.SecBoards[StaticData.SecBoards
+                .FindIndex(secb => secb.Id == deleteItem.SecBoard)].Name;
 
             return View(deleteItem);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(DealModel model)
+        public async Task<IActionResult> Delete(CancellationToken cancellationToken, DealModel model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost Delete called");
 
-            string result = await _repository.DeleteSingleDeal(model.Id);
+            string result = await _repository.DeleteSingleDeal(cancellationToken, model.Id);
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Удаление не удалось.\r\n{result}";

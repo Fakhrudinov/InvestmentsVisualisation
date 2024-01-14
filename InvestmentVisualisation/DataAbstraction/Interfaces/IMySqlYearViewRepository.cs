@@ -5,10 +5,10 @@ namespace DataAbstraction.Interfaces
 {
     public interface IMySqlYearViewRepository
     {
-        Task CallFillViewShowLast12Month();
-        Task DropTableLast12MonthView();
-        Task<List<YearViewModel>> GetLast12MonthViewPage();
-        Task<List<YearViewModel>> GetYearViewPage();
-        Task RecalculateYearView(int year, bool sortedByVolume);
+        Task CallFillViewShowLast12Month(CancellationToken cancellationToken);
+        Task DropTableLast12MonthView(CancellationToken cancellationToken);
+        Task<List<YearViewModel>> GetLast12MonthViewPage(CancellationToken cancellationToken);
+        Task<List<YearViewModel>> GetYearViewPage(CancellationToken cancellationToken);
+        Task RecalculateYearView(CancellationToken cancellationToken, int year, bool sortedByVolume);
     }
 }

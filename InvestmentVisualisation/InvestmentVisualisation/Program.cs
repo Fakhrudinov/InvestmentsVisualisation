@@ -23,8 +23,6 @@ builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection(
 
 builder.Services
     .Configure<WebDiviPageSettings>("SmLab", builder.Configuration.GetSection("WebPageDividentInfo:SmartLabDiviPageSettings"));
-//builder.Services
-//    .Configure<WebDiviPageSettings>("InvLab", builder.Configuration.GetSection("WebPageDividentInfo:InvLabDiviPageSettings"));
 builder.Services
     .Configure<WebDiviPageSettings>("Dohod", builder.Configuration.GetSection("WebPageDividentInfo:DohodDiviPageSettings"));
 builder.Services
@@ -51,8 +49,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
-    //pattern: "{controller=WishList}/{action=WishList}");
-    pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
+    pattern: "{controller=Incoming}/{action=CreateIncoming}");
+    //pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
 
 app.Run();
 

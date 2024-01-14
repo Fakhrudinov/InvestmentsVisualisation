@@ -40,22 +40,26 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<int> GetDealsCount()
+        public async Task<int> GetDealsCount(CancellationToken cancellationToken)
         {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetDealsCount.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return 0;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 
-        public async Task<List<DealModel>> GetPageFromDeals(int itemsAtPage, int pageNumber)
+        public async Task<List<DealModel>> GetPageFromDeals(
+            CancellationToken cancellationToken, 
+            int itemsAtPage, 
+            int pageNumber)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDeals start " +
                 $"with itemsAtPage={itemsAtPage} page={pageNumber}");
@@ -65,13 +69,15 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetPageFromDeals.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDeals execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                    $"GetPageFromDeals execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -84,14 +90,16 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     DealModel newDeal = new DealModel();
 
+                                    cancellationToken.ThrowIfCancellationRequested();
                                     newDeal.Id = sdr.GetInt32("id");
                                     newDeal.Date = sdr.GetDateTime("date");
                                     newDeal.SecCode = sdr.GetString("seccode");
@@ -118,8 +126,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDeals Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"GetPageFromDeals Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -132,16 +140,18 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<string> CreateNewDeal(CreateDealsModel model)
+        public async Task<string> CreateNewDeal(CancellationToken cancellationToken, CreateDealsModel model)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository CreateNewDeal start, newModel is\r\n" +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"CreateNewDeal start, newModel is\r\n" +
                 $"{model.Date} {model.SecCode} SecBoard={model.SecBoard} AvPrice={model.AvPrice} Pieces={model.Pieces} " +
                 $"Comission={model.Comission} NKD={model.NKD}");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "CreateNewDeal.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return "MySqlRepository Error! File with SQL script not found at " + filePath;
             }
             else
@@ -158,7 +168,8 @@ namespace DataBaseRepository
                     query = query.Replace(", @nkd", "");
                 }
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository CreateNewDeal execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                    $"CreateNewDeal execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -183,20 +194,20 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
                             //Return Int32 Number of rows affected
-                            var insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository CreateNewDeal execution " +
-                                $"affected {insertResult} lines");
+                            var insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"CreateNewDeal execution affected {insertResult} lines");
 
                             return insertResult.ToString();
 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository CreateNewDeal Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"CreateNewDeal Exception!\r\n{ex.Message}");
                             return ex.Message;
                         }
                         finally
@@ -212,23 +223,26 @@ namespace DataBaseRepository
             //  (@date_time, @seccode, @secboard, @av_price, @pieces, @comission, @nkd);
         }
 
-        public async Task<string> EditSingleDeal(DealModel model)
+        public async Task<string> EditSingleDeal(CancellationToken cancellationToken, DealModel model)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository EditSingleDeal start, newModel is\r\n" +
-                $"Id={model.Id} {model.Date} {model.SecCode} SecBoard={model.SecBoard} AvPrice={model.AvPrice} Pieces={model.Pieces} " +
-                $"Comission={model.Comission} nkd={model.NKD}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"EditSingleDeal start, newModel is\r\n" +
+                $"Id={model.Id} {model.Date} {model.SecCode} SecBoard={model.SecBoard} AvPrice={model.AvPrice} " +
+                $"Pieces={model.Pieces} Comission={model.Comission} nkd={model.NKD}");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "EditSingleDeal.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return "MySqlRepository Error! File with SQL script not found at " + filePath;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository EditSingleDeal execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                    $"EditSingleDeal execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -263,20 +277,20 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
                             //Return Int32 Number of rows affected
-                            int insertResult = await cmd.ExecuteNonQueryAsync();
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository EditSingleDeal execution " +
-                                $"affected {insertResult} lines");
+                            int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"EditSingleDeal execution affected {insertResult} lines");
 
                             return insertResult.ToString();
 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository EditSingleDeal Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"EditSingleDeal Exception!\r\n{ex.Message}");
                             return ex.Message;
                         }
                         finally
@@ -288,23 +302,26 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<DealModel> GetSingleDealById(int id)
+        public async Task<DealModel> GetSingleDealById(CancellationToken cancellationToken, int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetSingleDealById={id} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"GetSingleDealById={id} start");
 
             DealModel result = new DealModel();
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetSingleDealById.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
 
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetSingleDealById={id} execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                    $"GetSingleDealById={id} execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -315,11 +332,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     result.Id = sdr.GetInt32("id");
                                     result.Date = sdr.GetDateTime("date");
@@ -344,8 +361,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetSingleDealById={id} Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"GetSingleDealById={id} Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -358,14 +375,16 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<string> DeleteSingleDeal(int id)
+        public async Task<string> DeleteSingleDeal(CancellationToken cancellationToken, int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository DeleteSingleDeal id={id} start");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"DeleteSingleDeal id={id} start");
 
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "DeleteSingleDeal.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return "MySqlDealsRepository Error! File with SQL script not found at " + filePath;
             }
             else
@@ -373,16 +392,21 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@id", id.ToString());
 
-                return await _commonRepo.DeleteSingleRecordByQuery(query);
+                return await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
             }
         }
 
-        public async Task<int> GetDealsSpecificSecCodeCount(string secCode)
+        public async Task<int> GetDealsSpecificSecCodeCount(CancellationToken cancellationToken, string secCode)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetDealsSpecificSecCodeCount.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "Deals", 
+                "GetDealsSpecificSecCodeCount.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return 0;
             }
             else
@@ -390,29 +414,37 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@secCode", secCode);
 
-                return await _commonRepo.GetTableCountBySqlQuery(query);
+                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
             }
         }
 
-        public async Task<List<DealModel>> GetPageFromDealsSpecificSecCode(string secCode, int itemsAtPage, int pageNumber)
+        public async Task<List<DealModel>> GetPageFromDealsSpecificSecCode(
+            CancellationToken cancellationToken, 
+            string secCode, int itemsAtPage, 
+            int pageNumber)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDealsSpecificSecCode start " +
-                $"with secCode={secCode} itemsAtPage={itemsAtPage} page={pageNumber}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"GetPageFromDealsSpecificSecCode start with secCode={secCode} itemsAtPage={itemsAtPage} page={pageNumber}");
 
             List<DealModel> result = new List<DealModel>();
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Deals", "GetPageFromDealsSpecificSecCode.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "Deals", 
+                "GetPageFromDealsSpecificSecCode.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
                 return result;
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDealsSpecificSecCode " +
-                    $"execute query \r\n{query}");
-
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                    $"GetPageFromDealsSpecificSecCode execute query \r\n{query}"); 
+                
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query))
@@ -425,11 +457,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     DealModel newDeal = new DealModel();
 
@@ -459,8 +491,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository GetPageFromDealsSpecificSecCode Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                                $"GetPageFromDealsSpecificSecCode Exception!\r\n{ex.Message}");
                         }
                         finally
                         {

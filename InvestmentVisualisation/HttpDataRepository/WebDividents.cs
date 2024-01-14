@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
 
-
 namespace HttpDataRepository
 {
     public class WebDividents : IWebDividents
@@ -22,14 +21,15 @@ namespace HttpDataRepository
             _namedOptions = namedOptions;
         }
 
-        public DohodDivsAndDatesModel? GetDividentsTableFromDohod()
+        public DohodDivsAndDatesModel? GetDividentsTableFromDohod(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromDohod called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                $"GetDividentsTableFromDohod called");
 
             _options=_namedOptions.Get("Dohod");
 
             //download html and get table with dividents
-            string[]? rawDataTableSplitted = DownloadAndGetHtmlTableWithDividents();
+            string[]? rawDataTableSplitted = DownloadAndGetHtmlTableWithDividents(cancellationToken);
             if (rawDataTableSplitted is null)
             {
                 return null;
@@ -41,30 +41,26 @@ namespace HttpDataRepository
             return result;
         }
 
-        public List<SecCodeAndDividentModel>? GetDividentsTableFromVsdelke()
+        public List<SecCodeAndDividentModel>? GetDividentsTableFromVsdelke(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromVsdelke called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                $"GetDividentsTableFromVsdelke called");
 
             _options=_namedOptions.Get("Vsdelke");
-            return GetDividents();
+            return GetDividents(cancellationToken);
         }
-        public List<SecCodeAndDividentModel>? GetDividentsTableFromSmartLab()
+        public List<SecCodeAndDividentModel>? GetDividentsTableFromSmartLab(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromSmartLab called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                $"GetDividentsTableFromSmartLab called");
 
             _options=_namedOptions.Get("SmLab");
-            return GetDividents();
+            return GetDividents(cancellationToken);
         }
-        public List<SecCodeAndDividentModel>? GetDividentsTableFromInvLab()
-        {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetDividentsTableFromInvLab called");
 
-            _options=_namedOptions.Get("InvLab");
-            return GetDividents();
-        }
-        private List<SecCodeAndDividentModel> ? GetDividents()
+        private List<SecCodeAndDividentModel> ? GetDividents(CancellationToken cancellationToken)
         {
-            string[] ? rawDataTableSplitted = DownloadAndGetHtmlTableWithDividents();
+            string[] ? rawDataTableSplitted = DownloadAndGetHtmlTableWithDividents(cancellationToken);
             if (rawDataTableSplitted is null)
             {
                 return null;
@@ -106,7 +102,6 @@ namespace HttpDataRepository
                     // date not found
                     continue;
                 }
-
 
                 // get divident value
                 string div = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithDiscont].Replace("\"", "'"));
@@ -245,15 +240,17 @@ namespace HttpDataRepository
             return result;
         }
 
-        private string[]? DownloadAndGetHtmlTableWithDividents()
+        private string[]? DownloadAndGetHtmlTableWithDividents(CancellationToken cancellationToken)
         {
             //get fool html source
-            string? rawHtmlSource = GetFullHtmlPage(_options.BaseUrl);
+            string? rawHtmlSource = GetFullHtmlPage(cancellationToken, _options.BaseUrl);
 
-            if (rawHtmlSource is null || !rawHtmlSource.Contains(_options.StartWord) || !rawHtmlSource.Contains(_options.EndWord))
+            if (rawHtmlSource is null || 
+                !rawHtmlSource.Contains(_options.StartWord) || 
+                !rawHtmlSource.Contains(_options.EndWord))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents DownloadAndGetHtmlTableWithDividents " +
-                    $"rawHtmlSource is null " +
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                    $"DownloadAndGetHtmlTableWithDividents rawHtmlSource is null " +
                     $"or StartWord pointer '{_options.StartWord}' is not found " +
                     $"or EndWord pointer '{_options.EndWord}' is not found!");
 
@@ -265,8 +262,8 @@ namespace HttpDataRepository
             int endIndex = rawHtmlSource.Substring(startIndex).IndexOf(_options.EndWord);
 
             string rawDataTable = rawHtmlSource.Substring(startIndex, endIndex);
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents DownloadAndGetHtmlTableWithDividents " +
-                $"splitted text lenght is {rawDataTable.Length}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                $"DownloadAndGetHtmlTableWithDividents splitted text lenght is {rawDataTable.Length}");
 
             //split
             string[] rawDataTableSplitted = rawDataTable.Split(_options.TableRowSplitter);
@@ -331,7 +328,6 @@ namespace HttpDataRepository
         private string ? GetSecCodeFromTD(string rawText)
         {
             //<a href="/ik/analytics/dividend/trmk">
-            //<a href="https://invlab.ru/akcii/rossiyskie/bspb/"> // " class='action_title' data-val='Селигдар'><a href='https://invlab.ru/akcii/rossiyskie/selg/'>Селигдар</a></td>\n"
             //<a href="/forum/GAZP"> //"<a href=\"/forum/GAZP\">Газпром</a></td>\n\t"
 
             int startIndex = rawText.IndexOf("href='");
@@ -378,10 +374,10 @@ namespace HttpDataRepository
             return rawText;
         }
 
-        private string? GetFullHtmlPage(string baseUrl)
+        private string? GetFullHtmlPage(CancellationToken cancellationToken, string baseUrl)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetFullHtmlPage called, " +
-                $"baseURL={baseUrl}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                $"GetFullHtmlPage called, baseURL={baseUrl}");
 
             string rawHtmlSource = string.Empty;
 
@@ -392,17 +388,17 @@ namespace HttpDataRepository
             {
                 try
                 {
-                    HttpResponseMessage response = client.GetAsync(baseUrl).Result;
+                    HttpResponseMessage response = client.GetAsync(baseUrl, cancellationToken).Result;
                     response.EnsureSuccessStatusCode();
-                    rawHtmlSource = response.Content.ReadAsStringAsync().Result;
+                    rawHtmlSource = response.Content.ReadAsStringAsync(cancellationToken).Result;
 
-                    _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetFullHtmlPage " +
-                        $"rawHtmlSource lenght is {rawHtmlSource.Length}");
+                    _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                        $"GetFullHtmlPage rawHtmlSource lenght is {rawHtmlSource.Length}");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents GetFullHtmlPage Exception at " +
-                        $"baseURL={baseUrl}, Message is: {ex.Message}");
+                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                        $"GetFullHtmlPage Exception at baseURL={baseUrl}, Message is: {ex.Message}");
 
                     return null;
                 }

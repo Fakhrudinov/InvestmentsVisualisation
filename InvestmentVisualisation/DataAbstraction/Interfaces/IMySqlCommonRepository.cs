@@ -2,11 +2,11 @@
 {
     public interface IMySqlCommonRepository
     {
-        Task<string> DeleteSingleRecordByQuery(string query);
+        Task<string> DeleteSingleRecordByQuery(CancellationToken cancellationToken, string query);
         void FillFreeMoney();
         void FillStaticCategories();
         void FillStaticSecBoards();
         void FillStaticSecCodes();
-        Task<int> GetTableCountBySqlQuery(string query);
+        Task<int> GetTableCountBySqlQuery(CancellationToken cancellationToken, string query);
     }
 }

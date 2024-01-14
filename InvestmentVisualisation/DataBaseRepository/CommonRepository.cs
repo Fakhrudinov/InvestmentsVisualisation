@@ -27,9 +27,10 @@ namespace DataBaseRepository
             _connectionDBName = connection.Value.Database;
         }
 
-        public async Task<int> GetTableCountBySqlQuery(string query)
+        public async Task<int> GetTableCountBySqlQuery(CancellationToken cancellationToken, string query)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository GetTableCountBySqlQuery start with \r\n{query}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                $"GetTableCountBySqlQuery start with \r\n{query}");
 
             int result = 0;
 
@@ -41,14 +42,15 @@ namespace DataBaseRepository
 
                     try
                     {
-                        await con.OpenAsync();
-                        result = (int)(long)await cmd.ExecuteScalarAsync();
-                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository GetTableCountBySqlQuery result tableCount={result}");
+                        await con.OpenAsync(cancellationToken);
+                        result = (int)(long)await cmd.ExecuteScalarAsync(cancellationToken);
+                        _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                            $"GetTableCountBySqlQuery result tableCount={result}");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository GetTableCountBySqlQuery Exception!\r\n" +
-                            $"{ex.Message}");
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                            $"GetTableCountBySqlQuery Exception!\r\n{ex.Message}");
                     }
                     finally
                     {
@@ -65,12 +67,14 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromCategory.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticCategories execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                    $"FillStaticCategories execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -96,8 +100,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticCategories Exception!\r\n" +
-                                $"{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                                $"FillStaticCategories Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -113,12 +117,14 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromSecboard.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecBoards execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                    $"FillStaticSecBoards execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -143,8 +149,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecBoards Exception!\r\n" +
-                                $"{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                                $"FillStaticSecBoards Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -160,12 +166,14 @@ namespace DataBaseRepository
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetActualSecCodeAndSecBoard.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecCodes execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                    $"FillStaticSecCodes execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -191,8 +199,8 @@ namespace DataBaseRepository
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillStaticSecCodes Exception!\r\n" +
-                                $"{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                                $"FillStaticSecCodes Exception!\r\n{ex.Message}");
                         }
                         finally
                         {
@@ -203,10 +211,10 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<string> DeleteSingleRecordByQuery(string query)
+        public async Task<string> DeleteSingleRecordByQuery(CancellationToken cancellationToken, string query)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository DeleteSingleRecordByQuery " +
-                $"start execute query \r\n{query}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                $"DeleteSingleRecordByQuery start execute query \r\n{query}");
 
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
@@ -216,20 +224,20 @@ namespace DataBaseRepository
 
                     try
                     {
-                        await con.OpenAsync();
+                        await con.OpenAsync(cancellationToken);
 
                         //Return Int32 Number of rows affected
-                        int insertResult = await cmd.ExecuteNonQueryAsync();
-                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository DeleteSingleRecordByQuery execution " +
-                            $"affected {insertResult} lines");
+                        int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                            $"DeleteSingleRecordByQuery execution affected {insertResult} lines");
 
                         return insertResult.ToString();
 
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository DeleteSingleRecordByQuery Exception!" +
-                            $"\r\n{ex.Message}");
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                            $"DeleteSingleRecordByQuery Exception!\r\n{ex.Message}");
                         return ex.Message;
                     }
                     finally
@@ -242,17 +250,23 @@ namespace DataBaseRepository
 
         public void FillFreeMoney()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetMoneyValueFromLastYearMonth.sql");
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "Money", 
+                "GetMoneyValueFromLastYearMonth.sql");
             if (!File.Exists(filePath))
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! File with SQL script not found at " + filePath);
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
             }
             else
             {
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@data_base", _connectionDBName);
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney execute query \r\n{query}");
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                    $"FillFreeMoney execute query \r\n{query}");
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -265,12 +279,13 @@ namespace DataBaseRepository
 
                             var money = cmd.ExecuteScalar();
                             StaticData.FreeMoney = money.ToString();
-                            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney result money={money}");
+                            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                                $"FillFreeMoney result money={money}");
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository FillFreeMoney Exception!" +
-                                $"\r\n{ex.Message}");
+                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+                                $"FillFreeMoney Exception!\r\n{ex.Message}");
                         }
                         finally
                         {

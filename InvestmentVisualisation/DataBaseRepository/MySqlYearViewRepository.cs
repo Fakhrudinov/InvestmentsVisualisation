@@ -25,7 +25,7 @@ namespace DataBaseRepository
                 $"Database={connection.Value.Database}";
         }
 
-        public async Task<List<YearViewModel>> GetYearViewPage()
+        public async Task<List<YearViewModel>> GetYearViewPage(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository GetYearViewPage start");
             
@@ -52,11 +52,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     YearViewModel newLine = new YearViewModel();
 
@@ -68,18 +68,6 @@ namespace DataBaseRepository
                                     {
                                         newLine.ISIN = sdr.GetString("isin");
                                     }
-
-                                    //int checkForNull2 = sdr.GetOrdinal("pieces");
-                                    //if (!sdr.IsDBNull(checkForNull2))
-                                    //{
-                                    //    newLine.Pieces = sdr.GetInt32("pieces");
-                                    //}
-
-                                    //int checkForNull3 = sdr.GetOrdinal("av_price");
-                                    //if (!sdr.IsDBNull(checkForNull3))
-                                    //{
-                                    //    newLine.AvPrice = sdr.GetDecimal("av_price");
-                                    //}
 
                                     newLine.Volume = sdr.GetDecimal("volume");
 
@@ -198,7 +186,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task RecalculateYearView(int year, bool sortedByVolume)
+        public async Task RecalculateYearView(CancellationToken cancellationToken, int year, bool sortedByVolume)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository RecalculateYearView " +
                 $"year={year} sortedByVolume={sortedByVolume} start");
@@ -227,8 +215,8 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
-                            await cmd.ExecuteNonQueryAsync();
+                            await con.OpenAsync(cancellationToken);
+                            await cmd.ExecuteNonQueryAsync(cancellationToken);
                             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
                                 $"RecalculateYearView executed");
 
@@ -247,7 +235,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task CallFillViewShowLast12Month()
+        public async Task CallFillViewShowLast12Month(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
                 $"CallFillViewShowLast12Month start");
@@ -277,8 +265,8 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
-                            await cmd.ExecuteNonQueryAsync();
+                            await con.OpenAsync(cancellationToken);
+                            await cmd.ExecuteNonQueryAsync(cancellationToken);
                             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
                                 $"CallFillViewShowLast12Month executed");
 
@@ -297,7 +285,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task DropTableLast12MonthView()
+        public async Task DropTableLast12MonthView(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
                 $"DropTableLast12MonthView start");
@@ -327,8 +315,8 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
-                            await cmd.ExecuteNonQueryAsync();
+                            await con.OpenAsync(cancellationToken);
+                            await cmd.ExecuteNonQueryAsync(cancellationToken);
                             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
                                 $"DropTableLast12MonthView executed");
 
@@ -347,7 +335,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<List<YearViewModel>> GetLast12MonthViewPage()
+        public async Task<List<YearViewModel>> GetLast12MonthViewPage(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
                 $"GetLast12MonthViewPage start");
@@ -379,11 +367,11 @@ namespace DataBaseRepository
 
                         try
                         {
-                            await con.OpenAsync();
+                            await con.OpenAsync(cancellationToken);
 
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync())
+                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync())
+                                while (await sdr.ReadAsync(cancellationToken))
                                 {
                                     YearViewModel newLine = new YearViewModel();
 
