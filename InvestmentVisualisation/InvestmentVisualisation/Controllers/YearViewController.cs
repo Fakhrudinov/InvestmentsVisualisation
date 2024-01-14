@@ -27,23 +27,24 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0, bool sortedByVolume = false)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController GET Index called, year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController " +
+                $"GET Index called, year={year}");
 
             int currentYear = DateTime.Now.Year;
 
             if (year >= _minimumYear && year < currentYear)
             {
-                await _repository.RecalculateYearView(year, sortedByVolume);
+                await _repository.RecalculateYearView(cancellationToken, year, sortedByVolume);
             }
             else
             {
                 // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
                 await _secVolumeRepository.RecalculateSecVolumeForYear(cancellationToken, currentYear);
-                await _repository.RecalculateYearView(currentYear, sortedByVolume);
+                await _repository.RecalculateYearView(cancellationToken, currentYear, sortedByVolume);
                 year = currentYear;
             }
 
-            List<YearViewModel> yearViews = await _repository.GetYearViewPage();
+            List<YearViewModel> yearViews = await _repository.GetYearViewPage(cancellationToken);
 
             List<int> objSt = new List<int>();
             for (int i = _minimumYear; i <= currentYear; i++)
@@ -57,15 +58,15 @@ namespace InvestmentVisualisation.Controllers
             return View(yearViews);
         }
 
-        public async Task<IActionResult> Last12Month()
+        public async Task<IActionResult> Last12Month(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController Last12Month");
 
             // create view
-            await _repository.CallFillViewShowLast12Month();
+            await _repository.CallFillViewShowLast12Month(cancellationToken);
             
             // get view
-            List<YearViewModel> last12MonthView = await _repository.GetLast12MonthViewPage();
+            List<YearViewModel> last12MonthView = await _repository.GetLast12MonthViewPage(cancellationToken);
 
             // fill summ
             for (int i = 0; i < last12MonthView.Count; i++)
@@ -101,7 +102,7 @@ namespace InvestmentVisualisation.Controllers
             }
 
             // DROP TABLE
-            await _repository.DropTableLast12MonthView();
+            await _repository.DropTableLast12MonthView(cancellationToken);
 
 
             return View(last12MonthView);
