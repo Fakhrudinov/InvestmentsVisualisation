@@ -88,7 +88,7 @@ namespace InvestmentVisualisation.Controllers
             return View("Create", model);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateFromText(string text)
+        public async Task<IActionResult> CreateFromText(CancellationToken cancellationToken, string text)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
                 $"CreateFromText called, text={text}");
@@ -173,7 +173,7 @@ namespace InvestmentVisualisation.Controllers
 
             // тикер
             //string rawIsin = textSplitted[startPointer + 3];
-            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(textSplitted[startPointer + 3]);
+            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из репозитория={rawSecCode}");
             //проверить, что нам прислали действительно seccode а не ошибку
             if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет

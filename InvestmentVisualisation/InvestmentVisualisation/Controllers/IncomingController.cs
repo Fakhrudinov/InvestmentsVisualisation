@@ -187,13 +187,13 @@ namespace InvestmentVisualisation.Controllers
                     {
                         _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                             $"CreateFromText try set SecCode by {textSplitted[4]}");
-                        model.SecCode = await GetSecCodeByISIN(textSplitted[4]);
+                        model.SecCode = await GetSecCodeByISIN(cancellationToken, textSplitted[4]);
                     }
                     if (textSplitted.Length >=5 && textSplitted[5].Length > 0 && textSplitted[5].Contains("ISIN-"))
                     {
                         _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                             $"CreateFromText try set SecCode by {textSplitted[5]}");
-                        model.SecCode = await GetSecCodeByISIN(textSplitted[5]);
+                        model.SecCode = await GetSecCodeByISIN(cancellationToken, textSplitted[5]);
                     }
 
                     //проверить, что нам прислали действительно seccode а не ошибку
@@ -209,7 +209,7 @@ namespace InvestmentVisualisation.Controllers
             return View("CreateIncoming", model);
         }
 
-        private async Task<string> GetSecCodeByISIN(string text)
+        private async Task<string> GetSecCodeByISIN(CancellationToken cancellationToken, string text)
         {
             //ТМК, ПАО ао01; ISIN-RU000A0B6NK6;
             string isin = text.Split("ISIN-")[1];
@@ -219,7 +219,7 @@ namespace InvestmentVisualisation.Controllers
             }
             isin = isin.Substring(0, 12);
 
-            string secCode = await _secCodesRepo.GetSecCodeByISIN(isin);
+            string secCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, isin);
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GetSecCodeByISIN " +
                 $"получили из репозитория={secCode}");
             return secCode;
