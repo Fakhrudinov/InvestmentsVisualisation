@@ -7,40 +7,77 @@
 }
 
 <div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Wish list</h3>
+            <p>
+                Индекс IRDIV от Доход:
+                <a href="https://www.dohod.ru/analytic/indexes/irdiv/" target="_blank">
+                    www.dohod.ru/analytic/indexes/irdiv
+                </a>  ребалансировка 2 раза в год, 19? сентября и 19? марта
+            </p>
+            <p>
+                Также инфа тут
+                <a href="https://vsdelke.ru/dividendy/dividendnye-aristokraty.html" target="_blank">
+                    vsdelke.ru/dividendy/dividendnye-aristokraty.html
+                </a>
+            </p>
+            <p>
+                Также инфа тут
+                <a href="https://investmint.ru/top-dd/" target="_blank">
+                    investmint.ru/top-dd
+                </a>
+            </p>
+        </div>
+        <div class="col">
+            <h5 style="text-align:center">Добавить в Wish list</h5>
 
-    <h3>Wish list</h3>
-    <p>Индекс IRDIV от Доход: 
-        <a href="https://www.dohod.ru/analytic/indexes/irdiv/" target="_blank">
-            www.dohod.ru/analytic/indexes/irdiv
-        </a>  ребалансировка 2 раза в год, 19? сентября и 19? марта
-    </p>
-    <p>Также инфа тут 
-        <a href="https://vsdelke.ru/dividendy/dividendnye-aristokraty.html" target="_blank">
-            vsdelke.ru/dividendy/dividendnye-aristokraty.html
-        </a>
-    </p>
-    <p>
-        Также инфа тут 
-        <a href="https://investmint.ru/top-dd/" target="_blank">
-            investmint.ru/top-dd
-        </a>
-    </p>
-
+            <form method="post" action="/WishList/CreateNewWish">
+                <div class="row">
+                    <div class="col-6" style="margin-right:0px;padding-right:0px;">
+                        @Html.DropDownList(
+                                 "seccode",
+                                 new SelectList(@secCodesList, "SecCode", "SecCode"),
+                                 new
+                                 {
+                                     @class = "form-select form-select-sm"
+                                 })
+                    </div>
+                    <div class="col-1" style="text-align:left; margin:0px; padding:0px;">
+                        <input type="number" style="width: 50px; border: 1px solid lightgray"
+                               class="form-control form-control-sm" name="level" min="1" max="5" value="1">
+                    </div>
+                    <div class="col" style="text-align:right;">
+                        <input type="submit" class="btn btn-primary btn-sm" style="width: 100%;" value="Добавить" />
+                    </div>
+                </div>
+                <textarea class="form-control" name="description" rows="3" 
+                          placeholder="Введите описание"></textarea>
+            </form>
+        </div>
+    </div>
 
     <div class="row">
-        <div class="col-md-5">
+        <div class="col">
 
             <table class="table table-hover">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>
                             @Html.DisplayNameFor(model => model.SecCode)
                         </th>
-                        <th width="160">
+                        <th>
+                            @* @Html.DisplayNameFor(model => model.Description) *@
+                            Описание
+                        </th>
+                        <th width="70">
                             @* @Html.DisplayNameFor(model => model.Level) *@
                         </th>
-                        <th width="80">
-                            @* del *@
+                        <th>
+                            @* edit button *@
+                        </th>
+                        <th width="100">
+                            @* del button *@
                         </th>
                     </tr>
                 </thead>
@@ -51,21 +88,34 @@
                             <td>
                                 @Html.DisplayFor(modelItem => item.SecCode)
                             </td>
-                            <td align="right" style="text-align:right;">
-                                <form method="post" action="/WishList/EditWishLevel">
-                                    <div class="input-group input-group-sm ">
-                                        <input name="seccode" value="@item.SecCode" hidden>
-                                        <input type="number" class="form-control" name="level" min="1" max="5" value="@item.Level">
-                                        <input type="submit" class="btn btn-outline-secondary" value="Edit Level" />
-                                    </div>
-                                </form>                                
+
+                            <form method="post" action="/WishList/EditWishLevel">
+                            <td>
+                                <textarea name="description" rows="1"
+                                          style=" min-width:500px; max-width:100%;width:100%;"
+                                          placeholder="Введите описание">@item.Description</textarea>
                             </td>
+                            <td>
+                                <input name="seccode" value="@item.SecCode" hidden>
+                                <input type="number" class="form-control form-control-sm" style="width: 50px;"
+                                       name="level" min="1" max="5" value="@item.Level">
+                            </td>
+                            <td>
+                                <input type="submit" class="btn btn-outline-secondary btn-sm" 
+                                       style="width: 100%;" value="Edit Level" />
+                            </td>
+                            </form>
+
                             <td>
                                 @Html.ActionLink(
                                     "Delete", 
                                     "Delete", 
                                     new { seccode = item.SecCode },
-                                    new { @class = "btn btn-outline-danger btn-sm" })
+                                    new 
+                                    { 
+                                        @class = "btn btn-outline-danger btn-sm", 
+                                        @style = "width: 100%;" 
+                                    })
                             </td>
                         </tr>
                     }
@@ -73,28 +123,5 @@
             </table>
 
         </div>
-         <div class="col-md-1">
-            
-        </div>
-        <div class="col-md-4">
-            <h5 style="text-align:center">Добавить в Wish list</h5>
-
-            <form method="post" action="/WishList/CreateNewWish">
-                <div class="input-group">
-                    @Html.DropDownList(
-                        "seccode", 
-                        new SelectList(@secCodesList, "SecCode", "SecCode"),
-                        new
-                        {
-                            @class = "form-select"
-                        })
-                    <input type="number" style="width: 50px; border: 1px solid gray" name="level" min="1" max="5" value="1">
-                    <input type="submit" class="btn btn-primary" value="Добавить" />
-                </div>
-            </form>
-        </div>
     </div>
-
-
-
 </div>

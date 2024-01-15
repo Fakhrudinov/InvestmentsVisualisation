@@ -388,7 +388,7 @@ namespace DataBaseRepository
                 string query = File.ReadAllText(filePath);
                 query = query.Replace("@id", id.ToString());
 
-                return await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
+                return await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
         }
 

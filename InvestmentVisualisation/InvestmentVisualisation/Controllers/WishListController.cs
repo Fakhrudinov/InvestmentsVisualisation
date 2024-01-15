@@ -49,23 +49,31 @@ namespace InvestmentVisualisation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNewWish(CancellationToken cancellationToken, string seccode, int level)
+        public async Task<IActionResult> CreateNewWish(
+            CancellationToken cancellationToken, 
+            string seccode, 
+            int level,
+            string description)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController CreateNewWish " +
                 $"seccode={seccode} level={level} called");
 
-            await _repository.AddNewWish(cancellationToken, seccode, level);
+            await _repository.AddNewWish(cancellationToken, seccode, level, description);
 
             return RedirectToAction("WishList");
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditWishLevel(CancellationToken cancellationToken, string seccode, int level)
+        public async Task<IActionResult> EditWishLevel(
+            CancellationToken cancellationToken, 
+            string seccode, 
+            int level, 
+            string description)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController EditWishLevel " +
                 $"seccode={seccode} level={level} called");
 
-            await _repository.EditWishLevel(cancellationToken, seccode, level);
+            await _repository.EditWishLevel(cancellationToken, seccode, level, description);
 
             return RedirectToAction("WishList");
         }

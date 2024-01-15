@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.WishList;
 using MySqlConnector;
+using System.Text;
 
 namespace DataBaseRepository
 {
@@ -86,6 +87,13 @@ namespace DataBaseRepository
                                 {
                                     newWishItem.Level = sdr.GetInt16("wish_level");
                                 }
+
+                                int checkForNull2 = sdr.GetOrdinal("description");
+                                if (!sdr.IsDBNull(checkForNull2))
+                                {
+                                    newWishItem.Description = sdr.GetString("description");
+                                }
+                                
                                 result.Add(newWishItem);
                             }
                         }
@@ -128,11 +136,11 @@ namespace DataBaseRepository
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                     $"DeleteWishBySecCode execute query\r\n{query}");
 
-                string result = await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
+                string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
         }
 
-        public async Task AddNewWish(CancellationToken cancellationToken, string seccode, int level)
+        public async Task AddNewWish(CancellationToken cancellationToken, string seccode, int level, string description)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository AddNewWish " +
                 $"seccode={seccode} level={level} start");
@@ -146,17 +154,20 @@ namespace DataBaseRepository
             }
             else
             {
-                string query = File.ReadAllText(filePath);
-                query = query.Replace("@seccode", seccode);
-                query = query.Replace("@level", level.ToString());
+                StringBuilder queryStringBuilder = new StringBuilder(File.ReadAllText(filePath));
+                queryStringBuilder.Replace("@seccode", seccode);
+                queryStringBuilder.Replace("@level", level.ToString());
+                queryStringBuilder.Replace("@description", description);
+                string query = queryStringBuilder.ToString();
+
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                     $"AddNewWish execute query\r\n{query}");
 
-                string result = await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
+                string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
         }
 
-        public async Task EditWishLevel(CancellationToken cancellationToken, string seccode, int level)
+        public async Task EditWishLevel(CancellationToken cancellationToken, string seccode, int level, string description)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository EditWishLevel " +
                 $"seccode={seccode} level={level} start");
@@ -174,13 +185,16 @@ namespace DataBaseRepository
             }
             else
             {
-                string query = File.ReadAllText(filePath);
-                query = query.Replace("@seccode", seccode);
-                query = query.Replace("@level", level.ToString());
+                StringBuilder queryStringBuilder = new StringBuilder(File.ReadAllText(filePath));
+                queryStringBuilder.Replace("@seccode", seccode);
+                queryStringBuilder.Replace("@level", level.ToString());
+                queryStringBuilder.Replace("@description", description);
+                string query = queryStringBuilder.ToString();
+
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                     $"EditWishLevel execute query\r\n{query}");
 
-                string result = await _commonRepo.DeleteSingleRecordByQuery(cancellationToken, query);
+                string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
         }
     }

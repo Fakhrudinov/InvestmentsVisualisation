@@ -2,7 +2,7 @@
 {
     public interface IMySqlCommonRepository
     {
-        Task<string> DeleteSingleRecordByQuery(CancellationToken cancellationToken, string query);
+        Task<string> ExecuteNonQueryAsyncByQueryText(CancellationToken cancellationToken, string query);
         void FillFreeMoney();
         void FillStaticCategories();
         void FillStaticSecBoards();

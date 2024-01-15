@@ -211,10 +211,10 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<string> DeleteSingleRecordByQuery(CancellationToken cancellationToken, string query)
+        public async Task<string> ExecuteNonQueryAsyncByQueryText(CancellationToken cancellationToken, string query)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                $"DeleteSingleRecordByQuery start execute query \r\n{query}");
+                $"ExecuteNonQueryAsyncByQueryText start execute query \r\n{query}");
 
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
@@ -229,7 +229,7 @@ namespace DataBaseRepository
                         //Return Int32 Number of rows affected
                         int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
                         _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                            $"DeleteSingleRecordByQuery execution affected {insertResult} lines");
+                            $"ExecuteNonQueryAsyncByQueryText execution affected {insertResult} lines");
 
                         return insertResult.ToString();
 
@@ -237,7 +237,7 @@ namespace DataBaseRepository
                     catch (Exception ex)
                     {
                         _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                            $"DeleteSingleRecordByQuery Exception!\r\n{ex.Message}");
+                            $"ExecuteNonQueryAsyncByQueryText Exception!\r\n{ex.Message}");
                         return ex.Message;
                     }
                     finally
