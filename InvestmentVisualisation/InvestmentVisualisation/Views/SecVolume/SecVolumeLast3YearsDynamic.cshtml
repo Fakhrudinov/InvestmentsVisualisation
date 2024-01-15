@@ -179,15 +179,21 @@
                         @Html.DisplayFor(modelItem => item.LastYearVolume)
                     </td>
                     <td style="border-right-color:black; border-right-width: 1px;">
-                        <div style="color:darkgreen;">
-                            @if (wishList.Find(x => x.SecCode.Equals(item.SecCode)) is not null)
-                            {
-                                StringBuilder level = new StringBuilder(5); 
-                                @for (int i = 0; i<wishList.Find(x => x.SecCode.Equals(item.SecCode)).Level; i++)
+                        <div style="color:darkgreen;">                            
+                            @{
+                                WishListItemModel wish = wishList.Find(x => x.SecCode.Equals(item.SecCode));
+                                if (wish is not null)
                                 {
-                                    level.Append("▉");
+                                    StringBuilder level = new StringBuilder(5);
+
+                                    @for (int i = 0; i < wish.Level; i++)
+                                    {
+                                        level.Append("▉");
+                                    }
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@wish.Description">
+                                        @level
+                                    </span>
                                 }
-                                <span>@level</span>
                             }
                         </div>
                     </td>
