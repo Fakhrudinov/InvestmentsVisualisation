@@ -96,6 +96,10 @@ namespace InvestmentVisualisation.Controllers
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                 $"CreateFromText called, text={text}");
+            //"Выплата процентного дохода (эмитированы после 01.01.17)\t\t\t\t30.01.2024\t706,8\t0\t\tПРОМОМЕД ДМ оббП02; ISIN-RU000A103G91;\t\t"
+            //\t\t\t\t
+            //"Выплата дивидендов\t30.01.2024\t3,484.10\t0.00\t\tНК Роснефть, ПАО ао01; ISIN-RU000A0J2Q06;"
+            //"Выплата дивидендов\t30.01.2024\t3484,1\t0\t\tНК Роснефть, ПАО ао01; ISIN-RU000A0J2Q06;\t\t"
 
             // /t = 5 штук . может быть и 6. isin искать в 5й или 6й
             // Тип / Дата / Зачислено / Списано / Примеч / Примеч
@@ -111,6 +115,9 @@ namespace InvestmentVisualisation.Controllers
                 ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + text;
                 return View("CreateIncoming");
             }
+
+            // fix format from new LK2024
+            text = text.Replace("\t\t\t\t", "\t");
 
             string[] textSplitted = text.Split("\t");
             if (textSplitted.Length < 3)
@@ -157,7 +164,7 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                 $"CreateFromText set {model.Date}");
 
-            //деньги
+            //деньги \t3,484.10  \t3484,1
             if (textSplitted[2].Length > 0 && !textSplitted[2].Equals("0.00"))
             {
                 model.Value = textSplitted[2];
@@ -170,7 +177,16 @@ namespace InvestmentVisualisation.Controllers
                 _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                     $"CreateFromText set {model.Value} by textSplitted[3]");
             }
-            model.Value = model.Value.Replace(",", "") ;
+            // если содержит точку - старый формат. //если нет - менять , на .
+            if (model.Value.Contains('.') && model.Value.Contains(','))
+            {
+                model.Value = model.Value.Replace(",", "");
+            }
+            if (model.Value.Contains(','))
+            {
+                model.Value = model.Value.Replace(",", ".");
+            }
+            
 
             //ISIN to seccode
             if (model.Category != 0 && model.Category != 3) // это не зачисленные мной деньги или не списанная брок комиссия
@@ -319,7 +335,8 @@ namespace InvestmentVisualisation.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Delete id={id} called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController " +
+                $"GET Delete id={id} called");
 
             IncomingModel deleteItem = await _repository.GetSingleIncomingById(cancellationToken, id);
 
@@ -333,15 +350,16 @@ namespace InvestmentVisualisation.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(CancellationToken cancellationToken, IncomingModel deleteIncoming)
+        public async Task<IActionResult> DeleteAction(CancellationToken cancellationToken, int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost Delete called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController " +
+                $"HttpPost DeleteAction id={id} called");
 
-            string result = await _repository.DeleteSingleIncoming(cancellationToken, deleteIncoming.Id);
+            string result = await _repository.DeleteSingleIncoming(cancellationToken, id);
             if (!result.Equals("1"))
             {
-                ViewData["Message"] = $"Удаление не удалось.\r\n{result}";
-                return View(deleteIncoming);
+                TempData["Message"] = $"Удаление id={id} не удалось.\r\n{result}";
+                return RedirectToAction("Delete", new { id = id });
             }
 
             return RedirectToAction("Incoming");

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.Deals;
 using System.Threading;
+using System.Reflection;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -92,6 +93,11 @@ namespace InvestmentVisualisation.Controllers
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
                 $"CreateFromText called, text={text}");
+            //"9466729404\t42847041579\tПокупка ЦБ на бирже\t\t25.01.2024 14:56:13\tРоссети Ленэнерго ап01, 2-01-00073-A
+            //\tRU0009092134
+            //\t1\t100
+            //\t207,3\tRUB\t20730\t0\tRUB\t0\t3,52\t0\t26.01.2024\t26.01.2024\tПАО Московская Биржа\tНКО АО НРД"
+
 
             //"7318187850\t34614262505\tПокупка ЦБ на бирже\t15.02.2023 10:40:43\tБанк СПб, ПАО ао03, 10300436B\tRU0009100945\t1.00\t50.00\t112.07\tRUB\t5,603.50\t0.00\tRUB\t0.00\t0.95\t0.00\t17.02.2023\t17.02.2023\tПАО Московская Биржа"
             //"Покупка ЦБ на бирже\t15.02.2023 10:53:59\tСелигдар, ПАО ао01, 1-01-32694-F\tRU000A0JPR50\t1.00\t100.00\t46.83\tRUB\t4,683.00\t0.00\tRUB\t0.00\t0.80\t0.0"
@@ -101,6 +107,9 @@ namespace InvestmentVisualisation.Controllers
                 ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + text;
                 return View("Create");
             }
+
+            // for new 2024 LK recognize - fix format
+            text = text.Replace("\t\t", "\t");
 
             string[] textSplitted = text.Split("\t");
             if (textSplitted.Length < 13)
@@ -164,7 +173,7 @@ namespace InvestmentVisualisation.Controllers
             // nkd // 289.20
             //string rawNkd = textSplitted[startPointer + 9];
             string nkd = CleanString(textSplitted[startPointer + 9]);
-            if (!nkd.Equals("0,00"))
+            if (!nkd.Equals("0,00") && !nkd.Equals("0") && !nkd.Equals("RUB"))
             {
                 model.NKD = nkd;
             }
@@ -274,7 +283,8 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Delete id={id} called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
+                $"Delete id={id} called");
 
             DealModel deleteItem = await _repository.GetSingleDealById(cancellationToken, id);
 
@@ -285,15 +295,16 @@ namespace InvestmentVisualisation.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(CancellationToken cancellationToken, DealModel model)
+        public async Task<IActionResult> DeleteAction(CancellationToken cancellationToken, int id)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost Delete called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                $"HttpPost DeleteAction id={id} called");
 
-            string result = await _repository.DeleteSingleDeal(cancellationToken, model.Id);
+            string result = await _repository.DeleteSingleDeal(cancellationToken, id);
             if (!result.Equals("1"))
             {
-                ViewData["Message"] = $"Удаление не удалось.\r\n{result}";
-                return View(model);
+                TempData["Message"] = $"Удаление id={id} не удалось.\r\n{result}";
+                return RedirectToAction("Delete", new { id = id });
             }
 
             return RedirectToAction("Deals");
@@ -303,6 +314,17 @@ namespace InvestmentVisualisation.Controllers
 
         private string CleanString(string str)
         {
+            // если содержит точку - старый формат. //если нет - менять , на .
+            if (str.Contains('.') && str.Contains(','))
+            {
+                str = str.Replace(",", "");
+            }
+            if (str.Contains(','))
+            {
+                str = str.Replace(",", ".");
+            }
+
+
             if (str.EndsWith('.')) // убрать последнюю точку, чтобы RegEx не ругался
             {
                 str = str.Substring(0, str.Length - 1);

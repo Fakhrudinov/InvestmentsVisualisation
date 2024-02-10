@@ -1,9 +1,9 @@
 ﻿@model DataAbstraction.Models.Deals.DealModel
 
 <div class="container">
-    @if (ViewData["Message"] != null)
+    @if (TempData["Message"] != null)
     {
-        <strong style="color:red"> @ViewData["Message"] </strong>
+        <strong style="color:red"> @TempData["Message"] </strong>
     }
 
     <h3>Уверен, что хочешь удалить?</h3>
@@ -61,7 +61,8 @@
             </dd>
         </dl>
     
-        <form asp-action="Delete" class="form-group btn-group">
+        <form asp-action="DeleteAction" class="form-group btn-group">
+            <input type="number" value="@Model.Id" name="id" hidden />
             <input type="submit" value="Delete" class="btn btn-danger" />
             <a asp-action="Deals" class="btn btn-outline-success">Назад к списку сделок</a>
         </form>
