@@ -14,11 +14,11 @@ namespace DataAbstraction.Models.SecVolume
 
         public int ? PreviousYearPieces { get; set; }
 
-        public decimal LastYearChanges { get; set; }
-        public int LastYearPieces { get; set; }
+        public decimal ? LastYearChanges { get; set; }
+        public int ? LastYearPieces { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:0.00}")]
-        public decimal LastYearVolume { get; set; }
+        public decimal ? LastYearVolume { get; set; }
 
         public string ? SmartLabDividents { get; set; }
         public string? DohodDividents { get; set; }

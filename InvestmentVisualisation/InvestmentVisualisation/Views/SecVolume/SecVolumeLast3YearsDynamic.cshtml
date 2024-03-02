@@ -165,52 +165,64 @@
                         @Html.DisplayFor(modelItem => item.PreviousYearPieces)
                     </td>
                     @{
-                        string color = "white;";
-                        // calculate color
-                        switch (item.LastYearChanges)
+                        if (item.LastYearChanges is not null)
                         {
-                            case 0:
-                                break;
-                            case < 5:
-                                color = "#E8F5E9;";
-                                break;
-                            case < 15:
-                                color = "#C8E6C9;";
-                                break;
-                            case < 20:
-                                color = "#A5D6A7;";
-                                break;
-                            case < 25:
-                                color = "#81C784;";
-                                break;
-                            case < 30:
-                                color = "#66BB6A; color:white;";
-                                break;
-                            case < 35:
-                                color = "#4CAF50; color:white;";
-                                break;
-                            case < 50:
-                                color = "#43A047; color:white;";
-                                break;
-                            case < 70:
-                                color = "#388E3C; color:white;";
-                                break;
-                            case < 90:
-                                color = "#2E7D32; color:white;";
-                                break;
-                            case >= 90:
-                                color = "#1B5E20; color:white;";
-                                break;
+                            string color = "white;";
+                            // calculate color
+                            switch (item.LastYearChanges)
+                            {
+                                case 0:
+                                    break;
+                                case < 5:
+                                    color = "#E8F5E9;";
+                                    break;
+                                case < 10:
+                                    color = "#C8E6C9;";
+                                    break;
+                                case < 15:
+                                    color = "#A5D6A7;";
+                                    break;
+                                case < 20:
+                                    color = "#81C784;";
+                                    break;
+                                case < 30:
+                                    color = "#66BB6A; color:white;";
+                                    break;
+                                case < 40:
+                                    color = "#4CAF50; color:white;";
+                                    break;
+                                case < 50:
+                                    color = "#43A047; color:white;";
+                                    break;
+                                case < 70:
+                                    color = "#388E3C; color:white;";
+                                    break;
+                                case < 90:
+                                    color = "#2E7D32; color:white;";
+                                    break;
+                                case >= 90:
+                                    color = "#1B5E20; color:white;";
+                                    break;
+                            }
+
+                            <td style="
+                                    text-align:right;
+                                    border-left-color:black;
+                                    border-left-width: 1px;
+                                    background-color: @color">
+                                @Html.DisplayFor(modelItem => item.LastYearChanges)
+                                %
+                            </td>
+                        }
+                        else
+                        {
+                            <td style="
+                                        border-left-color:black;
+                                        border-left-width: 1px;
+                                        ">
+                            </td>
                         }
                     }
-                        <td style="
-                                text-align:right;
-                                border-left-color:black; 
-                                border-left-width: 1px; 
-                                background-color: @color">
-                        @Html.DisplayFor(modelItem => item.LastYearChanges)
-                        %   
-                    </td>
                     <td style="text-align:right;">
                         @Html.DisplayFor(modelItem => item.LastYearPieces)
                     </td>
@@ -218,18 +230,33 @@
                         @Html.DisplayFor(modelItem => item.LastYearVolume)
                     </td>
                     <td style="border-right-color:black; border-right-width: 1px;">
-                        <div style="color:darkgreen;">                            
+                        <div>                            
                             @{
                                 WishListItemModel wish = wishList.Find(x => x.SecCode.Equals(item.SecCode));
                                 if (wish is not null)
                                 {
                                     StringBuilder level = new StringBuilder(5);
 
-                                    @for (int i = 0; i < wish.Level; i++)
+                                    @for (int i = 0; i < Math.Abs(wish.Level); i++)
                                     {
                                         level.Append("▉");
                                     }
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@wish.Description">
+
+                                    string color = "darkgreen";
+                                    if (wish.Level < 0)
+                                    {
+                                        color = "red";
+                                    }
+
+                                    if (wish.Level == 0)
+                                    {
+                                        color = "lightgray";
+                                        level.Append("▉▉▉▉▉");
+                                    }
+
+
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@wish.Description"
+                                        style="color:@color">
                                         @level
                                     </span>
                                 }

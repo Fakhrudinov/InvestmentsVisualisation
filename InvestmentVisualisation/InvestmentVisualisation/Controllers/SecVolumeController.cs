@@ -464,7 +464,7 @@ namespace InvestmentVisualisation.Controllers
 
                 if(record.PreviousYearPieces is not null)
                 {
-                    record.LastYearChanges = CalcPercent(record.LastYearPieces, (int)record.PreviousYearPieces);
+                    record.LastYearChanges = CalcPercent((int)record.LastYearPieces, (int)record.PreviousYearPieces);
                 }
             }
         }
