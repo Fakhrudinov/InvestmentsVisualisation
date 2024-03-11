@@ -100,6 +100,7 @@ namespace InvestmentVisualisation.Controllers
             //\t\t\t\t
             //"Выплата дивидендов\t30.01.2024\t3,484.10\t0.00\t\tНК Роснефть, ПАО ао01; ISIN-RU000A0J2Q06;"
             //"Выплата дивидендов\t30.01.2024\t3484,1\t0\t\tНК Роснефть, ПАО ао01; ISIN-RU000A0J2Q06;\t\t"
+            //new//"Депозитарная комиссия - за хранение ЦБ\t\t\t\t29.02.2024\t0\t1588,84\tДепо Базовый (№2, ФЛ+абон. 30р)"
 
             // /t = 5 штук . может быть и 6. isin искать в 5й или 6й
             // Тип / Дата / Зачислено / Списано / Примеч / Примеч
@@ -107,7 +108,6 @@ namespace InvestmentVisualisation.Controllers
             //"Выплата дивидендов\t16.02.2023\t4,482.80\t0.00\t\tТМК, ПАО ао01; ISIN-RU000A0B6NK6;"
             //"Выплата процентного дохода (эмитированы после 01.01.17)\t16.02.2023\t16.96\t0.00\t\tИС петролеум ОббП01; ISIN-RU000A1013C9;"
             //"Поступление ДС клиента (безналичное)\t22.02.2023\t60,009.00\t0.00\t\tПеревод средств для участия в торгах по договору на брокерское обслуживание BP19195 от 11.10.2017 #ACC# BP19195-MS-01 #SBP89998#^НДС не облагается"
-            // Депозитарная комиссия - за хранение ЦБ	31.01.2023	0.00	533.52	Депо Базовый (№2, ФЛ+абон. 30р)
             // Оборот по погашению ЦБ  14.02.2023  120.00  0.00 === никогда НЕТ isin!
 
             if (text is null || !text.Contains("\t"))
@@ -164,14 +164,14 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                 $"CreateFromText set {model.Date}");
 
-            //деньги \t3,484.10  \t3484,1
-            if (textSplitted[2].Length > 0 && !textSplitted[2].Equals("0.00"))
+            //деньги \t3,484.10  \t3484,1 // 0 in new
+            if (textSplitted[2].Length > 0 && !textSplitted[2].Equals("0.00") && !textSplitted[2].Equals("0"))
             {
                 model.Value = textSplitted[2];
                 _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
                     $"CreateFromText set {model.Value} by textSplitted[2]");
             }
-            else if (textSplitted[3].Length > 0 && !textSplitted[3].Equals("0.00"))
+            else if (textSplitted[3].Length > 0 && !textSplitted[3].Equals("0.00") && !textSplitted[3].Equals("0"))
             {
                 model.Value = textSplitted[3];
                 _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
