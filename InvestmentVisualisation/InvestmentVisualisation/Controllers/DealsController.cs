@@ -4,8 +4,8 @@ using DataAbstraction.Interfaces;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.Deals;
-using System.Threading;
-using System.Reflection;
+using UserInputService;
+using System.Text;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -15,17 +15,20 @@ namespace InvestmentVisualisation.Controllers
         private IMySqlDealsRepository _repository;
         private int _itemsAtPage;
         private IMySqlSecCodesRepository _secCodesRepo;
+        private InputHelper _helper;
 
         public DealsController(
             ILogger<DealsController> logger, 
             IMySqlDealsRepository repository, 
             IOptions<PaginationSettings> paginationSettings,
-            IMySqlSecCodesRepository secCodesRepo)
+            IMySqlSecCodesRepository secCodesRepo,
+            InputHelper helper)
         {
             _logger = logger;
             _repository = repository;
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
             _secCodesRepo = secCodesRepo;
+            _helper = helper;
         }
 
 
@@ -67,12 +70,16 @@ namespace InvestmentVisualisation.Controllers
             return View(dealsWithPaginations);
         }
 
-        public ActionResult Create()
+        public ActionResult Create(CreateDealsModel model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Create called");
 
-            CreateDealsModel model = new CreateDealsModel();
-            model.Date = DateTime.Now.AddDays(-1);// обычно вношу за вчера
+            //CreateDealsModel model = new CreateDealsModel();
+            if (model.Date == DateTime.MinValue)
+            {
+                model.Date = DateTime.Now.AddDays(-1);// обычно вношу за вчера
+            }
+          
 
             return View(model);
         }
@@ -105,18 +112,16 @@ namespace InvestmentVisualisation.Controllers
             if (text is null || !text.Contains("\t"))
             {
                 ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + text;
-                return View("Create");
+                return View("Create", new CreateDealsModel());
             }
 
-            // for new 2024 LK recognize - fix format
-            text = text.Replace("\t\t", "\t");
+            string[]? textSplitted = _helper.ReturnSplittedArray(text);
 
-            string[] textSplitted = text.Split("\t");
-            if (textSplitted.Length < 13)
+            if (textSplitted is null || textSplitted.Length < 13)
             {
                 ViewData["Message"] = "Чтение строки не удалось, " +
                     "получено менее 13 элементов (12х табуляций-разделителей) в строке: " + text;
-                return View("Create");
+                return View("Create", new CreateDealsModel());
             }
 
             // поищем, где расположен текст "Покупка ЦБ на бирже" - от этой точки будем считывать столбцы
@@ -132,63 +137,113 @@ namespace InvestmentVisualisation.Controllers
                 if (i > 5)
                 {
                     ViewData["Message"] = "Не найдена точка входа 'Покупка ЦБ на бирже' в тексте: " + text;
-                    return View("Create");
+                    return View("Create", new CreateDealsModel());
                 }
             }
 
             // начинаем заполнение
             CreateDealsModel model = new CreateDealsModel();
+            StringBuilder stringBuilderErrors = new StringBuilder();
 
             // дата // 15.02.2023 10:40:43
-            //string rawData = textSplitted[startPointer + 1];
-            //string[] dataSplitted = textSplitted[startPointer + 1].Split(' ').First().Split('.');
-            //string dateString = $"{dataSplitted[2]}-{dataSplitted[1]}-{dataSplitted[0]} {DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}";
-            //model.Date = DateTime.Parse(dateString);
-            model.Date = DateTime.Parse(textSplitted[startPointer + 1]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                $"CreateFromText set date={model.Date}");
+            if (_helper.IsDataFormatCorrect(textSplitted[startPointer + 1]))
+            {
+                model.Date = DateTime.Parse(textSplitted[startPointer + 1]);
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText set date={model.Date} from {textSplitted[startPointer + 1]}");
+            }
+            else
+            {
+                stringBuilderErrors.Append("Date not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText Date not recognized from {textSplitted[startPointer + 1]}");
+
+                // just set yesterday
+                model.Date = DateTime.Now.AddDays(-1);
+            }
 
             // количество // 60,000.00
-            //string rawPieces = textSplitted[startPointer + 5]; 
-            string pieces = textSplitted[startPointer + 5].Split('.').First();
-            model.Pieces = Int32.Parse(pieces.Replace(",", ""));
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                $"CreateFromText set Pieces={model.Pieces}");
+            if (_helper.IsInt32Correct(textSplitted[startPointer + 5]))
+            {
+                model.Pieces = _helper.GetInt32FromString(textSplitted[startPointer + 5]);
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText set Pieces={model.Pieces} from {textSplitted[startPointer + 5]}");
+            }
+            else
+            {
+                stringBuilderErrors.Append("Pieces not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText Pieces not recognized from {textSplitted[startPointer + 5]}");
+            }
 
             // цена // 4,583.5 или 0.08708
-            //string rawPrice = textSplitted[startPointer + 6];
-            model.AvPrice = CleanString(textSplitted[startPointer + 6]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                $"CreateFromText set AvPrice={model.AvPrice}");
+            if (_helper.IsDecimal(textSplitted[startPointer + 6]))
+            {
+                model.AvPrice = _helper.CleanPossibleNumber(textSplitted[startPointer + 6]);
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText set AvPrice={model.AvPrice} from {textSplitted[startPointer + 6]}");
+            }
+            else
+            {
+                stringBuilderErrors.Append("AvPrice not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText AvPrice not recognized from {textSplitted[startPointer + 6]}");
+            }
 
             //комиссия = комиссия биржи + комиссия брокера 1.79	0.24
-            //string rawMoexComiss = textSplitted[startPointer + 11];
-            //string rawBrokComiss = textSplitted[startPointer + 12];
-            string moexComiss = CleanString(textSplitted[startPointer + 11]);
-            string brokComiss = CleanString(textSplitted[startPointer + 12]);
-            model.Comission = (decimal.Parse(moexComiss) + decimal.Parse(brokComiss)).ToString();
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                $"CreateFromText set Comission={model.Comission} from {moexComiss} + {brokComiss}");
+            if (_helper.IsDecimal(textSplitted[startPointer + 11]) && _helper.IsDecimal(textSplitted[startPointer + 12]))
+            {
+                decimal moexComiss = _helper.GetDecimalFromString(textSplitted[startPointer + 11]);
+                decimal brokComiss = _helper.GetDecimalFromString(textSplitted[startPointer + 12]);
+                model.Comission = (moexComiss + brokComiss).ToString();
+
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText set Comission={model.Comission} from " +
+                    $"{textSplitted[startPointer + 11]}({moexComiss}) + {textSplitted[startPointer + 12]}({brokComiss})");
+            }
+            else
+            {
+                stringBuilderErrors.Append("Comission not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText Comission not recognized from " +
+                    $"{textSplitted[startPointer + 11]} or {textSplitted[startPointer + 12]}");
+            }
 
             // nkd // 289.20
-            //string rawNkd = textSplitted[startPointer + 9];
-            string nkd = CleanString(textSplitted[startPointer + 9]);
-            if (!nkd.Equals("0,00") && !nkd.Equals("0") && !nkd.Equals("RUB"))
+            string nkd = _helper.CleanPossibleNumber(textSplitted[startPointer + 9]);
+            if (!nkd.Equals("0.00") && !nkd.Equals("0,00") && !nkd.Equals("0") && !nkd.Equals("RUB"))
             {
-                model.NKD = nkd;
+                if (_helper.IsDecimal(textSplitted[startPointer + 9]))
+                {
+                    model.NKD = nkd;
+                    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                        $"CreateFromText set NKD={model.NKD} from {textSplitted[startPointer + 9]}");
+                }
+                else
+                {
+                    stringBuilderErrors.Append("NKD not recognized! ");
+                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                        $"CreateFromText NKD is zero value or not recognized from {textSplitted[startPointer + 9]}");
+                }
             }
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                $"CreateFromText set NKD={model.NKD}");
+
 
             // тикер
-            //string rawIsin = textSplitted[startPointer + 3];
             string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из репозитория={rawSecCode}");
             //проверить, что нам прислали действительно seccode а не ошибку
             if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет
             {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"CreateFromText ISIN not recognized from {textSplitted[startPointer + 3]}");
+
+                if (rawSecCode is null)
+                {
+                    rawSecCode = "ISIN not recognized! ";
+                }
+
                 //отправим найденное в ошибки
-                ViewData["Message"] = rawSecCode;
+                stringBuilderErrors.Append(rawSecCode);
                 model.SecCode = "0";//сбросим присвоенную ошибку
             }
             else
@@ -198,7 +253,26 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
                 $"CreateFromText set SecCode={model.SecCode}");
 
+            ViewData["Message"] = stringBuilderErrors.ToString();
             return View("Create", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RecalculateComission(CreateDealsModel model)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST " +
+                $"RecalculateComission called with Pieces={model.Pieces} AvPrice={model.AvPrice}");
+            decimal decimalAvPrice = _helper.GetDecimalFromString(model.AvPrice);
+            decimal posValue = (decimalAvPrice * model.Pieces);
+
+            model.Comission = Math.Round((posValue/100000)*17, 2).ToString();
+
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST " +
+                $"RecalculateComission decimalAvPrice={decimalAvPrice}, posValue={posValue}, finally " +
+                $"model.Comission={model.Comission}");
+
+            return RedirectToAction("Create", model);
         }
 
         [HttpPost]
@@ -214,14 +288,14 @@ namespace InvestmentVisualisation.Controllers
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Create error " +
                     $"- Сделка по secCode Деньги не возможна!");
                 ViewData["Message"] = $"Сделка по тикеру Деньги не возможна!";
-                return View();
+                return View(model);
             }
             if (model.SecBoard == 1 && model.NKD is not null)
             {
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Create error " +
                     $"- NKD на акции недопустим");
                 ViewData["Message"] = $"NKD на акции недопустим";
-                return View();
+                return View(model);
             }
 
             model.AvPrice = model.AvPrice.Replace(',', '.');
@@ -241,7 +315,7 @@ namespace InvestmentVisualisation.Controllers
             if (!result.Equals("1"))
             {
                 ViewData["Message"] = $"Добавление не удалось. \r\n{result}";
-                return View();
+                return View(model);
             }
 
             return RedirectToAction("Deals");
@@ -308,32 +382,6 @@ namespace InvestmentVisualisation.Controllers
             }
 
             return RedirectToAction("Deals");
-        }
-
-
-
-        private string CleanString(string str)
-        {
-            // если содержит точку - старый формат. //если нет - менять , на .
-            if (str.Contains('.') && str.Contains(','))
-            {
-                str = str.Replace(",", "");
-            }
-            if (str.Contains(','))
-            {
-                str = str.Replace(",", ".");
-            }
-
-
-            if (str.EndsWith('.')) // убрать последнюю точку, чтобы RegEx не ругался
-            {
-                str = str.Substring(0, str.Length - 1);
-            }
-            str = str.Replace(",", "");
-
-            str = str.Replace(".", ",");
-
-            return str;
         }
     }
 }

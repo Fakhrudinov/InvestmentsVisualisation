@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBaseRepository", "DataB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAbstraction", "DataAbstraction\DataAbstraction.csproj", "{6B84C7F5-F0D2-40DF-9206-961F90C8717C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpDataRepository", "HttpDataRepository\HttpDataRepository.csproj", "{FAF0414C-6BC2-4AC3-B15D-DCFE9962D746}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpDataRepository", "HttpDataRepository\HttpDataRepository.csproj", "{FAF0414C-6BC2-4AC3-B15D-DCFE9962D746}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserInputService", "UserInputService\UserInputService.csproj", "{6D12667D-04A1-4752-8ECB-19FEE898FB6D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{FAF0414C-6BC2-4AC3-B15D-DCFE9962D746}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAF0414C-6BC2-4AC3-B15D-DCFE9962D746}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAF0414C-6BC2-4AC3-B15D-DCFE9962D746}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

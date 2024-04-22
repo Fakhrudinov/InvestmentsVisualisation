@@ -5,7 +5,6 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
-using System.Threading;
 
 namespace DataBaseRepository
 {
@@ -400,7 +399,7 @@ namespace DataBaseRepository
             string filePath = Path.Combine(
                 Directory.GetCurrentDirectory(), 
                 "SqlQueries", 
-                "SecCodes", 
+                "Incoming", 
                 "GetSecCodeFromLastRecord.sql");
             if (!File.Exists(filePath))
             {

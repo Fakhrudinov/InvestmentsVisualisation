@@ -2,8 +2,9 @@ using DataAbstraction.Interfaces;
 using DataAbstraction.Models.Settings;
 using DataBaseRepository;
 using HttpDataRepository;
+using UserInputService;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -28,7 +29,9 @@ builder.Services
 builder.Services
     .Configure<WebDiviPageSettings>("Vsdelke", builder.Configuration.GetSection("WebPageDividentInfo:VsdelkeDiviPageSettings"));
 
-var app = builder.Build();
+builder.Services.AddTransient<InputHelper>();
+
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

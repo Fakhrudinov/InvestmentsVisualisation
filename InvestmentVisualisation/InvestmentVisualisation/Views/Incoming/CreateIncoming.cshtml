@@ -64,6 +64,10 @@
                     <label asp-for="Comission" class="control-label"></label>
                     <input asp-for="Comission" class="form-control" />
                     <span asp-validation-for="Comission" class="text-danger"></span>
+                    @if (ViewData["ComissionMessage"] != null)
+                    {
+                        <span style="color:blue"> @ViewData["ComissionMessage"] </span>
+                    }
                 </div>
 
                 <br />

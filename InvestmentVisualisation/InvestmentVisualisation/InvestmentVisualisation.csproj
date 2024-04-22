@@ -19,6 +19,7 @@
     <ProjectReference Include="..\DataAbstraction\DataAbstraction.csproj" />
     <ProjectReference Include="..\DataBaseRepository\DataBaseRepository.csproj" />
     <ProjectReference Include="..\HttpDataRepository\HttpDataRepository.csproj" />
+    <ProjectReference Include="..\UserInputService\UserInputService.csproj" />
   </ItemGroup>
 
   <ItemGroup>
