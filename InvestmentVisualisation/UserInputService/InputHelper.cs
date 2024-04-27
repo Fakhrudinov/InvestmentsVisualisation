@@ -70,6 +70,14 @@ namespace UserInputService
 
             if (dotIndex > 0 && commaIndex  > 0)
             {
+                // is delimiter is last symbol - add zero after
+                int lenght = text.Length - 1;
+                if (dotIndex == lenght || commaIndex == lenght)
+                {
+                    text = text + "00";
+                }
+
+
                 // if . is correct
                 if (dotIndex > commaIndex)
                 {
