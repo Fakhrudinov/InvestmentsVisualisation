@@ -84,12 +84,14 @@
     <br />
     <h5>Заливка тестового контура данными прода</h5>
     <p>TRUNCATE TABLE money_test.deals;
-    <br />INSERT INTO money_test.deals SELECT * FROM money.deals ;
-    <br />TRUNCATE TABLE money_test.incoming;
-    <br />INSERT INTO money_test.incoming SELECT * FROM money.incoming;
+        <br />INSERT INTO money_test.deals SELECT * FROM money.deals ;
+        <br />TRUNCATE TABLE money_test.incoming;
+        <br />INSERT INTO money_test.incoming SELECT * FROM money.incoming;
+        <br />TRUNCATE TABLE money_test.incoming;
+        <br />INSERT INTO money_test.incoming SELECT * FROM money.incoming;
+        <br />TRUNCATE TABLE money_test.money_by_month;
+        <br />INSERT INTO money_test.money_by_month  SELECT * FROM money.money_by_month;
     </p>
-
-
 
     <br />
     <br />
