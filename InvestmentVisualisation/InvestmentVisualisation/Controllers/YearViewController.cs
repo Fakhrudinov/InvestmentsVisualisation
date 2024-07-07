@@ -105,6 +105,13 @@ namespace InvestmentVisualisation.Controllers
             await _repository.DropTableLast12MonthView(cancellationToken);
 
 
+            if (last12MonthView is not null && last12MonthView.Count > 0 && last12MonthView[0].Summ > 0)
+            {
+                // fill summ/12 = monthly average dividents
+                ViewBag.MonthAverage = Math.Round((decimal)last12MonthView[0].Summ/12, 0);
+            }
+
+
             return View(last12MonthView);
         }        
     }

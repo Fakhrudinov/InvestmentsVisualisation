@@ -2,7 +2,14 @@
 @model IEnumerable<DataAbstraction.Models.YearView.YearViewModel>
 
 <div class="container" style="margin-left:17%;">
-    <h3>Сводная таблица дивидентов за последние 12 месяцев</h3>
+    @if (ViewBag.MonthAverage is not null)
+    {
+        <h3>Сводная таблица дивидентов за последние 12 месяцев, @ViewBag.MonthAverage руб в среднем в месяц</h3>
+    }
+    else
+    {
+        <h3>Сводная таблица дивидентов за последние 12 месяцев</h3>
+    }
     <table class="table table-hover table-sm">
         <thead>
             <tr>
@@ -11,18 +18,22 @@
                 </th>
                 @if (DateTime.Now.Month < 12)
                 {
-                    <th colspan="@(12 - DateTime.Now.Month)" style="background-color:lightcyan; text-align:center;
-                                                            border-top: 1px solid lightgray;border-bottom: 1px solid lightgray; border-left: 1px solid lightgray;">
+                    <th colspan="@(12 - DateTime.Now.Month)" style="background-color:lightcyan; 
+                                                                    text-align:center;
+                                                                    border-top: 1px solid lightgray;
+                                                                    border-bottom: 1px solid lightgray; 
+                                                                    border-left: 1px solid lightgray;">
                         @DateTime.Now.AddMonths(- DateTime.Now.Month).Year
                     </th>
                 }
                 <th colspan="@DateTime.Now.Month" 
-                    style="background-color:aquamarine; border: 1px solid lightgray; text-align:center;">
+                    style="background-color:aquamarine; 
+                            border: 1px solid lightgray; 
+                            text-align:center;">
                     @DateTime.Now.Year
                 </th>
-                <th colspan="2">
-                    
-                </th>
+                <td colspan="2">
+                </td>
             </tr>
             <tr>
                 <th>
