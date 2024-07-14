@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.BaseModels;
 using Newtonsoft.Json;
+using DataAbstraction.Models.WishList;
+using UserInputService;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -17,6 +19,7 @@ namespace InvestmentVisualisation.Controllers
         private int _minimumYear;
         private IWebDividents _webRepository;
         private IMySqlWishListRepository _wishListRepository;
+        private InputHelper _helper;
 
         private enum WebSites
         {
@@ -30,7 +33,8 @@ namespace InvestmentVisualisation.Controllers
             IMySqlSecVolumeRepository repository,
             IOptions<PaginationSettings> paginationSettings,
             IWebDividents webRepository,
-            IMySqlWishListRepository wishListRepository)
+            IMySqlWishListRepository wishListRepository,
+            InputHelper helper)
         {
             _logger = logger;
             _repository = repository;
@@ -38,6 +42,7 @@ namespace InvestmentVisualisation.Controllers
             _minimumYear = paginationSettings.Value.SecVolumeMinimumYear;
             _webRepository = webRepository;
             _wishListRepository = wishListRepository;
+            _helper = helper;
         }
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, int year = 0)
@@ -118,7 +123,8 @@ namespace InvestmentVisualisation.Controllers
             CalculateChangesPercentsForList(model);
 
             // get wish List<WishListItemModel> 
-            ViewBag.WishList = await _wishListRepository.GetFullWishList(cancellationToken);
+            var wishValues = await _wishListRepository.GetFullWishList(cancellationToken);
+            ViewBag.WishList = wishValues;
 
             // get web site data
             DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod(cancellationToken);
@@ -167,7 +173,7 @@ namespace InvestmentVisualisation.Controllers
                 model.AddRange(temporary);
             }
 
-            CalculateColorDependingByDivsValues(model);
+            CalculateColorDependingByDivsValues(model, wishValues);
 
             return View(model);
         }
@@ -260,69 +266,207 @@ namespace InvestmentVisualisation.Controllers
             return View();
 		}
 
-        private void CalculateColorDependingByDivsValues(List<SecVolumeLast2YearsDynamicModel> model)
+        private void CalculateColorDependingByDivsValues(
+            List<SecVolumeLast2YearsDynamicModel> model,
+            List<WishListItemModel> wishValues)
         {
-            // color grade from high to low
-            //  darkgreen
-            //  green
-            //  mediumseagreen
-            //  lightgreen
+            /// coloring plan
+            /// get wish value as is
+            ///     5 -------max
+            ///     min value = -5 ------------ min
+            /// get past value
+            ///     from 0 to 4 = 0
+            ///     from 5 to 6 = 1
+            ///     from 6 to 8 = 2
+            ///     from 9 = 3 --------max
+            /// get future value from Dohod, 
+            ///     from 0 to 3 = 0
+            ///         4 = 1
+            ///         5=2
+            ///         6=3
+            ///         7=4
+            ///         8=5
+            ///         9=6
+            ///         10+ = 7 -------max
+            /// summ: 5 + 3 + 7 = 15 ---------total max
+            ///     if wish value below zero = use only wish!
+            /// min value = -5 ---------------total min
 
-            foreach (var item in model)
+            foreach (SecVolumeLast2YearsDynamicModel item in model)
             {
-                int past = 0;
-                if (item.SmartLabDividents is not null && 
-                    Int16.TryParse(item.SmartLabDividents.Split(',')[0], out short intValue))
+                int wishValue = 0;
+
+                if (wishValues is not null)
                 {
-                    past++;
-                    if (intValue > 7)
+                    WishListItemModel? wish = wishValues.Find(x => x.SecCode.Equals(item.SecCode));
+                    if (wish is not null)
                     {
-                        past = past + 10;
-                    }
-                    else
-                    {
-                        past = intValue;
+                        wishValue = wish.Level;
                     }
                 }
-
-                int mask = 0;
-
-                int? futVsdelke = GetIntOrNullFromString(item.VsdelkeDividents, ref mask);
-                int? futDohod = GetIntOrNullFromString(item.DohodDividents, ref mask);
-
-                if (past > 10 && mask > 20)
+                if (wishValue < 0)
                 {
-                    item.LineColor = "darkgreen; color: white";
+                    item.LineColor = GetColorByValue(wishValue);
+                    continue;
                 }
-                else if (past + futVsdelke + futDohod >= 20)
+
+                //int summ = 0;
+                int pastValue = 0;
+
+                if (item.SmartLabDividents is not null)
                 {
-                    item.LineColor = "green; color: white";
+                    if (_helper.IsInt32Correct(item.SmartLabDividents))
+                    {
+                        /// get past value
+                        ///     from 0 to 4 = 0
+                        ///     from 5 to 6 = 1
+                        ///     from 6 to 8 = 2
+                        ///     from 9 = 3 --------max
+
+                        int rawPastValue = _helper.GetInt32FromString(item.SmartLabDividents);
+                        if (rawPastValue > 0) // -1 returned in case of parsing error. And zero we dont calculate
+                        {
+                            switch (rawPastValue)
+                            {
+                                case >= 9:
+                                    pastValue = 3;
+                                    break;
+                                case >=6:
+                                    pastValue = 2;
+                                    break;
+                                case >=5:
+                                    pastValue = 1;
+                                    break;
+                                    //case >=1:
+                                    //    pastValue = 0;
+                                    //    break;
+                            }
+                        }
+                    }
                 }
-                else if (past + futVsdelke + futDohod >= 19)
+
+                int futureValue = 0;
+                if (item.DohodDividents is not null)
                 {
-                    item.LineColor = "lightgreen; color: black";
+                    /// get future value from Dohod, 
+                    ///     from 0 to 3 = 0
+                    ///         4 = 1
+                    ///         5=2
+                    ///         6=3
+                    ///         7=4
+                    ///         8=5
+                    ///         9=6
+                    ///         10+ = 7 -------max
+                    if (_helper.IsInt32Correct(item.DohodDividents))
+                    {
+                        int rawfutureValue = _helper.GetInt32FromString(item.DohodDividents);
+                        if (rawfutureValue > 0) // -1 returned in case of parsing error. And zero we dont calculate
+                        {
+                            switch (rawfutureValue)
+                            {
+                                case >= 10:
+                                    futureValue = 7;
+                                    break;
+                                case >=9:
+                                    futureValue = 6;
+                                    break;
+                                case >=8:
+                                    futureValue = 5;
+                                    break;
+                                case >=7:
+                                    futureValue = 4;
+                                    break;
+                                case >=6:
+                                    futureValue = 3;
+                                    break;
+                                case >=5:
+                                    futureValue = 2;
+                                    break;
+                                case >=4:
+                                    futureValue = 1;
+                                    break;
+                            }
+                        }
+                    }
                 }
+
+                item.LineColor = GetColorByValue(wishValue + pastValue + futureValue);
             }
         }
 
-        private int? GetIntOrNullFromString(string? stringValue, ref int mask)
+        private string GetColorByValue(int wishValue)
         {
-            if (stringValue is null)
+            string color = "white; color:black;";
+
+            switch (wishValue)
             {
-                return null;
+                case -5:
+                    color = "#db0000;color:white;";
+                    break;
+                case -4:
+                    color = "#e23333;color:white;";
+                    break;
+                case -3:
+                    color = "#e96666;color:white;";
+                    break;
+                case -2:
+                    color = "#f19999; color:black;";
+                    break;
+                case -1:
+                    color = "#f8cccc; color:black;";
+                    break;
+
+                case 0:
+                    break;
+
+                case 1:
+                    color = "#eef4ee; color:black;";
+                    break;
+                case 2:
+                    color = "#dde9de; color:black;";
+                    break;
+                case 3:
+                    color = "#ccddcd; color:black;";
+                    break;
+                case 4:
+                    color = "#bbd2bd; color:black;";
+                    break;
+                case 5:
+                    color = "#aac7ac; color:black;";
+                    break;
+                case 6:
+                    color = "#99bc9b; color:black;";
+                    break;
+                case 7:
+                    color = "#88b18b; color:black;";
+                    break;
+                case 8:
+                    color = "#77a57a; color:white;";
+                    break;
+                case 9:
+                    color = "#669a6a; color:white;";
+                    break;
+                case 10:
+                    color = "#558f59; color:white;";
+                    break;
+                case 11:
+                    color = "#448448; color:white;";
+                    break;
+                case 12:
+                    color = "#337938; color:white;";
+                    break;
+                case 13:
+                    color = "#226d27; color:white;";
+                    break;
+                case 14:
+                    color = "#116217; color:white;";
+                    break;
+                case >= 15:
+                    color = "#005706; color:white;";
+                    break;
             }
 
-            if (Int16.TryParse(stringValue.Split(',')[0], out short intValue))
-            {
-                mask++;
-
-                if (intValue > 7)
-                {
-                    mask = mask + 10;
-                }
-            }
-
-            return intValue;
+            return color;
         }
 
         private void RemoveEmptyPositionWithLowDivs(List<SecVolumeLast2YearsDynamicModel> model)

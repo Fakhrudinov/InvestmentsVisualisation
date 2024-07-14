@@ -162,12 +162,21 @@ namespace UserInputService
             //31 000,00
             //31,000.00
             string textCleaned = CleanPossibleNumber(text);
-            
-            // now only 31000 or 31000.11 possible.
-            string textCleanedWitoutTail = textCleaned.Replace(".00", "");
+
+            int dotIndex = text.IndexOf('.');
+            int commaIndex = text.IndexOf(",");
+
+            if (dotIndex > 0)
+            {
+                textCleaned = textCleaned.Substring(0, dotIndex);
+            }
+            if (commaIndex > 0)
+            {
+                textCleaned = textCleaned.Substring(0, commaIndex);
+            }
 
             // now only 31000 possible. Or some shit...
-            if (Int32.TryParse(textCleanedWitoutTail, out int parsedWithDot))
+            if (Int32.TryParse(textCleaned, out int parsedWithDot))
             {
                 return true;
             }
@@ -181,12 +190,21 @@ namespace UserInputService
         public int GetInt32FromString(string text)
         {
             string textCleaned = CleanPossibleNumber(text);
+            
+            int dotIndex = text.IndexOf('.');
+            int commaIndex = text.IndexOf(",");
 
-            // now only 31000 or 31000.11 possible.
-            string textCleanedWitoutTail = textCleaned.Replace(".00", "");
+            if (dotIndex > 0)
+            {
+                textCleaned = textCleaned.Substring(0, dotIndex);
+            }
+            if (commaIndex > 0)
+            {
+                textCleaned = textCleaned.Substring(0, commaIndex);
+            }
 
             // now only 31000 possible. Or some shit...
-            if (Int32.TryParse(textCleanedWitoutTail, out int parsedWithDot))
+            if (Int32.TryParse(textCleaned, out int parsedWithDot))
             {
                 return parsedWithDot;
             }
