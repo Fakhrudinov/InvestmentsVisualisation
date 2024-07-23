@@ -26,6 +26,8 @@ namespace DataAbstraction.Models.SecVolume
 
         public string LineColor { get; set; } = "white; color: black";
 
+        public string? DSIIndex { get; set; }
+
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         [DataType(DataType.Date)]
         public DateTime NextDivDate { get; set; }

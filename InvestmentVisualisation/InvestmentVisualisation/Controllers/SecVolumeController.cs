@@ -128,10 +128,10 @@ namespace InvestmentVisualisation.Controllers
 
             // get web site data
             DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod(cancellationToken);
-            if (dohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
+            if (dohodDivs is not null && dohodDivs.DohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
             {
                 SetDividentsToModel(dohodDivs.DohodDivs, model, WebSites.Dohod);
-                SetDividentDatesToModel(dohodDivs.DohodDates, model);
+                SetDividentDatesAndDSIIndexToModel(dohodDivs.DohodDates, model);
                 ViewBag.DohodDivs = true;
             }
 
@@ -511,7 +511,7 @@ namespace InvestmentVisualisation.Controllers
             return true;
         }
 
-        private void SetDividentDatesToModel(
+        private void SetDividentDatesAndDSIIndexToModel(
             List<SecCodeAndTimeToCutOffModel>? dohodDates, 
             List<SecVolumeLast2YearsDynamicModel> model)
         {
@@ -526,6 +526,7 @@ namespace InvestmentVisualisation.Controllers
                 if (index >= 0)
                 {
                     model[index].NextDivDate = smDivDate.Date;
+                    model[index].DSIIndex = smDivDate.DSIIndex;
                 }
                 else
                 {
@@ -535,6 +536,7 @@ namespace InvestmentVisualisation.Controllers
                         SecCode = smDivDate.SecCode 
                     };
                     newModel.NextDivDate = smDivDate.Date;
+                    newModel.DSIIndex = smDivDate.DSIIndex;
 
                     model.Add(newModel);
                 }

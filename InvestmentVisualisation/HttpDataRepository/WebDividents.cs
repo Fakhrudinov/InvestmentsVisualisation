@@ -103,6 +103,9 @@ namespace HttpDataRepository
                     continue;
                 }
 
+                // get DSI Index - TD 12
+                newDiv.DSIIndex = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithDiscont + 5]);
+
                 // get divident value
                 string div = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithDiscont].Replace("\"", "'"));
                 div = div.Replace(".", ",");

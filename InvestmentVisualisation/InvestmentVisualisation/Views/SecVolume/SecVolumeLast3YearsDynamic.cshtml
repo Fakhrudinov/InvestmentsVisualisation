@@ -1,4 +1,5 @@
-﻿@using DataAbstraction.Models.WishList
+﻿@using DataAbstraction.Models.SecVolume
+@using DataAbstraction.Models.WishList
 @using System.Text
 @model IEnumerable<DataAbstraction.Models.SecVolume.SecVolumeLast2YearsDynamicModel>
 
@@ -61,7 +62,7 @@
                 }
                 @if (ViewBag.DohodDivs == true)
                 {
-                    <th colspan="2" class="border border-dark border-bottom-0" style="text-align:center;">
+                    <th colspan="3" class="border border-dark border-bottom-0" style="text-align:center;">
                         <a href="https://www.dohod.ru/ik/analytics/dividend" target="_blank">Dohod</a>
                     </th>
                 }
@@ -121,6 +122,9 @@
                     <th style="text-align:right;">
                         future
                     </th>
+                    <th style="text-align:right;">
+                        DSI
+                    </th>
                     <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
                         @*Даты*@
 
@@ -144,7 +148,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model) 
+            @foreach (SecVolumeLast2YearsDynamicModel item in Model)
             {
                 <tr>
                     <td style="border-left-color:black; border-left-width: 1px;">
@@ -323,6 +327,20 @@
                                     </div>
                                 }
                             </a>
+                        </td>
+                        <td style="text-align:right;">
+                            @if (item.DSIIndex is not null)
+                            {
+                                <div style="font-weight:bold">
+                                    @Html.DisplayFor(modelItem => item.DSIIndex)
+                                </div>
+                            }
+                            else
+                            {
+                                <div style="">
+                                    &nbsp;
+                                </div>
+                            }
                         </td>
                         <td style="border-right-color:black; border-right-width: 1px;text-align:right;">
                             @if (item.NextDivDate > DateTime.MinValue)
