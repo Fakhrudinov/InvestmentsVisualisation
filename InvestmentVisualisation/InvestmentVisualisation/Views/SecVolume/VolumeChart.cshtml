@@ -12,50 +12,66 @@
 	<script>
         window.onload = function () 
         {
-            var chart = new CanvasJS.Chart("chartContainer", 
-            {
-                height: @hh,
-                animationEnabled: true,
-                axisX:
+            var chart = new CanvasJS.Chart("chartContainer",
                 {
-                    labelFontSize: 15,
-                    interval: 1
-                },
-                axisY:
-                {
-                    //title: "bottom title",
-                    interval: 1,
-                    suffix: "%",
-                    minimum: 0,
-                    maximum: @maxChart,
-                    labelFontSize: 14,
-                    gridColor: "rgba(1,77,101,.2)"
-                },
-                axisY2: 
-                {
-                    //title: "Top title",
-                    interval: 1,
-                    suffix: "%",
-                    minimum: 0,
-                    maximum: @maxChart,
-                    labelFontSize: 14,
-                    gridColor: "rgba(1,77,101,.2)"
-                },
-                data: 
-                [
+                    height: @hh,
+                    animationEnabled: true,
+                    axisX:
                     {
-                        axisYType: "secondary",
-                        type: "bar",
+                        labelFontSize: 15,
+                        interval: 1
                     },
+                    axisY:
                     {
-                        type: "bar",
-                        axisYIndex: 0,
-                        color: "#014D65",
-                        dataPoints: @Html.Raw(ViewBag.ChartData),
-                        toolTipContent: "{label}: {y}%"
-                    }
-                ]
-            });
+                        //title: "bottom title",
+                        interval: 1,
+                        suffix: "%",
+                        minimum: 0,
+                        maximum: @maxChart,
+                        labelFontSize: 14,
+                        gridColor: "rgba(1,77,101,.2)"
+                    },
+                    axisY2:
+                    {
+                        //title: "Top title",
+                        interval: 1,
+                        suffix: "%",
+                        minimum: 0,
+                        maximum: @maxChart,
+                        labelFontSize: 14,
+                        gridColor: "rgba(1,77,101,.2)"
+                    },
+                    data:
+                        [
+                            {
+                                axisYType: "secondary",
+                                type: "stackedBar",
+                            },
+                            {
+                                // data set 1: main data
+                                type: "stackedBar",
+                                axisYIndex: 0,
+                                color: "#014D65",
+                                dataPoints: @Html.Raw(ViewBag.ChartData),
+                                toolTipContent: "{label}: {y}%"
+                            },
+                            {
+                                // data set 2: additional data like  how many need to bay
+                                type: "stackedBar",
+                                axisYIndex: 0,
+                                color: "#FF4DFF",
+                                dataPoints: @Html.Raw(ViewBag.ChartDataAddition),
+                                toolTipContent: "{label}"
+                            },
+                            {
+                                // data set 3: naming at axis
+                                type: "stackedBar",
+                                axisYIndex: 0,
+                                //color: "#004DFF",
+                                dataPoints: @Html.Raw(ViewBag.ChartDataZero),
+                            }
+                        ]
+                });
             chart.render();
 		}
 	</script>

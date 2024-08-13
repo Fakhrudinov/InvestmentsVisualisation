@@ -3,6 +3,7 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.WishList;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -10,11 +11,16 @@ namespace InvestmentVisualisation.Controllers
     {
         private readonly ILogger<WishListController> _logger;
         private IMySqlWishListRepository _repository;
+        private WishListSettings _wishListSettings;
 
-        public WishListController(ILogger<WishListController> logger, IMySqlWishListRepository repository)
+        public WishListController(
+            ILogger<WishListController> logger, 
+            IMySqlWishListRepository repository,
+            IOptions<WishListSettings> wishListSettings)
         {
             _logger = logger;
             _repository = repository;
+            _wishListSettings=wishListSettings.Value;
         }
 
         public async Task<IActionResult> WishList(CancellationToken cancellationToken)
@@ -34,6 +40,7 @@ namespace InvestmentVisualisation.Controllers
                 }
             }
             ViewBag.WishList = secCodesList;
+            ViewBag.WishLevels = _wishListSettings.LevelsWeight;
 
             return View(result);
         }

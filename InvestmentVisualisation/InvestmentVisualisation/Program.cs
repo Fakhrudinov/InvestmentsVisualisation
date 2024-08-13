@@ -1,5 +1,6 @@
 using DataAbstraction.Interfaces;
 using DataAbstraction.Models.Settings;
+using DataAbstraction.Models.WishList;
 using DataBaseRepository;
 using HttpDataRepository;
 using UserInputService;
@@ -21,6 +22,7 @@ builder.Services.AddTransient<IWebDividents, WebDividents>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
+builder.Services.Configure<WishListSettings>(builder.Configuration.GetSection("WishListSettings"));
 
 builder.Services
     .Configure<WebDiviPageSettings>("SmLab", builder.Configuration.GetSection("WebPageDividentInfo:SmartLabDiviPageSettings"));
@@ -51,10 +53,10 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}");
+    //pattern: "{controller=Home}/{action=Index}");
 //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
 //pattern: "{controller=Incoming}/{action=CreateIncoming}");
-//pattern: "{controller=SecVolume}/{action=SecVolumeLast3YearsDynamic}");
+    pattern: "{controller=SecVolume}/{action=VolumeChart}");
 
 app.Run();
 

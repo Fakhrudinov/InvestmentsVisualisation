@@ -1,14 +1,16 @@
 ﻿@using DataAbstraction.Models
 @using DataAbstraction.Models.BaseModels
 @using DataAbstraction.Models.WishList
+@using System.Text
 @model IEnumerable<WishListItemModel>
 @{
     List<StaticSecCode> secCodesList = ViewBag.WishList;
+    int[]? levelsWeight = ViewBag.WishLevels;
 }
 
 <div class="container">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-6">
             <h3>Wish list</h3>
             <p>
                 Индекс IRDIV от Доход:
@@ -29,7 +31,32 @@
                 </a>
             </p>
         </div>
-        <div class="col">
+        <div class="col-md-2" style="">
+            <div>
+                @if (levelsWeight is not null && levelsWeight.Length > 0)
+                {
+                    <h5>Вес уровней</h5>
+                    for (int w = levelsWeight.Length -1; w > 0; w--)
+                    {
+                        StringBuilder level = new StringBuilder(5);
+                        @for (int i = 0; i < Math.Abs(w); i++)
+                        {
+                            level.Append("▉");
+                        }
+
+                        <div class="row" style="padding:0px; margin:0px;">
+                            <div class="col-6" style="margin:0px;padding:0px; color:darkgreen;">
+                                @level
+                            </div>
+                            <div class="col-6" style="text-align:left;">
+                                @levelsWeight[w]
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="col-4">
             <h5 style="text-align:center">Добавить в Wish list</h5>
 
             <form method="post" action="/WishList/CreateNewWish">
@@ -51,7 +78,7 @@
                         <input type="submit" class="btn btn-primary btn-sm" style="width: 100%;" value="Добавить" />
                     </div>
                 </div>
-                <textarea class="form-control" name="description" rows="3" 
+                <textarea class="form-control" name="description" rows="4" 
                           placeholder="Введите описание, max lenght 300"></textarea>
             </form>
         </div>

@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using DataAbstraction.Models.WishList;
 using UserInputService;
 
+
 namespace InvestmentVisualisation.Controllers
 {
     public class SecVolumeController : Controller
@@ -20,6 +21,7 @@ namespace InvestmentVisualisation.Controllers
         private IWebDividents _webRepository;
         private IMySqlWishListRepository _wishListRepository;
         private InputHelper _helper;
+        private WishListSettings _wishListSettings;
 
         private enum WebSites
         {
@@ -34,7 +36,8 @@ namespace InvestmentVisualisation.Controllers
             IOptions<PaginationSettings> paginationSettings,
             IWebDividents webRepository,
             IMySqlWishListRepository wishListRepository,
-            InputHelper helper)
+            InputHelper helper,
+            IOptions<WishListSettings> wishListSettings)
         {
             _logger = logger;
             _repository = repository;
@@ -43,6 +46,7 @@ namespace InvestmentVisualisation.Controllers
             _webRepository = webRepository;
             _wishListRepository = wishListRepository;
             _helper = helper;
+            _wishListSettings=wishListSettings.Value;
         }
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, int year = 0)
@@ -123,7 +127,7 @@ namespace InvestmentVisualisation.Controllers
             CalculateChangesPercentsForList(model);
 
             // get wish List<WishListItemModel> 
-            var wishValues = await _wishListRepository.GetFullWishList(cancellationToken);
+            List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(cancellationToken);
             ViewBag.WishList = wishValues;
 
             // get web site data
@@ -259,8 +263,121 @@ namespace InvestmentVisualisation.Controllers
 			// sort
 			chartItems = chartItems.OrderBy( chartItem => chartItem.Y ).ToList();
 
-			ViewBag.ChartData = JsonConvert.SerializeObject(chartItems);
-			ViewBag.ChartItemsCount = chartItems.Count;
+            // add data list for axis labels on chart
+            List<ChartItemModel> chartItemsZero = new List<ChartItemModel> ();
+            foreach (ChartItemModel chartItem in chartItems)
+            {
+                ChartItemModel newZeroed = new ChartItemModel(chartItem.Label, 0);
+                chartItemsZero.Add (newZeroed);
+            }
+
+
+            // add data list for additional info - which need to bye
+            /// get wish list
+            ///     clean list from zero and negative
+            /// 
+            /// clean chartItemsRaw from items not present in wish
+            /// 
+            /// fill new chartItemsAdditional from sorted chartItems with zero value
+            ///     if item EQUAL item in chartItemsRaw - just add 
+            /// 
+            // get wish list
+            //     clean list from zero and negative
+            List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(cancellationToken);
+            for (int i = wishValues.Count - 1; i >= 0; i--)
+            {
+                if (wishValues[i].Level <= 0)
+                {
+                    wishValues.RemoveAt(i);
+                }
+            }
+            // clean chartItemsRaw from items not present in wish
+            for (int i = chartItemsRaw.Count - 1; i >= 0; i--)
+            {
+                // if not in wishValues = delete
+                if (! wishValues.Any(wish => wish.SecCode.Equals(chartItemsRaw[i].Label)))
+                {
+                    chartItemsRaw.RemoveAt(i);
+                }
+            }
+            // fill new chartItemsAdditional from sorted chartItems with zero value
+            // 
+            List<ChartItemModel> chartItemsAdditional = new List<ChartItemModel>();
+            foreach (ChartItemModel chartItem in chartItems)
+            {
+                //// debug point
+                //if (chartItem.Label.Equals("PHOR"))
+                //{
+                //    Console.WriteLine();
+                //}
+
+
+                ChartItemModel newAdd = new ChartItemModel(chartItem.Label, 0);
+                
+                if (newAdd.Label.Length > 8 && newAdd.Label[4].Equals('+'))
+                {
+                    /// split
+                    /// 
+                    /// find wish index by first 
+                    /// get index value from settings by first 
+                    /// get index value from settings by second
+                    /// summ = first + second
+                    /// if (settings minus summ > 0)
+                    ///     Math.Round( (settings minus summ) / onePercent, 2)
+                    string[] splittedLabel = newAdd.Label.Split('+');
+                    if (splittedLabel.Length == 2)
+                    {
+                        WishListItemModel? wishIndexFirst = wishValues.Find(w => w.SecCode.Equals(splittedLabel[0]));
+                        WishListItemModel? wishIndexSecond = wishValues.Find(w => w.SecCode.Equals(splittedLabel[1]));
+                        ChartItemModel? rawIndexFirst = chartItemsRaw.Find(r => r.Label.Equals(splittedLabel[0]));
+                        ChartItemModel? rawIndexSecond = chartItemsRaw.Find(r => r.Label.Equals(splittedLabel[1]));
+
+                        if (wishIndexFirst is not null && rawIndexFirst is not null && rawIndexSecond is not null &&
+                            _wishListSettings is not null && _wishListSettings.LevelsWeight is not null)
+                        {
+                            int settingsValue = _wishListSettings.LevelsWeight[wishIndexFirst.Level];
+                            decimal differ = settingsValue - (rawIndexFirst.Y + rawIndexSecond.Y);
+                            if (differ > 0)
+                            {
+                                newAdd.Y = Math.Round(differ / onePercent, 2);
+                                newAdd.Label = $"{newAdd.Label} объем ({rawIndexFirst.Y}+{rawIndexSecond.Y}), " +
+                                    $"докупить {differ}. " +
+                                    $"{splittedLabel[0]}:{wishIndexFirst.Description}; " +
+                                    $"{splittedLabel[1]}:{wishIndexSecond.Description}";
+                            }
+                        }
+                    }
+                }            
+                else if (chartItemsRaw.Any(raw => raw.Label.Equals( newAdd.Label)))
+                {
+                    /// find wish index
+                    /// get index value from settings
+                    /// if (settings minus chartItemsRaw > 0)
+                    ///     Math.Round( (settings minus chartItemsRaw) / onePercent, 2)
+                    WishListItemModel? wishIndex = wishValues.Find(w => w.SecCode.Equals(chartItem.Label));
+                    ChartItemModel? rawIndex = chartItemsRaw.Find(r => r.Label.Equals(chartItem.Label));
+                    if (wishIndex is not null && rawIndex is not null && 
+                        _wishListSettings is not null && _wishListSettings.LevelsWeight is not null)
+                    {
+                        int settingsValue = _wishListSettings.LevelsWeight[wishIndex.Level];
+                        decimal differ = settingsValue - rawIndex.Y;
+                        if (differ > 0)
+                        {
+                            newAdd.Y = Math.Round(differ / onePercent, 2);
+                            newAdd.Label = $"{newAdd.Label} объем {rawIndex.Y}, докупить {differ}. {wishIndex.Description}";
+                        }
+                    }
+                }
+
+                chartItemsAdditional.Add(newAdd);
+            }
+
+
+            ViewBag.ChartData = JsonConvert.SerializeObject(chartItems);
+            ViewBag.ChartDataZero = JsonConvert.SerializeObject(chartItemsZero);
+            ViewBag.ChartDataAddition = JsonConvert.SerializeObject(chartItemsAdditional);
+
+            ViewBag.ChartItemsCount = chartItems.Count;
             ViewBag.MaximumOnChart = Decimal.ToInt16(chartItems[chartItems.Count - 1].Y) + 1;
 
             return View();
