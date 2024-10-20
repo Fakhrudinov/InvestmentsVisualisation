@@ -45,7 +45,8 @@
                 </th>
 
                 <th>
-                    @Html.DisplayNameFor(model => model.Deals.ElementAt(0).SecBoard)
+                    @* @Html.DisplayNameFor(model => model.Deals.ElementAt(0).SecBoard) *@
+                    Тип
                 </th>
 
                 <th style="text-align:right;">
@@ -53,6 +54,9 @@
                 </th>
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.Deals.ElementAt(0).Pieces)
+                </th>
+                <th style="text-align:right;">
+                    Объем
                 </th>
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.Deals.ElementAt(0).Comission)
@@ -64,7 +68,8 @@
             </tr>
         </thead>
         <tbody>
-    @foreach (var item in Model.Deals) {
+    @foreach (var item in Model.Deals) 
+    {
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Id)
@@ -73,7 +78,7 @@
                     @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.SecCode)
+                        <strong>@Html.DisplayFor(modelItem => item.SecCode)</strong>
                 </td>
                 <td>
                     @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
@@ -83,6 +88,18 @@
                 </td>
                 <td style="text-align:right;">
                     @Html.DisplayFor(modelItem => item.Pieces)
+                </td>
+                <td style="text-align:right;">
+                        @{
+                            decimal volume = 0;
+                            //decimal avPriceDecimal = 0;
+                            if (Decimal.TryParse(item.AvPrice, out decimal avPriceDecimal))
+                            {
+                                volume = Math.Round(item.Pieces * avPriceDecimal, 2);//Math.Round(comission, 2)
+                            }
+                        }
+
+                        <strong>@volume.ToString("# ##0.00")</strong>
                 </td>
                 <td style="text-align:right;">
                     @Html.DisplayFor(modelItem => item.Comission)

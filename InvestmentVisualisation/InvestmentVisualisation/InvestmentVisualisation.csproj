@@ -143,6 +143,9 @@
     <None Update="SqlQueries\WishList\GetFullWishList.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\WishList\GetFullWishListOrderByLevel.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\YearView\CallFillViewShowLast12Month.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -167,6 +170,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="wishsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\images\invest_cat.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

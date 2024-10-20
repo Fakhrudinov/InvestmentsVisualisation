@@ -41,7 +41,7 @@ namespace DataBaseRepository
             }
         }
 
-        public async Task<List<WishListItemModel>> GetFullWishList(CancellationToken cancellationToken)
+        public async Task<List<WishListItemModel>> GetFullWishList(CancellationToken cancellationToken, string sqlFileName)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                 $"GetFullWishList start");
@@ -51,8 +51,8 @@ namespace DataBaseRepository
             string filePath = Path.Combine(
                 Directory.GetCurrentDirectory(), 
                 "SqlQueries", 
-                "WishList", 
-                "GetFullWishList.sql");
+                "WishList",
+                sqlFileName);
             if (!File.Exists(filePath))
             {
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
@@ -101,7 +101,7 @@ namespace DataBaseRepository
                     catch (Exception ex)
                     {
                         _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
-                            $"GetFullWishList Exception!\r\n{ex.Message}");
+                            $"GetFullWishList {sqlFileName} Exception!\r\n{ex.Message}");
                     }
                     finally
                     {

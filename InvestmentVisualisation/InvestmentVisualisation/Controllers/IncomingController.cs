@@ -294,16 +294,16 @@ namespace InvestmentVisualisation.Controllers
             }
 
 
-            // try calculate comission
-            if (model.Category == 1 && !model.Value.Equals("0"))
-            {
-                decimal comission = _helper.GetDecimalFromString(model.Value) / 100;
-                decimal comissionRounded = Math.Round(comission, 2);
+            //// try calculate comission
+            //if (model.Category == 1 && !model.Value.Equals("0"))
+            //{
+            //    decimal comission = _helper.GetDecimalFromString(model.Value) / 100;
+            //    decimal comissionRounded = Math.Round(comission, 2);
 
-                model.Comission = comissionRounded.ToString();
+            //    model.Comission = comissionRounded.ToString();
 
-                ViewData["ComissionMessage"] = "Comission calculated manually! Recheck!";
-            }
+            //    ViewData["ComissionMessage"] = "Comission calculated manually! Recheck!";
+            //}
 
 
 

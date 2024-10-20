@@ -1,0 +1,1 @@
+﻿SELECT * FROM wish_list order by wish_level desc;

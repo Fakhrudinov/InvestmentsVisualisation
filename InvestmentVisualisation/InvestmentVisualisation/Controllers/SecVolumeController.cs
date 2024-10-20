@@ -21,7 +21,7 @@ namespace InvestmentVisualisation.Controllers
         private IWebDividents _webRepository;
         private IMySqlWishListRepository _wishListRepository;
         private InputHelper _helper;
-        private WishListSettings _wishListSettings;
+        private WishListSettings ? _wishListSettings;
 
         private enum WebSites
         {
@@ -36,8 +36,8 @@ namespace InvestmentVisualisation.Controllers
             IOptions<PaginationSettings> paginationSettings,
             IWebDividents webRepository,
             IMySqlWishListRepository wishListRepository,
-            InputHelper helper,
-            IOptions<WishListSettings> wishListSettings)
+            InputHelper helper
+            )
         {
             _logger = logger;
             _repository = repository;
@@ -46,7 +46,6 @@ namespace InvestmentVisualisation.Controllers
             _webRepository = webRepository;
             _wishListRepository = wishListRepository;
             _helper = helper;
-            _wishListSettings=wishListSettings.Value;
         }
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, int year = 0)
@@ -127,7 +126,9 @@ namespace InvestmentVisualisation.Controllers
             CalculateChangesPercentsForList(model);
 
             // get wish List<WishListItemModel> 
-            List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(cancellationToken);
+            List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(
+                cancellationToken,
+                "GetFullWishList.sql");
             ViewBag.WishList = wishValues;
 
             // get web site data
@@ -184,14 +185,20 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> VolumeChart(CancellationToken cancellationToken)
         {
-			// get dat from DB
-			// (summ all volumes) / 100 = 1%
-			// calculate % in each position
-			// calculate rows number - for chart height calculation
-			// summ AO and AP
-			// sort data
+            // get data from wishsettings.json 
+            // get data from DB
+            // (summ all volumes) / 100 = 1%
+            // calculate % in each position
+            // calculate rows number - for chart height calculation
+            // summ AO and AP
+            // sort data
 
-			List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData(cancellationToken);
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .AddJsonFile("wishsettings.json")
+                .Build();
+            _wishListSettings = configuration.GetSection("WishListSettings").Get<WishListSettings>();
+
+            List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData(cancellationToken);
 
             // calculate 1%
             decimal totalVolume = 0;
@@ -283,7 +290,9 @@ namespace InvestmentVisualisation.Controllers
             /// 
             // get wish list
             //     clean list from zero and negative
-            List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(cancellationToken);
+            List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(
+                cancellationToken, 
+                "GetFullWishList.sql");
             for (int i = wishValues.Count - 1; i >= 0; i--)
             {
                 if (wishValues[i].Level <= 0)

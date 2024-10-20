@@ -3,7 +3,6 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.WishList;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -11,23 +10,49 @@ namespace InvestmentVisualisation.Controllers
     {
         private readonly ILogger<WishListController> _logger;
         private IMySqlWishListRepository _repository;
-        private WishListSettings _wishListSettings;
+        private WishListSettings ? _wishListSettings;
 
         public WishListController(
             ILogger<WishListController> logger, 
-            IMySqlWishListRepository repository,
-            IOptions<WishListSettings> wishListSettings)
+            IMySqlWishListRepository repository
+            )
         {
             _logger = logger;
             _repository = repository;
-            _wishListSettings=wishListSettings.Value;
         }
 
-        public async Task<IActionResult> WishList(CancellationToken cancellationToken)
+        public async Task<IActionResult> WishList(
+            CancellationToken cancellationToken,
+            string sortMode = "bySecCode")
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController WishList called");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController WishList called" +
+                $"sortMode={sortMode}");
 
-            List<WishListItemModel> result = await _repository.GetFullWishList(cancellationToken);
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .AddJsonFile("wishsettings.json")
+                .Build();
+            _wishListSettings = configuration.GetSection("WishListSettings").Get<WishListSettings>();
+
+            string sqlFileSelector = "GetFullWishList.sql";
+            if (sortMode.Equals("byLevel"))
+            {
+                sqlFileSelector = "GetFullWishListOrderByLevel.sql";
+            }
+
+            List<WishListItemModel> result = await _repository.GetFullWishList(
+                cancellationToken,
+                sqlFileSelector);
+
+            ViewBag.WishList = GetSecCodesListWithoutExistingInWish(result);
+            if (_wishListSettings is not null && _wishListSettings.LevelsWeight is not null)
+            {
+                ViewBag.WishLevels = _wishListSettings.LevelsWeight;
+            }            
+            ViewBag.SortMode = sortMode;
+            return View(result);
+        }
+        private List<StaticSecCode> GetSecCodesListWithoutExistingInWish(List<WishListItemModel> result)
+        {
 
             //create seccodes list for new wishes - remove all already used seccodes
             List<StaticSecCode> secCodesList = new List<StaticSecCode>(StaticData.SecCodes
@@ -39,10 +64,8 @@ namespace InvestmentVisualisation.Controllers
                     secCodesList.RemoveAt(i);
                 }
             }
-            ViewBag.WishList = secCodesList;
-            ViewBag.WishLevels = _wishListSettings.LevelsWeight;
 
-            return View(result);
+            return secCodesList;
         }
 
         public async Task<IActionResult> Delete(CancellationToken cancellationToken, string seccode)

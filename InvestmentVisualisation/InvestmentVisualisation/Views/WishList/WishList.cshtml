@@ -91,7 +91,24 @@
                 <thead>
                     <tr>
                         <th>
-                            @Html.DisplayNameFor(model => model.SecCode)
+                            @* @Html.DisplayNameFor(model => model.SecCode) *@
+
+                            @*тикер*@
+                            @if (ViewBag.SortMode == "bySecCode")
+                            {
+                                <div>
+                                    SecCode<span style="color:red;">&#9660;</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div>
+                                    <a asp-controller="WishList" asp-action="WishList"
+                                       asp-route-sortMode="bySecCode" style="text-decoration: none">
+                                        SecCode<span style="color:red;">&#9661;</span>
+                                    </a>
+                                </div>
+                            }
                         </th>
                         <th>
                             @* @Html.DisplayNameFor(model => model.Description) *@
@@ -99,6 +116,22 @@
                         </th>
                         <th width="70">
                             @* @Html.DisplayNameFor(model => model.Level) *@
+                            @if (ViewBag.SortMode == "byLevel")
+                            {
+                                <div>
+                                    Level<span style="color:red;">&#9660;</span>
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div>
+                                    <a asp-controller="WishList" asp-action="WishList"
+                                       asp-route-sortMode="byLevel" style="text-decoration: none">
+                                        Level<span style="color:red;">&#9661;</span>
+                                    </a>
+                                </div>
+                            }
                         </th>
                         <th>
                             @* edit button *@
@@ -129,13 +162,13 @@
                             </td>
                             <td>
                                 <input type="submit" class="btn btn-outline-secondary btn-sm" 
-                                       style="width: 100%;" value="Edit Level" />
+                                       style="width: 100%;" value="Сохранить" />
                             </td>
                             </form>
 
                             <td>
                                 @Html.ActionLink(
-                                    "Delete", 
+                                    "Удалить", 
                                     "Delete", 
                                     new { seccode = item.SecCode },
                                     new 
