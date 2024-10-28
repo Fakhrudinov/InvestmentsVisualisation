@@ -75,6 +75,7 @@
                                class="form-control form-control-sm" name="level" min="-5" max="5" value="1">
                     </div>
                     <div class="col" style="text-align:right;">
+                        <input name="sortMode" value="@ViewBag.SortMode" hidden />
                         <input type="submit" class="btn btn-primary btn-sm" style="width: 100%;" value="Добавить" />
                     </div>
                 </div>
@@ -161,6 +162,7 @@
                                        name="level" min="-5" max="5" value="@item.Level">
                             </td>
                             <td>
+                                <input name="sortMode" value="@ViewBag.SortMode" hidden />
                                 <input type="submit" class="btn btn-outline-secondary btn-sm" 
                                        style="width: 100%;" value="Сохранить" />
                             </td>
@@ -169,8 +171,8 @@
                             <td>
                                 @Html.ActionLink(
                                     "Удалить", 
-                                    "Delete", 
-                                    new { seccode = item.SecCode },
+                                    "Delete",
+                                         new { seccode = item.SecCode, sortMode = ViewBag.SortMode },
                                     new 
                                     { 
                                         @class = "btn btn-outline-danger btn-sm", 

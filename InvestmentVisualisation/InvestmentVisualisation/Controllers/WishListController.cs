@@ -68,14 +68,17 @@ namespace InvestmentVisualisation.Controllers
             return secCodesList;
         }
 
-        public async Task<IActionResult> Delete(CancellationToken cancellationToken, string seccode)
+        public async Task<IActionResult> Delete(
+            CancellationToken cancellationToken, 
+            string seccode, 
+            string sortMode = "bySecCode")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController Delete " +
                 $"seccode={seccode} called");
 
             await _repository.DeleteWishBySecCode(cancellationToken, seccode);
 
-            return RedirectToAction("WishList");
+            return RedirectToAction("WishList", new { sortMode = sortMode });
         }
 
         [HttpPost]
@@ -83,14 +86,15 @@ namespace InvestmentVisualisation.Controllers
             CancellationToken cancellationToken, 
             string seccode, 
             int level,
-            string description)
+            string description,
+            string sortMode = "bySecCode")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController CreateNewWish " +
                 $"seccode={seccode} level={level} called");
 
             await _repository.AddNewWish(cancellationToken, seccode, level, description);
 
-            return RedirectToAction("WishList");
+            return RedirectToAction("WishList", new { sortMode = sortMode });
         }
 
         [HttpPost]
@@ -98,14 +102,15 @@ namespace InvestmentVisualisation.Controllers
             CancellationToken cancellationToken, 
             string seccode, 
             int level, 
-            string description)
+            string description, 
+            string sortMode = "bySecCode")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController EditWishLevel " +
                 $"seccode={seccode} level={level} called");
 
             await _repository.EditWishLevel(cancellationToken, seccode, level, description);
 
-            return RedirectToAction("WishList");
+            return RedirectToAction("WishList", new { sortMode = sortMode });
         }
     }
 }
