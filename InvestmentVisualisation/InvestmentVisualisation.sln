@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAbstraction", "DataAbst
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HttpDataRepository", "HttpDataRepository\HttpDataRepository.csproj", "{FAF0414C-6BC2-4AC3-B15D-DCFE9962D746}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserInputService", "UserInputService\UserInputService.csproj", "{6D12667D-04A1-4752-8ECB-19FEE898FB6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserInputService", "UserInputService\UserInputService.csproj", "{6D12667D-04A1-4752-8ECB-19FEE898FB6D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InMemoryRepository", "InMemoryRepository\InMemoryRepository.csproj", "{E89CFA25-AB4E-4BE9-B43A-8BA12D2ACBA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D12667D-04A1-4752-8ECB-19FEE898FB6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E89CFA25-AB4E-4BE9-B43A-8BA12D2ACBA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E89CFA25-AB4E-4BE9-B43A-8BA12D2ACBA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E89CFA25-AB4E-4BE9-B43A-8BA12D2ACBA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E89CFA25-AB4E-4BE9-B43A-8BA12D2ACBA8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

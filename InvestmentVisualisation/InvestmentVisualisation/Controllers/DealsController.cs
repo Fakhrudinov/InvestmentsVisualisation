@@ -16,19 +16,22 @@ namespace InvestmentVisualisation.Controllers
         private int _itemsAtPage;
         private IMySqlSecCodesRepository _secCodesRepo;
         private InputHelper _helper;
+        private IInMemoryRepository _inMemoryRepository;
 
         public DealsController(
             ILogger<DealsController> logger, 
             IMySqlDealsRepository repository, 
             IOptions<PaginationSettings> paginationSettings,
             IMySqlSecCodesRepository secCodesRepo,
-            InputHelper helper)
+            InputHelper helper,
+            IInMemoryRepository inMemoryRepository)
         {
             _logger = logger;
             _repository = repository;
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
             _secCodesRepo = secCodesRepo;
             _helper = helper;
+            _inMemoryRepository = inMemoryRepository;
         }
 
 
@@ -36,6 +39,8 @@ namespace InvestmentVisualisation.Controllers
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
                 $"Deals called, page={page} secCode={secCode}");
+
+            _inMemoryRepository.DeleteAllDeals();
 
             int count = 0;
             if (secCode.Length > 0)
@@ -109,151 +114,8 @@ namespace InvestmentVisualisation.Controllers
             //"7318187850\t34614262505\tПокупка ЦБ на бирже\t15.02.2023 10:40:43\tБанк СПб, ПАО ао03, 10300436B\tRU0009100945\t1.00\t50.00\t112.07\tRUB\t5,603.50\t0.00\tRUB\t0.00\t0.95\t0.00\t17.02.2023\t17.02.2023\tПАО Московская Биржа"
             //"Покупка ЦБ на бирже\t15.02.2023 10:53:59\tСелигдар, ПАО ао01, 1-01-32694-F\tRU000A0JPR50\t1.00\t100.00\t46.83\tRUB\t4,683.00\t0.00\tRUB\t0.00\t0.80\t0.0"
 
-            if (text is null || !text.Contains("\t"))
-            {
-                ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + text;
-                return View("Create", new CreateDealsModel());
-            }
+            CreateDealsModel? model = await TryParseStringToDeaL(text, cancellationToken);
 
-            string[]? textSplitted = _helper.ReturnSplittedArray(text);
-
-            if (textSplitted is null || textSplitted.Length < 13)
-            {
-                ViewData["Message"] = "Чтение строки не удалось, " +
-                    "получено менее 13 элементов (12х табуляций-разделителей) в строке: " + text;
-                return View("Create", new CreateDealsModel());
-            }
-
-            // поищем, где расположен текст "Покупка ЦБ на бирже" - от этой точки будем считывать столбцы
-            int startPointer = 0;
-            for (int i = 0; i < textSplitted.Length; i++)
-            {
-                if (textSplitted[i].Contains("Покупка ЦБ на бирже"))
-                {
-                    startPointer = i;
-                    break;
-                }
-
-                if (i > 5)
-                {
-                    ViewData["Message"] = "Не найдена точка входа 'Покупка ЦБ на бирже' в тексте: " + text;
-                    return View("Create", new CreateDealsModel());
-                }
-            }
-
-            // начинаем заполнение
-            CreateDealsModel model = new CreateDealsModel();
-            StringBuilder stringBuilderErrors = new StringBuilder();
-
-            // дата // 15.02.2023 10:40:43
-            if (_helper.IsDataFormatCorrect(textSplitted[startPointer + 1]))
-            {
-                model.Date = DateTime.Parse(textSplitted[startPointer + 1]);
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText set date={model.Date} from {textSplitted[startPointer + 1]}");
-            }
-            else
-            {
-                stringBuilderErrors.Append("Date not recognized! ");
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText Date not recognized from {textSplitted[startPointer + 1]}");
-
-                // just set yesterday
-                model.Date = DateTime.Now.AddDays(-1);
-            }
-
-            // количество // 60,000.00
-            if (_helper.IsInt32Correct(textSplitted[startPointer + 5]))
-            {
-                model.Pieces = _helper.GetInt32FromString(textSplitted[startPointer + 5]);
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText set Pieces={model.Pieces} from {textSplitted[startPointer + 5]}");
-            }
-            else
-            {
-                stringBuilderErrors.Append("Pieces not recognized! ");
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText Pieces not recognized from {textSplitted[startPointer + 5]}");
-            }
-
-            // цена // 4,583.5 или 0.08708
-            if (_helper.IsDecimal(textSplitted[startPointer + 6]))
-            {
-                model.AvPrice = _helper.CleanPossibleNumber(textSplitted[startPointer + 6]);
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText set AvPrice={model.AvPrice} from {textSplitted[startPointer + 6]}");
-            }
-            else
-            {
-                stringBuilderErrors.Append("AvPrice not recognized! ");
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText AvPrice not recognized from {textSplitted[startPointer + 6]}");
-            }
-
-            //комиссия = комиссия биржи + комиссия брокера 1.79	0.24
-            if (_helper.IsDecimal(textSplitted[startPointer + 11]) && _helper.IsDecimal(textSplitted[startPointer + 12]))
-            {
-                decimal moexComiss = _helper.GetDecimalFromString(textSplitted[startPointer + 11]);
-                decimal brokComiss = _helper.GetDecimalFromString(textSplitted[startPointer + 12]);
-                model.Comission = (moexComiss + brokComiss).ToString();
-
-                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText set Comission={model.Comission} from " +
-                    $"{textSplitted[startPointer + 11]}({moexComiss}) + {textSplitted[startPointer + 12]}({brokComiss})");
-            }
-            else
-            {
-                stringBuilderErrors.Append("Comission not recognized! ");
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText Comission not recognized from " +
-                    $"{textSplitted[startPointer + 11]} or {textSplitted[startPointer + 12]}");
-            }
-
-            // nkd // 289.20
-            string nkd = _helper.CleanPossibleNumber(textSplitted[startPointer + 9]);
-            if (!nkd.Equals("0.00") && !nkd.Equals("0,00") && !nkd.Equals("0") && !nkd.Equals("RUB"))
-            {
-                if (_helper.IsDecimal(textSplitted[startPointer + 9]))
-                {
-                    model.NKD = nkd;
-                    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                        $"CreateFromText set NKD={model.NKD} from {textSplitted[startPointer + 9]}");
-                }
-                else
-                {
-                    stringBuilderErrors.Append("NKD not recognized! ");
-                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                        $"CreateFromText NKD is zero value or not recognized from {textSplitted[startPointer + 9]}");
-                }
-            }
-
-
-            // тикер
-            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из репозитория={rawSecCode}");
-            //проверить, что нам прислали действительно seccode а не ошибку
-            if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                    $"CreateFromText ISIN not recognized from {textSplitted[startPointer + 3]}");
-
-                if (rawSecCode is null)
-                {
-                    rawSecCode = "ISIN not recognized! ";
-                }
-
-                //отправим найденное в ошибки
-                stringBuilderErrors.Append(rawSecCode);
-                model.SecCode = "0";//сбросим присвоенную ошибку
-            }
-            else
-            {
-                model.SecCode = rawSecCode;
-            }
-            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
-                $"CreateFromText set SecCode={model.SecCode}");
-
-            ViewData["Message"] = stringBuilderErrors.ToString();
             return View("Create", model);
         }
 
@@ -277,7 +139,7 @@ namespace InvestmentVisualisation.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CancellationToken cancellationToken, CreateDealsModel model)
+        public async Task<IActionResult> Create(CreateDealsModel model, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController POST Create called");
 
@@ -382,6 +244,392 @@ namespace InvestmentVisualisation.Controllers
             }
 
             return RedirectToAction("Deals");
+        }
+
+        public ActionResult CreateNewDeals(List<IndexedDealModel> ? model)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
+                $"CreateNewDeals called");
+
+            if (model is null)
+            {
+                model = _inMemoryRepository.GetAllDeals();
+            }
+            else
+            {
+                _inMemoryRepository.DeleteAllDeals();
+            }
+
+            return View(model);
+        }
+        public IActionResult DeleteDealById(string id, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                $"DeleteDealById id={id} called");
+
+            _inMemoryRepository.DeleteSingleDealByStringId(id);
+
+            List<IndexedDealModel> model = _inMemoryRepository.GetAllDeals();
+            return View("CreateNewDeals", model);
+        }
+
+        [HttpPost]
+        public IActionResult EditDealById(
+            Guid id,
+            DateTime date,
+            string? price,
+            int pieces,
+            string? nkd,
+            string? comission,
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                $"EditDealById called");
+            bool hasNoErrors = true;
+            // validation -----------------------
+            CreateDealsModel? checkExist = _inMemoryRepository.GetCreateDealsModelByGuid(id);
+            // is exist?
+            if (checkExist is null)
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "Что-то пошло не так! Сделки с таким Guid не найдено в IInMemoryRepository";
+            }
+            // nkd only on obligations!
+            if (hasNoErrors && checkExist is not null && checkExist.SecBoard != 2 && nkd is not null)
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "NKD допустим только на облигации!";
+            }
+            // pieces > 0
+            if (hasNoErrors && pieces <= 0)
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "Количество штук введено некорректно. Должно быть целое число больше нуля";
+            }
+            // avprice not null && > 0
+            if (hasNoErrors && price is null || (_helper.IsDecimal(price) && _helper.GetDecimalFromString(price) <= 0))
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "Цена введена некорректно. Должно быть задано, как число больше нуля";
+            }
+            // nkd null || not null>0
+            if (hasNoErrors && nkd is not null && (_helper.IsDecimal(nkd) && _helper.GetDecimalFromString(nkd) <= 0))
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "НКД должно быть или как NULL, или должно быть задано, как число больше нуля";
+            }
+            // comission null || not null>0
+            if (hasNoErrors && comission is not null && 
+                (_helper.IsDecimal(comission) && _helper.GetDecimalFromString(comission) <= 0))
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "Комиссия должна быть или как NULL, или должна быть задана, как число больше нуля";
+            }
+            // date not minValue
+            if (hasNoErrors && date.Equals(DateTime.MinValue) || date > DateTime.Now)
+            {
+                hasNoErrors = false;
+                ViewData["Message"] = "Дата введена некорректно. Дата должна быть задана и быть в прошлом.";
+            }
+
+            if (hasNoErrors)
+            {
+                IndexedDealModel editDeal = new IndexedDealModel
+                {
+                    Id = id,
+                    Date = date,
+                    Pieces = pieces,
+                    AvPrice = price,
+                    NKD = nkd,
+                    Comission = comission,
+
+                };
+                _inMemoryRepository.EditSingleDeal(editDeal);
+            }
+
+            List<IndexedDealModel> model = _inMemoryRepository.GetAllDeals();
+            return View("CreateNewDeals", model);
+        }
+
+        public async Task<IActionResult> AddSingleDealById(string id, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                $"AddSingleDealById id={id} called");
+
+            CreateDealsModel ? newDeal = _inMemoryRepository.GetCreateDealsModelById(id);
+            if (newDeal is not null)
+            {
+                return await Create(newDeal, cancellationToken);
+            }
+
+            ViewData["Message"] = "В репозитории 'IInMemoryRepository' не удалось найти запись с ID " + id;
+            List<IndexedDealModel> model = _inMemoryRepository.GetAllDeals();
+            return View("CreateNewDeals", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateDealsFromText(string excelData, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"CreateDealsFromText called, excelData={excelData}");
+
+            // new recognition, delete old dictionary
+            _inMemoryRepository.DeleteAllDeals();
+
+            if (excelData is not null && excelData.Contains("\r\n"))
+            {
+                string[] excelRawList = excelData.Split("\r\n");
+
+                foreach (string excelString in excelRawList)
+                {
+                    if (excelString.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    CreateDealsModel? newDeal = await TryParseStringToDeaL(excelString, cancellationToken);
+                    if (newDeal is not null)
+                    {
+                        _inMemoryRepository.AddNewDeal(newDeal);
+                    }
+                }
+
+                int dealsCount = _inMemoryRepository.ReturnDealsCount();
+                if (dealsCount > 0 && excelRawList.Length - 1 != dealsCount)
+                {
+                    ViewData["Message"] = $"Распознано {dealsCount} строк из вставленных {excelRawList.Length - 1} строк";
+                }
+                else
+                {
+                    // null error message here after all ------------------------------------------
+                }
+            }
+
+            List<IndexedDealModel> ? model = new List<IndexedDealModel>();
+            if (_inMemoryRepository.ReturnDealsCount() == 0)
+            {
+                model = null;
+                ViewData["Message"] = "Не удалось распознать ни одной сделки!";
+            }
+            else
+            {
+                model = _inMemoryRepository.GetAllDeals();
+
+                //logica = summ same SecCode with same AvPrice
+                for (int i = model.Count - 1; i >= 0; i--)
+                {
+                    foreach (IndexedDealModel dealTarget in model)
+                    {
+                        if (dealTarget.Id == model[i].Id)
+                        {
+                            break;
+                        }
+
+                        if (dealTarget.SecCode == model[i].SecCode && dealTarget.AvPrice == model[i].AvPrice)
+                        {
+                            _inMemoryRepository.CombineTwoDealsById(dealTarget.Id, model[i].Id);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            model = _inMemoryRepository.GetAllDeals();
+
+            return View("CreateNewDeals", model);
+        }
+
+
+        public async Task<IActionResult> AddAllDealsFromInMemoryRepository(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                $"AddAllDealsFromInMemoryRepository called");
+
+            List<IndexedDealModel> model = _inMemoryRepository.GetAllDeals();
+
+            if (model is not null && model.Count > 0)
+            {
+                string result = await _repository.CreateNewDealsFromList(cancellationToken, model);
+                if (!result.Equals(_inMemoryRepository.ReturnDealsCount().ToString()))
+                {
+                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                        $"AddAllDealsFromInMemoryRepository action CreateNewDealsFromList error: \r\n{result}");
+
+                    ViewData["Message"] = $"Добавление не удалось. \r\n{result}";
+                    return View("CreateNewDeals", model);
+                }
+
+                return RedirectToAction("Deals");
+            }
+
+            ViewData["Message"] = "Что-то не так. Репозиторий сделок пуст, нечего добавлять.";
+            return View("CreateNewDeals", model);
+        }
+
+        private async Task<CreateDealsModel?> TryParseStringToDeaL(string text, CancellationToken cancellationToken)
+        {
+            if (text is null || !text.Contains("\t"))
+            {
+                ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + 
+                    text;
+                //return View("Create", new CreateDealsModel());
+                return null;
+            }
+
+            string[]? textSplitted = _helper.ReturnSplittedArray(text);
+
+            if (textSplitted is null || textSplitted.Length < 13)
+            {
+                ViewData["Message"] = "Чтение строки не удалось, " +
+                    "получено менее 13 элементов (12х табуляций-разделителей) в строке: " + text;
+                //return View("Create", new CreateDealsModel());
+                return null;
+            }
+
+            // поищем, где расположен текст "Покупка ЦБ на бирже" - от этой точки будем считывать столбцы
+            int startPointer = 0;
+            for (int i = 0; i < textSplitted.Length; i++)
+            {
+                if (textSplitted[i].Contains("Покупка ЦБ на бирже"))
+                {
+                    startPointer = i;
+                    break;
+                }
+
+                if (i > 5)
+                {
+                    ViewData["Message"] = "Не найдена точка входа 'Покупка ЦБ на бирже' в тексте: " + text;
+                    //return View("Create", new CreateDealsModel());
+                    return null;
+                }
+            }
+
+            // начинаем заполнение
+            CreateDealsModel model = new CreateDealsModel();
+            StringBuilder stringBuilderErrors = new StringBuilder();
+
+            // дата // 15.02.2023 10:40:43
+            if (_helper.IsDataFormatCorrect(textSplitted[startPointer + 1]))
+            {
+                model.Date = DateTime.Parse(textSplitted[startPointer + 1]);
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL set date={model.Date} from {textSplitted[startPointer + 1]}");
+            }
+            else
+            {
+                stringBuilderErrors.Append("Date not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL Date not recognized from {textSplitted[startPointer + 1]}");
+
+                // just set yesterday
+                model.Date = DateTime.Now.AddDays(-1);
+            }
+
+            // количество // 60,000.00
+            if (_helper.IsInt32Correct(textSplitted[startPointer + 5]))
+            {
+                model.Pieces = _helper.GetInt32FromString(textSplitted[startPointer + 5]);
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL set Pieces={model.Pieces} from {textSplitted[startPointer + 5]}");
+            }
+            else
+            {
+                stringBuilderErrors.Append("Pieces not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL Pieces not recognized from {textSplitted[startPointer + 5]}");
+            }
+
+            // цена // 4,583.5 или 0.08708
+            if (_helper.IsDecimal(textSplitted[startPointer + 6]))
+            {
+                model.AvPrice = _helper.CleanPossibleNumber(textSplitted[startPointer + 6]);
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL set AvPrice={model.AvPrice} from {textSplitted[startPointer + 6]}");
+            }
+            else
+            {
+                stringBuilderErrors.Append("AvPrice not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL AvPrice not recognized from {textSplitted[startPointer + 6]}");
+            }
+
+            //комиссия = комиссия биржи + комиссия брокера 1.79	0.24
+            if (_helper.IsDecimal(textSplitted[startPointer + 11]) && _helper.IsDecimal(textSplitted[startPointer + 12]))
+            {
+                decimal moexComiss = _helper.GetDecimalFromString(textSplitted[startPointer + 11]);
+                decimal brokComiss = _helper.GetDecimalFromString(textSplitted[startPointer + 12]);
+                model.Comission = (moexComiss + brokComiss).ToString();
+
+                if (model.Comission.Equals("0"))
+                {
+                    model.Comission = null;
+                }
+
+                _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL set Comission={model.Comission} from " +
+                    $"{textSplitted[startPointer + 11]}({moexComiss}) + {textSplitted[startPointer + 12]}({brokComiss})");
+            }
+            else
+            {
+                stringBuilderErrors.Append("Comission not recognized! ");
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL Comission not recognized from " +
+                    $"{textSplitted[startPointer + 11]} or {textSplitted[startPointer + 12]}");
+            }
+
+            // nkd // 289.20
+            string nkd = _helper.CleanPossibleNumber(textSplitted[startPointer + 9]);
+            if (!nkd.Equals("0.00") && !nkd.Equals("0,00") && !nkd.Equals("0") && !nkd.Equals("RUB"))
+            {
+                if (_helper.IsDecimal(textSplitted[startPointer + 9]))
+                {
+                    model.NKD = nkd;
+                    _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                        $"TryParseStringToDeaL set NKD={model.NKD} from {textSplitted[startPointer + 9]}");
+                }
+                else
+                {
+                    stringBuilderErrors.Append("NKD not recognized! ");
+                    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                        $"TryParseStringToDeaL NKD is zero value or not recognized from {textSplitted[startPointer + 9]}");
+                }
+            }
+
+
+            // тикер
+            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из " +
+                $"репозитория={rawSecCode}");
+            //проверить, что нам прислали действительно seccode а не ошибку
+            if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                    $"TryParseStringToDeaL ISIN not recognized from {textSplitted[startPointer + 3]}");
+
+                //отправим найденное в ошибки
+                stringBuilderErrors.Append("ISIN не распознан! Не отправляйте сделки в базу данных!");
+                model.SecCode = "0";//сбросим присвоенную ошибку
+            }
+            else
+            {
+                model.SecCode = rawSecCode;
+            }
+            _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                $"TryParseStringToDeaL set SecCode={model.SecCode}");
+
+            // secBord
+            model.SecBoard = StaticData.SecCodes[StaticData.SecCodes.FindIndex(x => x.SecCode == model.SecCode)].SecBoard;
+            if (model.SecCode.Equals("0"))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController TryParseStringToDeaL error " +
+                    $"- deals SecBoard not recognized - now it is '0' !!! Possible problem in database table Deals");
+                stringBuilderErrors.Append($"Secbord(0=деньги) не найден или найден некорректно! " +
+                    $"Не отправляйте сделки в базу данных!");
+            }
+
+            ViewData["Message"] = stringBuilderErrors.ToString();
+
+            return model;
         }
     }
 }

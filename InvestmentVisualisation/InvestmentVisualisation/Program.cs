@@ -1,9 +1,9 @@
 using DataAbstraction.Interfaces;
 using DataAbstraction.Models.Settings;
-using DataAbstraction.Models.WishList;
 using DataBaseRepository;
 using HttpDataRepository;
 using UserInputService;
+using InMemoryRepository;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +32,8 @@ builder.Services
 
 builder.Services.AddTransient<InputHelper>();
 
+builder.Services.AddSingleton<IInMemoryRepository, Repository>();
+
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,7 +57,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}");
 //pattern: "{controller=Incoming}/{action=Incoming}/{id?}");
 //pattern: "{controller=Incoming}/{action=CreateIncoming}");
-    //pattern: "{controller=SecVolume}/{action=VolumeChart}");
+    //pattern: "{controller=Deals}/{action=CreateNewDeals}");
 
 app.Run();
 

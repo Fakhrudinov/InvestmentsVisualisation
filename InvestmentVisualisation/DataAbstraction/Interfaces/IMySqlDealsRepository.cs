@@ -5,6 +5,7 @@ namespace DataAbstraction.Interfaces
     public interface IMySqlDealsRepository
     {
         Task<string> CreateNewDeal(CancellationToken cancellationToken, CreateDealsModel model);
+        Task<string> CreateNewDealsFromList(CancellationToken cancellationToken, List<IndexedDealModel> model);
         Task<string> DeleteSingleDeal(CancellationToken cancellationToken, int id);
         Task<string> EditSingleDeal(CancellationToken cancellationToken, DealModel model);
         Task<int> GetDealsCount(CancellationToken cancellationToken);
