@@ -1,0 +1,119 @@
+﻿@using DataAbstraction.Models.Deals
+@using UserInputService
+@model List<IndexedDealModel>
+
+<div class="container">
+    <h4>Добавить сделки</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+
+            @if (ViewData["Message"] != null)
+            {
+                <strong style="color:red"> @ViewData["Message"] </strong>
+            }
+
+            <form method="post" action="/Deals/CreateDealsFromText">
+                <div class="input-group mb-3">
+                    <textarea type="text" name="excelData" class="form-control" rows="1"
+                    placeholder="Вставьте строки из отчета"></textarea>
+                    <button class="btn btn-outline-secondary" type="submit">Анализировать</button>
+                </div>
+            </form>
+
+
+            @if (Model is not null && Model.Count > 0)
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Тип</th>
+                            <th>SecCode</th>
+                            <th>AvPrice</th>
+                            <th>Pieces</th>
+                            <th>Volume</th>
+                            <th>NKD</th>
+                            <th>Comission</th>
+                            <th>@* Buttons *@</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (IndexedDealModel deal in Model)
+                        {
+                            <tr>
+                                <form method="post" action="EditDealById">
+                                    <input value="@deal.Id"         name="id" hidden />
+                                    <input value="@deal.SecBoard"   name="secboard" type="number" hidden />
+                                    <input value="@deal.SecCode"    name="seccode" hidden />
+                                <td>
+                                     <input type="datetime-local"
+                                           class="form-control form-control-sm"
+                                           name="date"
+                                           value="@deal.Date.ToString("yyyy-MM-ddTHH:mm")"
+                                           max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" /> 
+                                </td>
+                                <td align="center">@deal.SecBoard</td>
+                                <td style="font-weight:bold;">@deal.SecCode</td>
+                                <td><input value="@deal.AvPrice" name="price" 
+                                    class="form-control form-control-sm" style="width:150px" /></td>
+                                <td><input value="@deal.Pieces" name="pieces" type="number" 
+                                    class="form-control form-control-sm" style="width:100px" /></td>
+                                <td style="text-align:right;">
+                                        @{
+                                            decimal volume = 0;
+                                            InputHelper helper = new InputHelper();
+                                            if (helper.IsDecimal(deal.AvPrice))
+                                            {
+                                                volume = Math.Round(deal.Pieces * helper.GetDecimalFromString(deal.AvPrice), 2);
+                                            }
+                                        }
+                                    <strong>@volume.ToString("# ##0.00")</strong>
+                                </td>
+                                <td><input value="@deal.NKD" name="nkd" 
+                                    class="form-control form-control-sm" style="width:100px" /></td>
+                                <td><input value="@deal.Comission" name="comission" 
+                                    class="form-control form-control-sm" style="width:100px" /></td>
+                                <td align="right">
+                                    <input type="submit" value="Изменить" class="btn btn-primary btn-sm" />
+
+                                    @Html.ActionLink(
+                                                "Удалить", 
+                                                "DeleteDealById",
+                                                new { id = @deal.Id },
+                                                new { @class = "btn btn-danger btn-sm" })
+                                    @Html.ActionLink(
+                                                "Добавить одну",
+                                                 "AddSingleDealById",
+                                                 new { id = @deal.Id },
+                                                 new { @class = "btn btn-success btn-sm" })
+                                </td>
+                                </form>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @Html.ActionLink(
+                         "Добавить все",
+                         "AddAllDealsFromInMemoryRepository",
+                         "Deals",
+                         null,
+                         new { @class = "btn btn-success btn-lg" })
+            }
+
+            @Html.ActionLink(
+                     "Назад к списку сделок",
+                     "Deals",
+                     "Deals",
+                     null,
+                     new { @class = "btn btn-outline-secondary btn-lg" })
+
+        </div>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+</div>

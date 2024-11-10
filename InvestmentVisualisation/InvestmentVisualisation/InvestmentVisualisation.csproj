@@ -19,10 +19,14 @@
     <ProjectReference Include="..\DataAbstraction\DataAbstraction.csproj" />
     <ProjectReference Include="..\DataBaseRepository\DataBaseRepository.csproj" />
     <ProjectReference Include="..\HttpDataRepository\HttpDataRepository.csproj" />
+    <ProjectReference Include="..\InMemoryRepository\InMemoryRepository.csproj" />
     <ProjectReference Include="..\UserInputService\UserInputService.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SqlQueries\Deals\CreateNewDealsFromList.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Deals\GetDealsSpecificSecCodeCount.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

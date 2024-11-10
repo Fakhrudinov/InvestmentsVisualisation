@@ -24,7 +24,13 @@
             
                 <div class="form-group">
                     <label asp-for="Date" class="control-label"></label>
-                    @{ string strDate = Model.Date.ToString("yyyy-MM-ddTHH:mm");  }
+                    @{
+                        string strDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-ddTHH:mm");
+                        if (Model is not null)
+                        {
+                            strDate = Model.Date.ToString("yyyy-MM-ddTHH:mm");  
+                        }
+                    }
                     <input type="datetime-local"
                            class="form-control"
                            asp-for="Date"

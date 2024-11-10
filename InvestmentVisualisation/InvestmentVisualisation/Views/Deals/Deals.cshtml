@@ -1,5 +1,6 @@
 ﻿@using DataAbstraction.Models
 @using DataAbstraction.Models.Deals
+@using UserInputService
 
 @model DealsWithPaginations
 
@@ -21,12 +22,15 @@
     }
 
     <p>
-        <a asp-area="" asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
+        <a asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
+        <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary">Добавить несколько</a>
 
         @{
             if (ViewBag.secCode is not null)
             {
-                <a asp-area="" asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">Назад к списку всех сделок</a>
+                <a asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">
+                    Назад к списку всех сделок
+                </a>
             }
         }
 
@@ -92,13 +96,12 @@
                 <td style="text-align:right;">
                         @{
                             decimal volume = 0;
-                            //decimal avPriceDecimal = 0;
-                            if (Decimal.TryParse(item.AvPrice, out decimal avPriceDecimal))
+                            InputHelper helper = new InputHelper();
+                            if (helper.IsDecimal(item.AvPrice))
                             {
-                                volume = Math.Round(item.Pieces * avPriceDecimal, 2);//Math.Round(comission, 2)
+                                volume = Math.Round(item.Pieces * helper.GetDecimalFromString(item.AvPrice), 2);
                             }
                         }
-
                         <strong>@volume.ToString("# ##0.00")</strong>
                 </td>
                 <td style="text-align:right;">

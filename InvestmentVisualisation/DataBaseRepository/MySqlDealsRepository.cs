@@ -5,6 +5,8 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Text;
+using UserInputService;
 
 namespace DataBaseRepository
 {
@@ -13,14 +15,17 @@ namespace DataBaseRepository
         private ILogger<MySqlDealsRepository> _logger;
         private readonly string _connectionString;
         private IMySqlCommonRepository _commonRepo;
+        private InputHelper _helper;
 
         public MySqlDealsRepository(
             IOptions<DataBaseConnectionSettings> connection, 
             ILogger<MySqlDealsRepository> logger,
-            IMySqlCommonRepository commonRepo)
+            IMySqlCommonRepository commonRepo,
+            InputHelper helper)
         {
             _logger = logger;
             _commonRepo=commonRepo;
+            _helper=helper;
 
             _connectionString = $"" +
                 $"Server={connection.Value.Server};" +
@@ -503,6 +508,119 @@ namespace DataBaseRepository
 
                 return result;
             }
+        }
+
+        public async Task<string> CreateNewDealsFromList(CancellationToken cancellationToken, List<IndexedDealModel> model)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"CreateNewDealsFromList start");
+
+            string query = GetSqlRequestForNewDeals(model.Count);
+            if (! query.ToUpper().StartsWith("INSERT"))
+            {
+                return query;
+            }
+
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                $"CreateNewDealsFromList execute query \r\n{query}");
+
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
+                {
+                    cmd.Connection = con;
+
+                    ////(@date_time, @seccode, @secboard, @av_price, @pieces, @comission, @nkd);
+
+                    for (int i = 0; i < model.Count(); i++)
+                    {
+                        cmd.Parameters.AddWithValue("@date_time" + i, model[i].Date);
+                        cmd.Parameters.AddWithValue("@seccode" + i, model[i].SecCode);
+                        cmd.Parameters.AddWithValue("@secboard" + i, model[i].SecBoard);
+                        cmd.Parameters.AddWithValue("@av_price" + i, _helper.CleanPossibleNumber(model[i].AvPrice));
+                        cmd.Parameters.AddWithValue("@pieces" + i, model[i].Pieces);
+                        
+                        if (model[i].Comission is not null && !model[i].Comission.Equals(""))
+                        {
+                            cmd.Parameters.AddWithValue("@comission" + i, _helper.CleanPossibleNumber( model[i].Comission));
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue("@comission" + i, DBNull.Value);
+                        }
+
+                        if (model[i].NKD is not null && !model[i].NKD.Equals(""))
+                        {
+                            cmd.Parameters.AddWithValue("@nkd" + i, _helper.CleanPossibleNumber(model[i].NKD));
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue("@nkd" + i, DBNull.Value);
+                        }
+                    }
+
+                    try
+                    {
+                        await con.OpenAsync(cancellationToken);
+
+                        //Return Int32 Number of rows affected
+                        int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                            $"CreateNewDealsFromList execution affected {insertResult} lines");
+
+                        return insertResult.ToString();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
+                            $"CreateNewDealsFromList Exception!\r\n{ex.Message}");
+                        return ex.Message;
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
+                    }
+                }
+            }
+        }
+
+        private string GetSqlRequestForNewDeals(int count)
+        {
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "SqlQueries",
+                "Deals",
+                "CreateNewDealsFromList.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+                return "MySqlRepository Error! File with SQL script not found at " + filePath;
+            }
+
+            /// INSERT INTO `deals` 
+            ///     (`date`, `seccode`, `secboard`, `av_price`, `pieces`, `comission`, `nkd`) 
+            /// VALUES
+            ///     (
+            ///          @date_time, @seccode, @secboard, @av_price, @pieces, @comission, @nkd
+            ///                 ),(
+            ///          '2024-10-07 12:00:36', 'BSPB', '1', '365.0000', '20', null, '1.55'
+            ///     );
+
+            StringBuilder query = new StringBuilder(File.ReadAllText(filePath));
+            StringBuilder parameters = new StringBuilder();
+
+            for (int i = 0; i < count; i++)
+            {
+                parameters.Append($"),\r\n(" +
+                    $"@date_time{i}, @seccode{i}, @secboard{i}, @av_price{i}, @pieces{i}, @comission{i}, @nkd{i}");
+            }
+            parameters.Remove(0, 5);
+
+            query.Replace("@values", parameters.ToString());
+
+            return query.ToString();
         }
     }
 }

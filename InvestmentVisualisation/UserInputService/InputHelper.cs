@@ -5,8 +5,8 @@ namespace UserInputService
 {
     public class InputHelper
     {
-        private IMySqlSecCodesRepository _secCodesRepo;
-        private readonly ILogger<InputHelper> _logger;
+        private IMySqlSecCodesRepository ? _secCodesRepo;
+        private readonly ILogger<InputHelper> ? _logger;
 
         public InputHelper(
             ILogger<InputHelper> logger,
@@ -14,6 +14,10 @@ namespace UserInputService
         {
             _logger = logger;
             _secCodesRepo = secCodesRepo;
+        }
+
+        public InputHelper()        
+        {            
         }
 
         public bool IsDataFormatCorrect(string text)
@@ -62,8 +66,13 @@ namespace UserInputService
 
 
         // default delimeter is point = '.'
-        public string CleanPossibleNumber(string text)
+        public string CleanPossibleNumber(string ? text)
         {
+            if (text is null)
+            {
+                return "";
+            }
+
             text = text.Replace(" ", "");
             int dotIndex = text.IndexOf('.');
             int commaIndex = text.IndexOf(",");
