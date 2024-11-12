@@ -118,7 +118,11 @@ namespace InvestmentVisualisation.Controllers
             {
                 model = await _repository.GetSecVolumeLast3YearsDynamicSortedByVolume(cancellationToken, DateTime.Now.Year);
             }
-            else
+            else if (sortMode.Equals("byWish"))
+            {
+                model = await _repository.GetSecVolumeLast3YearsDynamicSortedByWish(cancellationToken, DateTime.Now.Year);
+            }
+            else // sortMode = "byTiker"
             {
                 model = await _repository.GetSecVolumeLast3YearsDynamic(cancellationToken, DateTime.Now.Year);
             }

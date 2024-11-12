@@ -102,7 +102,23 @@
                     }
                 </th>
                 <th style="text-align:center;">
-                    Wish
+                    @* Wish level*@
+                    @if (ViewBag.SortMode == "byWish")
+                    {
+                        <div>
+                            Wish<span style="color:red;">&#9660;</span>
+                        </div>
+
+                    }
+                    else
+                    {
+                        <div>
+                            <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                               asp-route-sortMode="byWish" style="text-decoration: none">
+                                Wish<span style="color:red;">&#9661;</span>
+                            </a>
+                        </div>
+                    }
                 </th>
 
                 @if (ViewBag.SmartLab == true)

@@ -220,6 +220,18 @@ namespace DataBaseRepository
                 "GetSecVolumeLast3YearsDynamicSortedByVolume.sql", 
                 year);
         }
+        public async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicSortedByWish(
+            CancellationToken cancellationToken, 
+            int year)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+                $"GetSecVolumeLast3YearsDynamicSortedByWish start with year={year}");
+
+            return await GetSecVolumeLast3YearsDynamicByQueryName(
+                cancellationToken,
+                "GetSecVolumeLast3YearsDynamicSortedByWish.sql",
+                year);
+        }
         private async Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicByQueryName(
             CancellationToken cancellationToken,
             string queryName, 
@@ -369,5 +381,5 @@ namespace DataBaseRepository
 				return result;
 			}
 		}
-	}
+    }
 }
