@@ -39,6 +39,16 @@ namespace DataBaseRepository
             {
                 _commonRepo.FillStaticSecCodes();
             }
+
+            if (StaticData.Categories.Count == 0)
+            {
+                _commonRepo.FillStaticCategories();
+            }
+
+            if (StaticData.FreeMoney is null)
+            {
+                _commonRepo.FillFreeMoney();
+            }
         }
 
         public async Task<List<WishListItemModel>> GetFullWishList(CancellationToken cancellationToken, string sqlFileName)
