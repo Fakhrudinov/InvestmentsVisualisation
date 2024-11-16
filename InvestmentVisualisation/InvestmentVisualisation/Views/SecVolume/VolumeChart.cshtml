@@ -53,7 +53,7 @@
                                 axisYIndex: 0,
                                 color: "#014D65",
                                 dataPoints: @Html.Raw(ViewBag.ChartData),
-                                toolTipContent: "{label}: {y}%"
+                                toolTipContent: "{label}; {y}%"
                             },
                             {
                                 // data set 2: additional data like  how many need to bay
@@ -78,7 +78,7 @@
 }
 
 <div class="container">
-	<h3 style="text-align:center">Размер всех позиций в процентах</h3>
+    <h3 style="text-align:center">Размер всех позиций в процентах. Всего докупить: @ViewBag.TotalNeedToBy</h3>
 	<div id="chartContainer" style="width: 100%;"></div>
 </div>
 

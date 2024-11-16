@@ -8,6 +8,7 @@ using DataAbstraction.Models.BaseModels;
 using Newtonsoft.Json;
 using DataAbstraction.Models.WishList;
 using UserInputService;
+using System.Collections.Generic;
 
 
 namespace InvestmentVisualisation.Controllers
@@ -203,7 +204,7 @@ namespace InvestmentVisualisation.Controllers
             _wishListSettings = configuration.GetSection("WishListSettings").Get<WishListSettings>();
 
             List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData(cancellationToken);
-
+            List<ChartItemModel> chartItemsRawCopy= new List<ChartItemModel>(chartItemsRaw);
             // calculate 1%
             decimal totalVolume = 0;
             foreach (ChartItemModel chartItem in chartItemsRaw)
@@ -314,7 +315,7 @@ namespace InvestmentVisualisation.Controllers
                 }
             }
             // fill new chartItemsAdditional from sorted chartItems with zero value
-            // 
+            decimal totalNeedToBy = 0;
             List<ChartItemModel> chartItemsAdditional = new List<ChartItemModel>();
             foreach (ChartItemModel chartItem in chartItems)
             {
@@ -352,6 +353,8 @@ namespace InvestmentVisualisation.Controllers
                             decimal differ = settingsValue - (rawIndexFirst.Y + rawIndexSecond.Y);
                             if (differ > 0)
                             {
+                                totalNeedToBy = totalNeedToBy + differ;
+
                                 newAdd.Y = Math.Round(differ / onePercent, 2);
                                 newAdd.Label = $"{newAdd.Label} объем ({rawIndexFirst.Y}+{rawIndexSecond.Y}), " +
                                     $"докупить {differ}. " +
@@ -376,6 +379,8 @@ namespace InvestmentVisualisation.Controllers
                         decimal differ = settingsValue - rawIndex.Y;
                         if (differ > 0)
                         {
+                            totalNeedToBy = totalNeedToBy + differ;
+
                             newAdd.Y = Math.Round(differ / onePercent, 2);
                             newAdd.Label = $"{newAdd.Label} объем {rawIndex.Y}, докупить {differ}. {wishIndex.Description}";
                         }
@@ -386,12 +391,45 @@ namespace InvestmentVisualisation.Controllers
             }
 
 
+            // add volume to ordinary Labels
+            foreach (ChartItemModel chartItem in chartItems)
+            {
+                //// debug point
+                //if (chartItem.Label.Equals("PHOR"))
+                //{
+                //    Console.WriteLine();
+                //}
+
+                if (chartItem.Label.Length > 8 && chartItem.Label[4].Equals('+'))
+                {
+                    string[] splittedLabel = chartItem.Label.Split('+');
+                    ChartItemModel? rawIndexFirst = chartItemsRawCopy.Find(r => r.Label.Equals(splittedLabel[0]));
+                    ChartItemModel? rawIndexSecond = chartItemsRawCopy.Find(r => r.Label.Equals(splittedLabel[1]));
+
+                    if (rawIndexFirst is not null && rawIndexSecond is not null)
+                    {
+                        chartItem.Label = chartItem.Label + $" объем ({rawIndexFirst.Y+rawIndexSecond.Y})";
+                    }
+                }
+                else
+                {
+                    ChartItemModel? rawIndex = chartItemsRawCopy.Find(r => r.Label.Equals(chartItem.Label));
+                    if (rawIndex is not null)
+                    {
+                        chartItem.Label = chartItem.Label + " объём " + rawIndex.Y;
+                    }                    
+                }
+            }
+
+
+            // set data to view
             ViewBag.ChartData = JsonConvert.SerializeObject(chartItems);
             ViewBag.ChartDataZero = JsonConvert.SerializeObject(chartItemsZero);
             ViewBag.ChartDataAddition = JsonConvert.SerializeObject(chartItemsAdditional);
 
             ViewBag.ChartItemsCount = chartItems.Count;
             ViewBag.MaximumOnChart = Decimal.ToInt16(chartItems[chartItems.Count - 1].Y) + 1;
+            ViewBag.TotalNeedToBy = totalNeedToBy;
 
             return View();
 		}
