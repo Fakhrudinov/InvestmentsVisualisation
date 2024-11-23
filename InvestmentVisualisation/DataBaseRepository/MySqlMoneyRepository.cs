@@ -211,5 +211,71 @@ namespace DataBaseRepository
         {
             _commonRepo.FillFreeMoney();
         }
-    }
+
+		public async Task<List<BankDepoDataBaseModel>?> GetBankDepoChartData(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+				$"GetBankDepoChartData start");
+
+			string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetBankDepoChartData.sql");
+			if (!File.Exists(filePath))
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+					$"File with SQL script not found at " + filePath);
+				return null;
+			}
+
+			string query = File.ReadAllText(filePath);
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetBankDepoChartData query GetBankDepoChartData.sql text:\r\n{query}");
+
+            List<BankDepoDataBaseModel> bankDepoChartItems = new List<BankDepoDataBaseModel>();
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								BankDepoDataBaseModel newChartItem = new BankDepoDataBaseModel();
+
+								newChartItem.DateOpen = sdr.GetDateTimeOffset("date_open");
+								newChartItem.DateClose = sdr.GetDateTimeOffset("date_close");
+								newChartItem.Name = sdr.GetString("name");
+								newChartItem.PlaceName = sdr.GetInt16("placed_name");
+                                newChartItem.Percent = sdr.GetDecimal("percent");
+								newChartItem.SummAmount = sdr.GetDecimal("summ");
+
+								bankDepoChartItems.Add(newChartItem);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+							$"GetBankDepoChartData Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+            if (bankDepoChartItems.Count == 0)
+            {
+                return null;
+            }
+
+            return bankDepoChartItems;
+		}
+	}
 }
