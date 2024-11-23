@@ -141,24 +141,46 @@
                     <th style="text-align:right;">
                         DSI
                     </th>
-                    <th style="border-right-color:black; border-right-width: 1px;text-align:right;">
+                    <th style="border-right-color:black; border-right-width: 1px;">
                         @*Даты*@
-
-                        @if (ViewBag.SortMode == "byTime")
-                        {
-                            <div>
-                                Даты<span style="color:red;">&#9660;</span>
+                        <div class="row">
+                            <div class="col" title="Любые дивиденты с сортировкой по времени"
+                                    style="padding-right:0px;text-align:right;">
+                                @if (ViewBag.SortMode == "byTime")
+                                {
+                                    <div>
+                                        Даты<span style="color:red;">&#9660;</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                           asp-route-sortMode="byTime" style="text-decoration: none">
+                                            Даты<span style="color:red;">&#9661;</span>
+                                        </a>
+                                    </div>
+                                }
                             </div>
-                        }
-                        else
-                        {
-                            <div>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
-                                    asp-route-sortMode="byTime" style="text-decoration: none">
-                                    Даты<span style="color:red;">&#9661;</span>
-                                </a>
+                            <div class="col" title="Только мои позиции с сортировкой по времени" 
+                                    style="padding-left:0px;padding-right:0px;">
+                                @if (ViewBag.SortMode == "byTimeFiltered")
+                                {
+                                    <div>
+                                        ДФ<span style="color:red;">&#11167;</span>@* &#9660; &#11163; &#10728; *@
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic"
+                                           asp-route-sortMode="byTimeFiltered" style="text-decoration: none">
+                                            ДФ<span style="color:red;">&#11163;</span>
+                                        </a>
+                                    </div>
+                                }
                             </div>
-                        }
+                        </div>
                     </th>
                 }
             </tr>

@@ -8,7 +8,7 @@ using DataAbstraction.Models.BaseModels;
 using Newtonsoft.Json;
 using DataAbstraction.Models.WishList;
 using UserInputService;
-using System.Collections.Generic;
+using System;
 
 
 namespace InvestmentVisualisation.Controllers
@@ -159,10 +159,16 @@ namespace InvestmentVisualisation.Controllers
                 ViewBag.Vsdelke = true;
             }
 
+            // clean model from all not mine positions
+            if (sortMode.Equals("byTimeFiltered"))
+            {
+                RemoveAnyEmptyPositions(model);
+            }
+
             // clean model from (not mine) +-0 div pozitions
             RemoveEmptyPositionWithLowDivs(model);
 
-            if (sortMode.Equals("byTime"))
+            if (sortMode.Equals("byTime") || sortMode.Equals("byTimeFiltered"))
             {
                 // move empty DateTime items in temp list
                 List<SecVolumeLast2YearsDynamicModel> temporary = new List<SecVolumeLast2YearsDynamicModel>();
@@ -186,6 +192,17 @@ namespace InvestmentVisualisation.Controllers
             CalculateColorDependingByDivsValues(model, wishValues);
 
             return View(model);
+        }
+
+        private void RemoveAnyEmptyPositions(List<SecVolumeLast2YearsDynamicModel> model)
+        {
+            for (int i = model.Count -1; i>0; i--)
+            {
+                if (model[i].LastYearPieces is null || model[i].LastYearPieces == 0)
+                {
+                    model.RemoveAt(i);
+                }
+            }
         }
 
         public async Task<IActionResult> VolumeChart(CancellationToken cancellationToken)
