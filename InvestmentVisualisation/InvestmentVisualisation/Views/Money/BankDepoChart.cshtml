@@ -1,0 +1,57 @@
+﻿
+@{
+    ViewData["Title"] = "Bank Deposits Chart";
+}
+
+@section scripts
+{
+	<script>
+		window.onload = function () {
+
+			var chart = new CanvasJS.Chart("chartContainer", {
+				axisX: {
+					valueFormatString: "DD MMM",
+					//labelAngle: -30,
+					minimum: @ViewBag.ShowChartFrom,
+					maximum: @ViewBag.ShowChartTo,
+					interval: 1,
+					intervalType: "month",
+					crosshair: {
+						enabled: true,
+						snapToDataPoint: true
+					},
+					stripLines: [{
+						//value: new Date(2024, 11, 20),
+						value: new Date(@DateTimeOffset.Now.ToUnixTimeSeconds() * 1000),
+						label: "NOW",
+						labelFontColor: "#FF0000",
+						labelPlacement: "inside",//"inside",//"outside"
+						labelAlign: "near"//"far"//"center", "near"//useless when outside
+					}]
+				},
+				axisY: {
+					interval: 1,
+					minimum: 0,
+					maximum: @ViewBag.ChartItemsCount + 0.5,
+					includeZero: true,
+					// reversed: true,
+					gridThickness: 0,
+					crosshair: {
+						enabled: true,
+						snapToDataPoint: true
+					}
+				},
+				toolTip: {
+					shared: true
+				},
+				data: @Html.Raw(ViewBag.BankDepoChartItemArray)
+			});
+			chart.render();
+		}
+	</script>
+}
+
+<div class="container">
+	<h3 style="text-align:center">Деньги на вкладах: @ViewBag.TotalSumm</h3>
+	<div id="chartContainer" style="width: 100%;"></div>
+</div>
