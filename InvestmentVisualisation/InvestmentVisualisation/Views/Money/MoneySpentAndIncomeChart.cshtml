@@ -1,0 +1,57 @@
+﻿
+@{
+	ViewData["Title"] = "Bank Deposits Chart";
+	int startValue = @ViewBag.ScaleBreaksLow + 10000;
+	int endValue = @ViewBag.ScaleBreaksHigh - 10000;
+}
+
+@section scripts
+{
+	<script>
+		window.onload = function () {
+
+			var chart = new CanvasJS.Chart("chartContainer", {
+				axisX: {
+					interval: 1,
+					intervalType: "month",
+					valueFormatString: "MMM YY",
+				},
+				axisY: {
+					scaleBreaks: {
+						//autoCalculate: true
+						customBreaks: [{
+							startValue: @startValue,
+							endValue: @endValue,
+							//color: "orange"
+						}]
+					}
+				},
+				toolTip: {
+					shared: true
+				},
+				data: @Html.Raw(ViewBag.ChartItemArray)
+			});
+			chart.render();
+		}
+	</script>
+}
+
+<div class="container">
+	<h3 style="text-align:center">Расходы и приход дивидентов</h3>
+	<div id="chartContainer" style="width: 100%;"></div>
+	<br />
+	<br />
+	<h5>Месяцы по дивидентам</h5>
+	<p>Январь платят почти в расходы</p>
+	<p>Февраль без денег</p>
+	<p>Март без денег</p>
+	<p>Апрель без денег</p>
+	<p>Май платят почти в расходы</p>
+	<p>Июнь</p>
+	<p>Июль</p>
+	<p>Август</p>
+	<p>Сентябрь без денег</p>
+	<p>Октябрь</p>
+	<p>Ноябрь</p>
+	<p>Декабрь</p>
+</div>

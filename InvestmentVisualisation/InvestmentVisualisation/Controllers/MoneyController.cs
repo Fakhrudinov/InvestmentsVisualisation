@@ -7,8 +7,6 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.BaseModels;
 using System.Globalization;
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -98,11 +96,11 @@ namespace InvestmentVisualisation.Controllers
 
                 decimal totalSumm = 0;
 
-                BankDepoChartItemModel[] bankDepoChartItems = new BankDepoChartItemModel[bankDepoDBModelItems.Count];
+                ChartItemModel[] сhartItems = new ChartItemModel[bankDepoDBModelItems.Count];
                 for (int i = 0; i < bankDepoDBModelItems.Count; i++)
                 {
-                    List<DataPointsOfBankDepoChartItemModel> dataPoints = new List<DataPointsOfBankDepoChartItemModel>();
-					DataPointsOfBankDepoChartItemModel dataPointStart = new DataPointsOfBankDepoChartItemModel(
+                    List<DataPointsOfChartItemModel> dataPoints = new List<DataPointsOfChartItemModel>();
+					DataPointsOfChartItemModel dataPointStart = new DataPointsOfChartItemModel(
                         bankDepoDBModelItems[i].DateOpen.ToUnixTimeSeconds() * 1000,
                         i + 1,
                         bankDepoDBModelItems[i].Percent.ToString() + "% " + bankDepoDBModelItems[i].SummAmount + "руб; " +
@@ -114,7 +112,7 @@ namespace InvestmentVisualisation.Controllers
                         if (dateFromCollection > bankDepoDBModelItems[i].DateOpen && 
                             dateFromCollection < bankDepoDBModelItems[i].DateClose)
                         {
-                            DataPointsOfBankDepoChartItemModel dataPointTest = new DataPointsOfBankDepoChartItemModel(
+                            DataPointsOfChartItemModel dataPointTest = new DataPointsOfChartItemModel(
 								dateFromCollection.ToUnixTimeSeconds() * 1000,
                                                i + 1,
                                                "");
@@ -127,7 +125,7 @@ namespace InvestmentVisualisation.Controllers
                         }
 					}
 
-					DataPointsOfBankDepoChartItemModel dataPointEnd = new DataPointsOfBankDepoChartItemModel(
+					DataPointsOfChartItemModel dataPointEnd = new DataPointsOfChartItemModel(
                         bankDepoDBModelItems[i].DateClose.ToUnixTimeSeconds() * 1000,
                         i + 1,
                         bankDepoDBModelItems[i].DateClose.ToString("до dd MMM yyyy"));
@@ -145,28 +143,115 @@ namespace InvestmentVisualisation.Controllers
 					}
 
 
-					BankDepoChartItemModel newChartItem = new BankDepoChartItemModel(
+					ChartItemModel newChartItem = new ChartItemModel(
 						bankDepoDBModelItems[i].Name + " " + bankDepoDBModelItems[i].SummAmount + "руб.",
 						color,
 						dataPoints,
-						(int)bankDepoDBModelItems[i].SummAmount / 20000
+						(int)bankDepoDBModelItems[i].SummAmount / 20000,
+						"line"
 						);
 
                     totalSumm += bankDepoDBModelItems[i].SummAmount;
 
-					bankDepoChartItems[i] = newChartItem;
+					сhartItems[i] = newChartItem;
 				}
 				ViewBag.ShowChartFrom = collectionOfAllDate[0].AddDays(-25).ToUnixTimeSeconds() * 1000;
 				ViewBag.ShowChartTo = collectionOfAllDate[collectionOfAllDate.Count - 1].AddDays(15).ToUnixTimeSeconds() * 1000;
 				ViewBag.TotalSumm = totalSumm;
-				ViewBag.BankDepoChartItemArray = JsonConvert.SerializeObject(bankDepoChartItems);
-                ViewBag.ChartItemsCount = bankDepoChartItems.Length;// layout load script: @if (ViewBag.ChartItemsCount is not null)
+				ViewBag.ChartItemArray = JsonConvert.SerializeObject(сhartItems);
+                ViewBag.ChartItemsCount = сhartItems.Length;// layout load script: @if (ViewBag.ChartItemsCount is not null)
 			}
 
 			return View();
         }
 
-		private List<DateTimeOffset> CreateAndSortCollectionOfAllDates(List<BankDepoDataBaseModel> bankDepoDBModelItems)
+        public async Task<IActionResult> MoneySpentAndIncomeOfLast12MonthChart(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+                $"MoneySpentAndIncomeOfLast12MonthChart called");
+
+            List<MoneySpentAndIncomeModel>? moneySpentAndIncomeDBModelItems = await _repository
+                .GetMoneySpentAndIncomeModelChartData(cancellationToken);
+            
+            if (moneySpentAndIncomeDBModelItems is not null)
+            {
+                ChartItemModel[] chartItems = new ChartItemModel[3];
+                List<DataPointsOfChartItemModel> dataPointsDivident = new List<DataPointsOfChartItemModel>();
+                List<DataPointsOfChartItemModel> dataPointsAverageDivident = new List<DataPointsOfChartItemModel>();
+                List<DataPointsOfChartItemModel> dataPointsMoneySpent = new List<DataPointsOfChartItemModel>();
+                int maximumOfDividents = 0;
+                int maximumOfMonthly = 0;
+                for (int i = 0; i < moneySpentAndIncomeDBModelItems.Count; i++) 
+                {
+                    // for scaleBreaks high value
+                    if (moneySpentAndIncomeDBModelItems[i].Divident > maximumOfDividents)
+                    {
+                        maximumOfDividents = moneySpentAndIncomeDBModelItems[i].Divident;
+                    }
+
+                    // for scaleBreaks low value
+                    if (moneySpentAndIncomeDBModelItems[i].AverageDivident > maximumOfMonthly)
+                    {
+                        maximumOfMonthly = moneySpentAndIncomeDBModelItems[i].AverageDivident;
+                    }
+                    if (moneySpentAndIncomeDBModelItems[i].MoneySpent > maximumOfMonthly)
+                    {
+                        maximumOfMonthly = moneySpentAndIncomeDBModelItems[i].MoneySpent;
+                    }
+
+                    DataPointsOfChartItemModel dataPointDivident = new DataPointsOfChartItemModel(
+                        moneySpentAndIncomeDBModelItems[i].Date.ToUnixTimeSeconds() * 1000,
+                        moneySpentAndIncomeDBModelItems[i].Divident);
+                    dataPointsDivident.Add(dataPointDivident);
+
+                    DataPointsOfChartItemModel dataPointAverageDivident = new DataPointsOfChartItemModel(
+                        moneySpentAndIncomeDBModelItems[i].Date.ToUnixTimeSeconds() * 1000,
+                        moneySpentAndIncomeDBModelItems[i].AverageDivident);
+                    dataPointsAverageDivident.Add(dataPointAverageDivident);
+
+                    DataPointsOfChartItemModel dataPointMoneySpent = new DataPointsOfChartItemModel(
+                        moneySpentAndIncomeDBModelItems[i].Date.ToUnixTimeSeconds() * 1000,
+                        moneySpentAndIncomeDBModelItems[i].MoneySpent);
+                    dataPointsMoneySpent.Add(dataPointMoneySpent);
+                }
+
+                //
+                chartItems[0] = new ChartItemModel(
+                            "average dividents income",
+                            "rgba(10,200,10,0.5)",
+                            dataPointsAverageDivident,
+                            5,
+                            "area",
+							"circle"
+						);
+                chartItems[1] = new ChartItemModel(
+                            "money spent",
+                            "rgba(200,40,40,0.5)",
+                            dataPointsMoneySpent,
+                            1,
+                            "area",
+							"circle"
+						);
+                chartItems[2] = new ChartItemModel(
+                            "exact dividents at month",
+                            "rgba(10,10,250,0.9)",
+                            dataPointsDivident,
+                            1,
+							"line",
+							"circle"
+						);
+
+                ViewBag.ScaleBreaksHigh = maximumOfDividents;
+                ViewBag.ScaleBreaksLow = maximumOfMonthly;
+                ViewBag.ChartItemArray = JsonConvert.SerializeObject(chartItems);
+                ViewBag.ChartItemsCount = chartItems.Length;// layout load script: @if (ViewBag.ChartItemsCount is not null)
+            }
+
+            return View("MoneySpentAndIncomeChart");
+        }
+
+
+        private List<DateTimeOffset> CreateAndSortCollectionOfAllDates(List<BankDepoDataBaseModel> bankDepoDBModelItems)
 		{
 			List<DateTimeOffset> dates = new List<DateTimeOffset>();
 			foreach (BankDepoDataBaseModel item in bankDepoDBModelItems)

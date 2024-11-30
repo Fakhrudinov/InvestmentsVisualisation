@@ -2,20 +2,27 @@
 
 namespace DataAbstraction.Models.MoneyByMonth
 {
-	public class BankDepoChartItemModel
+	public class ChartItemModel
 	{
-		public BankDepoChartItemModel(
-			string name, 
+		public ChartItemModel(
+			string name,
 			string color,
 			//DataPointsOfBankDepoChartItemModel[] dataPoints,
-			List<DataPointsOfBankDepoChartItemModel> dataPoints,
-			int lineThickness
+			List<DataPointsOfChartItemModel> dataPoints,
+			int lineThickness,
+			string type,
+			string? markerType = "none"
 			)
 		{
 			this.name = name;
 			this.color = color;
 			this.dataPoints = dataPoints;
 			this.lineThickness = lineThickness;
+			this.type = type;
+			if ( markerType is not null)
+			{
+				this.markerType = markerType;
+			}
 		}
 
 		//public BankDepoChartItemModel(
@@ -29,7 +36,7 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "type")]
-		public string type = "line";
+		public string type;
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "name")]
@@ -49,7 +56,7 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "markerType")]
-		public string markerType = "none";
+		public string markerType;
 
 		////Explicitly setting the name to be used while serializing to JSON.
 		//[DataMember(Name = "markerSize")]
@@ -65,7 +72,7 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 		////Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "dataPoints")]
-		public List<DataPointsOfBankDepoChartItemModel> dataPoints;
+		public List<DataPointsOfChartItemModel> dataPoints;
 
 		/*
 		type: "line",
@@ -83,9 +90,15 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 	}
 
-	public class DataPointsOfBankDepoChartItemModel
+	public class DataPointsOfChartItemModel
 	{
-		public DataPointsOfBankDepoChartItemModel(long x, int y, string indexLabel)
+        public DataPointsOfChartItemModel(long x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
+        public DataPointsOfChartItemModel(long x, int y, string indexLabel)
 		{
 			this.x = x;
 			this.y = y;
@@ -102,7 +115,7 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "indexLabel")]
-		public string indexLabel = "";
+		public string ? indexLabel;
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "indexLabelFontWeight")]
 		public string indexLabelFontWeight = "bold";

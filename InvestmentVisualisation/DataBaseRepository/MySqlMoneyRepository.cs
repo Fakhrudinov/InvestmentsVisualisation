@@ -277,5 +277,72 @@ namespace DataBaseRepository
 
             return bankDepoChartItems;
 		}
-	}
+
+        public async Task<List<MoneySpentAndIncomeModel>?> GetMoneySpentAndIncomeModelChartData(
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetMoneySpentAndIncomeModelChartData start");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "Money", 
+                "GetMoneySpentAndIncomeModelChartData.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+                return null;
+            }
+
+            string query = File.ReadAllText(filePath);
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetMoneySpentAndIncomeModelChartData query GetMoneySpentAndIncomeModelChartData.sql text:\r\n{query}");
+
+            List<MoneySpentAndIncomeModel> сhartItems = new List<MoneySpentAndIncomeModel>();
+
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
+                {
+                    cmd.Connection = con;
+
+                    try
+                    {
+                        await con.OpenAsync(cancellationToken);
+
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+                        {
+                            while (await sdr.ReadAsync(cancellationToken))
+                            {
+                                MoneySpentAndIncomeModel newChartItem = new MoneySpentAndIncomeModel();
+                                newChartItem.Date = sdr.GetDateTimeOffset("date");
+                                newChartItem.Divident = sdr.GetInt32("div_round");
+                                newChartItem.AverageDivident = sdr.GetInt32("avrg_div_round");
+                                newChartItem.MoneySpent = sdr.GetInt32("spent_round");
+
+                                сhartItems.Add(newChartItem);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                            $"GetMoneySpentAndIncomeModelChartData Exception!\r\n{ex.Message}");
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
+                    }
+                }
+            }
+
+            if (сhartItems.Count == 0)
+            {
+                return null;
+            }
+
+            return сhartItems;
+        }
+    }
 }
