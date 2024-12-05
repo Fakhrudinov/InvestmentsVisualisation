@@ -1,4 +1,5 @@
 ﻿using DataAbstraction.Interfaces;
+using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.MoneyByMonth;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
@@ -329,6 +330,82 @@ namespace DataBaseRepository
                     {
                         _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                             $"GetMoneySpentAndIncomeModelChartData Exception!\r\n{ex.Message}");
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
+                    }
+                }
+            }
+
+            if (сhartItems.Count == 0)
+            {
+                return null;
+            }
+
+            return сhartItems;
+        }
+
+        public async Task<List<SecCodeAndNameAndPiecesModel>?> GetActualSecCodeAndNameAndPieces(
+            CancellationToken cancellationToken, 
+            int year)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetActualSecCodeAndNameAndPieces start with year={year}");
+
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(),
+                "SqlQueries",
+                "Money",
+                "GetActualSecCodeAndNameAndPieces.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+                return null;
+            }
+
+            string query = File.ReadAllText(filePath);
+            query = query.Replace("@year", year.ToString());
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                $"GetActualSecCodeAndNameAndPieces query GetActualSecCodeAndNameAndPieces.sql text:\r\n{query}");
+
+            List<SecCodeAndNameAndPiecesModel> сhartItems = new List<SecCodeAndNameAndPiecesModel>();
+
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
+                {
+                    cmd.Connection = con;
+
+                    try
+                    {
+                        await con.OpenAsync(cancellationToken);
+
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+                        {
+                            while (await sdr.ReadAsync(cancellationToken))
+                            {
+                                SecCodeAndNameAndPiecesModel newChartItem = new SecCodeAndNameAndPiecesModel();
+                                newChartItem.SecCode = sdr.GetString("seccode");
+                                newChartItem.Name = sdr.GetString("name");
+                                newChartItem.Pieces = sdr.GetInt32("pieces");
+
+                                сhartItems.Add(newChartItem);
+                                /*
+                                 SELECT si.seccode, si.name, sv.pieces_2024 as pieces-- , sv.volume_2024 
+	                                FROM money_test.seccode_info si 
+                                    right join money_test.sec_volume sv
+                                    on sv.seccode = si.seccode
+		                                where si.secboard = 1 
+                                        and si.expired_date is null;
+                                */
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                            $"GetActualSecCodeAndNameAndPieces Exception!\r\n{ex.Message}");
                     }
                     finally
                     {

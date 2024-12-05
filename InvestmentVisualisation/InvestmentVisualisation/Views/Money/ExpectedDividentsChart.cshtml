@@ -1,0 +1,70 @@
+﻿
+@{
+	ViewData["Title"] = "Bank Deposits Chart";
+}
+
+@section scripts
+{
+	<script>
+		window.onload = function () {
+
+			var chart = new CanvasJS.Chart("chartContainer", {
+				axisX: {
+					xValueType: "dateTime",					
+				},
+				axisY: {
+					title: "Доходность выплаты",
+					suffix: "%",
+				},
+				axisY2: {
+					title: "Сумма выплат",
+				},
+				data: [
+					{
+						type: "bubble",
+						xValueType: "dateTime",
+						yValueFormatString: "####.##",
+						zValueFormatString: "####.##",
+						indexLabel: "{name}",
+						indexLabelFontWeight: "bold",
+						toolTipContent: "<b>{name}</b><br/>дата: {x} <br/>доходность: {y}%<br/>сумма: {z} руб.",
+						dataPoints: @Html.Raw(ViewBag.ChartDataPoints)
+					},
+					{
+						type: "stepLine",
+						axisYType: "secondary",
+						toolTipContent: "Накопительный итог: {y}",
+						yValueFormatString: "####.## руб",
+						dataPoints: @Html.Raw(ViewBag.ChartVolumeDataPoints)
+					}
+				
+				]
+			});
+			chart.render();
+		}
+	</script>
+}
+
+<div class="container">
+	<h3 style="text-align:center">Ожидаемый в будущем приход дивидентов</h3>
+	<div id="chartContainer" style="width: 100%;"></div>
+
+</div>
+
+@* <div>
+	<br />
+	<br />
+	<h5>Месяцы по дивидендам</h5>
+	<p>Январь платят почти в расходы</p>
+	<p>Февраль без денег</p>
+	<p>Март без денег</p>
+	<p>Апрель без денег</p>
+	<p>Май платят почти в расходы</p>
+	<p>Июнь</p>
+	<p>Июль</p>
+	<p>Август</p>
+	<p>Сентябрь без денег</p>
+	<p>Октябрь</p>
+	<p>Ноябрь</p>
+	<p>Декабрь</p>
+</div> *@

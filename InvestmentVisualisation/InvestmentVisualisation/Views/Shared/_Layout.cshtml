@@ -31,21 +31,6 @@
                 <!--container-fluid-->
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">Мои инвестиции</a>
 
-                @*<div class="btn-group top_menu" role="group">
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" 
-                        ? "active" : "")" asp-controller="Incoming" asp-action="Incoming">Входящие деньги</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" 
-                        ? "active" : "")" asp-controller="Deals" asp-action="Deals">Сделки</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "Money" 
-                        ? "active" : "")" asp-controller="Money" asp-action="Index">Деньги помесячно</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" 
-                        ? "active" : "")" asp-controller="YearView" asp-action="Index">Таблица за год</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecCodes" 
-                        ? "active" : "")" asp-controller="SecCodes" asp-action="Index">Инструменты</a>
-                    <a class="btn btn-outline-primary @(ViewContext.RouteData.Values["controller"].ToString() == "SecVolume" 
-                        ? "active" : "")" asp-controller="SecVolume" asp-action="Index">Размер позиций</a>
-                </div>*@
-
                 <div class="btn-group" role="group" aria-label="TopMenu">
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
@@ -147,6 +132,11 @@
                             <li>
                                 <a asp-controller="Money" asp-action="MoneySpentAndIncomeOfLast12MonthChart" class="dropdown-item">
                                     График приходов/расходов за последний год
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="Money" asp-action="ExpectedDividentsChart" class="dropdown-item">
+                                    График ожидаемых приходов дивидентов
                                 </a>
                             </li>
                         </ul>

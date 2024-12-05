@@ -6,7 +6,7 @@
 FROM money_by_month s
 join money_spent_by_month m
      on s.date = m.date
-		where s.date < DATE_SUB(curdate(), INTERVAL 1 MONTH)
+		where s.date <= DATE_SUB(curdate(), INTERVAL 1 MONTH)
 	ORDER BY s.date desc
 	limit 12
 ;

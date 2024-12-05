@@ -8,8 +8,6 @@ using DataAbstraction.Models.BaseModels;
 using Newtonsoft.Json;
 using DataAbstraction.Models.WishList;
 using UserInputService;
-using System;
-
 
 namespace InvestmentVisualisation.Controllers
 {

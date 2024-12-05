@@ -7,7 +7,6 @@ namespace DataAbstraction.Models.MoneyByMonth
 		public ChartItemModel(
 			string name,
 			string color,
-			//DataPointsOfBankDepoChartItemModel[] dataPoints,
 			List<DataPointsOfChartItemModel> dataPoints,
 			int lineThickness,
 			string type,
@@ -24,15 +23,6 @@ namespace DataAbstraction.Models.MoneyByMonth
 				this.markerType = markerType;
 			}
 		}
-
-		//public BankDepoChartItemModel(
-		//	string name,
-		//	DataPointsOfBankDepoChartItemModel[] dataPoints
-		//	)
-		//{
-		//	this.name = name;
-		//	this.dataPoints = dataPoints;
-		//}
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "type")]
@@ -56,11 +46,7 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "markerType")]
-		public string markerType;
-
-		////Explicitly setting the name to be used while serializing to JSON.
-		//[DataMember(Name = "markerSize")]
-		//public int markerSize = 30;
+		public string ? markerType;
 
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "xValueType")]
@@ -72,22 +58,7 @@ namespace DataAbstraction.Models.MoneyByMonth
 
 		////Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "dataPoints")]
-		public List<DataPointsOfChartItemModel> dataPoints;
-
-		/*
-		type: "line",
-		name: "Total Visit",
-		lineThickness: 30,
-		color: "#F08080",
-		markerType: "none",
-		xValueType: "dateTime",
-		xValueFormatString: "MMM DD YYYY",
-		dataPoints: [
-			{ x: new Date(2017, 0, 15), y: 20 },
-			{ x: new Date(2017, 3, 16), y: 20 }
-		]
-		*/
-
+		public List<DataPointsOfChartItemModel> ? dataPoints;
 	}
 
 	public class DataPointsOfChartItemModel
@@ -119,9 +90,38 @@ namespace DataAbstraction.Models.MoneyByMonth
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "indexLabelFontWeight")]
 		public string indexLabelFontWeight = "bold";
+	}
 
-		////Explicitly setting the name to be used while serializing to JSON.
-		//[DataMember(Name = "indexLabelTextAlign")]
-		//public string indexLabelTextAlign = "left";
+	[DataContract]
+	public class ExtendedDataPointsOfChartItemModel
+	{
+		public ExtendedDataPointsOfChartItemModel(
+			long x, // date
+			decimal y, // percent
+			decimal z, // volume in rubles
+			string name // seccode			
+			)
+		{
+			this.x = x;
+			this.y = y;
+			this.z = z;
+			this.name = name;
+		}
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "x")]
+		public long x;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "y")]
+		public decimal y;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "z")]
+		public decimal z;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "name")]
+		public string name;
 	}
 }

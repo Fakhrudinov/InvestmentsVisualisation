@@ -1,9 +1,11 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models.BaseModels;
+using DataAbstraction.Models.MoneyByMonth;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
+using UserInputService;
 
 namespace HttpDataRepository
 {
@@ -11,14 +13,17 @@ namespace HttpDataRepository
     {
         private readonly ILogger<WebDividents> _logger;
         private readonly IOptionsSnapshot<WebDiviPageSettings> _namedOptions;
-        private WebDiviPageSettings _options;
+        private WebDiviPageSettings ? _options;
+        private InputHelper _helper;
 
         public WebDividents(
             ILogger<WebDividents> logger, 
-            IOptionsSnapshot<WebDiviPageSettings> namedOptions)
+            IOptionsSnapshot<WebDiviPageSettings> namedOptions,
+            InputHelper helper)
         {
             _logger = logger;
             _namedOptions = namedOptions;
+            _helper = helper;
         }
 
         public DohodDivsAndDatesModel? GetDividentsTableFromDohod(CancellationToken cancellationToken)
@@ -409,5 +414,80 @@ namespace HttpDataRepository
 
             return rawHtmlSource;
         }
-    }
+
+        public List<ExpectedDividentsFromWebModel>? GetFutureDividentsTableFromDohod(
+            CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebDividents " +
+                $"GetDividentsTableFromDohod called");
+
+            _options=_namedOptions.Get("Dohod");
+
+            //download html and get table with dividents
+            string[]? rawDataTableSplitted = DownloadAndGetHtmlTableWithDividents(cancellationToken);
+            if (rawDataTableSplitted is null)
+            {
+                return null;
+            }
+
+            List<ExpectedDividentsFromWebModel> result = new List<ExpectedDividentsFromWebModel>();
+
+			for (int i = _options.NumberOfRowToStartSearchData; i < rawDataTableSplitted.Length; i++)
+			{
+				string[] dataTr = rawDataTableSplitted[i].Split(_options.TableCellSplitter);
+				ExpectedDividentsFromWebModel newDiv = new ExpectedDividentsFromWebModel();
+
+                //get divident dateTime
+                newDiv.Date = GetDateFromTD(dataTr[_options.NumberOfCellWithDiscont + 2]);
+                if (newDiv.Date == DateTime.MinValue)
+                {
+                    // date not found
+                    continue;
+                }
+
+
+                // get divident value for one pieces of shares
+                string dividentPerPieceString = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithDiscont - 3]);
+                if (_helper.IsDecimal(dividentPerPieceString))
+                {
+                    newDiv.DividentToOnePiece = _helper.GetDecimalFromString(dividentPerPieceString);
+                }
+                if (newDiv.DividentToOnePiece == 0)
+                {
+                    // do not add empty values
+                    continue;
+                }
+
+
+                newDiv.SecCode = GetSecCodeFromTD(dataTr[_options.NumberOfCellWithHref].Replace("\"", "'"));
+				if (newDiv.SecCode is null)
+				{
+					// href with tiker name not found
+					continue;
+				}
+
+
+                //get bool - is approoved?
+                if (dataTr[_options.NumberOfCellWithDiscont - 2].Contains("<img"))
+                {
+                    newDiv.IsConfirmed = true;
+                }
+
+				// get divident percents value
+				string dividentPercentString = CleanTextFromHtmlTags(dataTr[_options.NumberOfCellWithDiscont].Replace("%", ""));
+				if (_helper.IsDecimal(dividentPercentString))
+				{
+					newDiv.DividentInPercents = _helper.GetDecimalFromString(dividentPercentString);
+				}
+
+				result.Add(newDiv);
+			}
+
+            if (result.Count == 0)
+            {
+                return null;
+            }
+			return result;
+		}
+	}
 }
