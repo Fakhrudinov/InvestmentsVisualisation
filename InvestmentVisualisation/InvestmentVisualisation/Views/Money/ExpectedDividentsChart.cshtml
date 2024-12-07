@@ -1,27 +1,36 @@
 ﻿
 @{
-	ViewData["Title"] = "Bank Deposits Chart";
+	ViewData["Title"] = "Expected Divs Chart";
 }
 
 @section scripts
 {
 	<script>
 		window.onload = function () {
-
-			var chart = new CanvasJS.Chart("chartContainer", {
+			var chart = new CanvasJS.Chart("chartContainerApprooved", {
+				zoomEnabled: true,
+				title: {
+					text: "Дивиденты, одобренные советом директоров",
+					fontSize: 20,
+				},
 				axisX: {
 					xValueType: "dateTime",					
 				},
 				axisY: {
-					title: "Доходность выплаты",
-					suffix: "%",
+					title: "Доходность выплаты, %",
+					titleFontSize: 17,
+					labelFontSize: 14,
+					//suffix: "%",
 				},
 				axisY2: {
 					title: "Сумма выплат",
+					titleFontSize: 17,
+					labelFontSize: 14,
 				},
 				data: [
 					{
 						type: "bubble",
+						color: "#80FF80",
 						xValueType: "dateTime",
 						yValueFormatString: "####.##",
 						zValueFormatString: "####.##",
@@ -32,6 +41,7 @@
 					},
 					{
 						type: "stepLine",
+						color: "#F08080",
 						axisYType: "secondary",
 						toolTipContent: "Накопительный итог: {y}",
 						yValueFormatString: "####.## руб",
@@ -41,30 +51,65 @@
 				]
 			});
 			chart.render();
+
+
+			var chart2 = new CanvasJS.Chart("chartContainerPossible", {
+				zoomEnabled: true,
+				title: {
+					text: "Возможные дивиденты, неподтвержденные советом директоров",
+					fontSize: 20,
+				},
+				axisX: {
+					xValueType: "dateTime",
+					labelFontSize: 14,
+					interval: 1,
+					intervalType: "month",
+				},
+				axisY: {
+					title: "Доходность выплаты, %",
+					titleFontSize: 17,
+					labelFontSize: 14,
+					//suffix: "%",
+				},
+				axisY2: {
+					title: "Сумма выплат",
+					titleFontSize: 17,
+					labelFontSize: 14,
+				},
+				// toolTip: {
+				// 	shared: true
+				// },
+				data: [
+					{
+						type: "bubble",
+						xValueType: "dateTime",
+						yValueFormatString: "####.##",
+						zValueFormatString: "####.##",
+						indexLabel: "{name}",
+						//indexLabelFontWeight: "bold",
+						indexLabelFontSize: 10,
+						toolTipContent: "<b>{name}</b><br/>дата: {x} <br/>доходность: {y}%<br/>сумма: {z} руб.",
+						dataPoints: @Html.Raw(ViewBag.PossibleDivsChartDataPoints)
+							},
+					{
+						type: "stepLine",
+						color: "#F08080",
+						axisYType: "secondary",
+						toolTipContent: "Накопительный итог: {y}",
+						yValueFormatString: "####.## руб",
+						// indexLabel: "{y}",
+						dataPoints: @Html.Raw(ViewBag.PossibleDivsChartVolumeDataPoints)
+					}
+
+				]
+			});
+			chart2.render();
 		}
 	</script>
 }
 
 <div class="container">
 	<h3 style="text-align:center">Ожидаемый в будущем приход дивидентов</h3>
-	<div id="chartContainer" style="width: 100%;"></div>
-
+	<div id="chartContainerApprooved" style="width: 100%; height: 400px; display: inline-block;"></div>
+	<div id="chartContainerPossible" style="width: 100%; height: 550px;display: inline-block;margin-top:30px;"></div>
 </div>
-
-@* <div>
-	<br />
-	<br />
-	<h5>Месяцы по дивидендам</h5>
-	<p>Январь платят почти в расходы</p>
-	<p>Февраль без денег</p>
-	<p>Март без денег</p>
-	<p>Апрель без денег</p>
-	<p>Май платят почти в расходы</p>
-	<p>Июнь</p>
-	<p>Июль</p>
-	<p>Август</p>
-	<p>Сентябрь без денег</p>
-	<p>Октябрь</p>
-	<p>Ноябрь</p>
-	<p>Декабрь</p>
-</div> *@

@@ -338,8 +338,60 @@ namespace InvestmentVisualisation.Controllers
 				volumeDataPoints.Add ( newVolumeDataPoint );
 			}
 
+			List<ExtendedDataPointsOfChartItemModel> possibleDivsExtendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
+			List<DataPointsOfChartItemModel> possibleDivsVolumeDataPoints = new List<DataPointsOfChartItemModel>();
+            int couterColor = 0;
+			foreach (ExpectedDividentsFromWebModel webDiv in dohodDivs)
+			{
+				if (webDiv.IsConfirmed)
+				{
+					continue;
+				}
+
+                string[] pseudoRandomColorTable = new string [] 
+                {
+					"rgba(10,200,10,0.3)",
+					"rgba(10,10,200,0.3)",
+					"rgba(200,10,10,0.3)",
+					"rgba(10,200,200,0.3)",
+					"rgba(200,200,10,0.3)",
+					"rgba(200,10,200,0.3)",
+					"rgba(200,200,200,0.3)",
+					"rgba(50,255,99,0.3)"
+				};
+
+				long dateOfDiv = new DateTimeOffset(webDiv.Date.AddDays(18)).ToUnixTimeSeconds() * 1000;
+				decimal onePercent = (webDiv.DividentToOnePiece * webDiv.Pieces) / 100;
+				decimal amountMinusTax = (webDiv.DividentToOnePiece * webDiv.Pieces) - (onePercent * 15);
+				summ = summ + (int)amountMinusTax;
+
+				ExtendedDataPointsOfChartItemModel newDataPoint = new ExtendedDataPointsOfChartItemModel(
+					dateOfDiv,
+					webDiv.DividentInPercents,
+					amountMinusTax,
+					webDiv.SecCode,
+                    pseudoRandomColorTable[couterColor]
+					);
+                couterColor ++;
+                if ( couterColor == pseudoRandomColorTable.Length)
+                {
+                    couterColor = 0;
+
+				}
+				possibleDivsExtendedDataPoints.Add(newDataPoint);
+
+				DataPointsOfChartItemModel newVolumeDataPoint = new DataPointsOfChartItemModel(
+					dateOfDiv,
+					summ);
+				possibleDivsVolumeDataPoints.Add(newVolumeDataPoint);
+			}
+
 			ViewBag.ChartDataPoints = JsonConvert.SerializeObject(extendedDataPoints);
 			ViewBag.ChartVolumeDataPoints = JsonConvert.SerializeObject(volumeDataPoints);
+
+			ViewBag.PossibleDivsChartDataPoints = JsonConvert.SerializeObject(possibleDivsExtendedDataPoints);
+			ViewBag.PossibleDivsChartVolumeDataPoints = JsonConvert.SerializeObject(possibleDivsVolumeDataPoints);
+
 			ViewBag.ChartItemsCount = extendedDataPoints.Count;// layout load script: @if(ViewBag.ChartItemsCount != null)
 
 			return View();

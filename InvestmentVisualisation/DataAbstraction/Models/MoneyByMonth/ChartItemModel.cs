@@ -99,13 +99,15 @@ namespace DataAbstraction.Models.MoneyByMonth
 			long x, // date
 			decimal y, // percent
 			decimal z, // volume in rubles
-			string name // seccode			
+			string name, // seccode
+			string ? color = null
 			)
 		{
 			this.x = x;
 			this.y = y;
 			this.z = z;
 			this.name = name;
+			this.color = color;
 		}
 
 		//Explicitly setting the name to be used while serializing to JSON.
@@ -123,5 +125,9 @@ namespace DataAbstraction.Models.MoneyByMonth
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "name")]
 		public string name;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "color")]
+		public string ? color;
 	}
 }

@@ -1,6 +1,6 @@
 ﻿
 @{
-	ViewData["Title"] = "Bank Deposits Chart";
+	ViewData["Title"] = "Money Spent Chart";
 	int startValue = @ViewBag.ScaleBreaksLow + 10000;
 	int endValue = @ViewBag.ScaleBreaksHigh - 10000;
 }
@@ -38,7 +38,7 @@
 
 <div class="container">
 	<h3 style="text-align:center">Расходы и приход дивидентов</h3>
-	<div id="chartContainer" style="width: 100%;"></div>
+	<div id="chartContainer" style="width: 100%; height: 550px;display: inline-block;"></div>
 	<br />
 	<br />
 	<h5>Месяцы по дивидентам</h5>
