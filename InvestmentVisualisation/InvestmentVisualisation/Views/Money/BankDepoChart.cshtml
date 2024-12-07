@@ -42,7 +42,9 @@
 					}
 				},
 				toolTip: {
-					shared: true
+					shared: true,
+					//content: "{x}: {y[#index]}",
+					fontColor: "black",
 				},
 				data: @Html.Raw(ViewBag.ChartItemArray)
 			});
