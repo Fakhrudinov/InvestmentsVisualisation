@@ -49,11 +49,78 @@
 				data: @Html.Raw(ViewBag.ChartItemArray)
 			});
 			chart.render();
+
+
+			var chart2 = new CanvasJS.Chart("chartContainerPayments", {
+				//zoomEnabled: true,
+				title: {
+					text: "Ожидаемые (примерные) выплаты по вкладам.",
+					fontSize: 16,
+				},
+				axisX: {
+					valueFormatString: "DD MMM",
+					//labelAngle: -30,
+					minimum: @ViewBag.ShowChartFrom,
+					maximum: @ViewBag.ShowChartTo,
+					interval: 1,
+					intervalType: "month",
+					crosshair: {
+						enabled: true,
+						snapToDataPoint: true
+					},
+					stripLines: [{
+						//value: new Date(2024, 11, 20),
+						value: new Date(@DateTimeOffset.Now.ToUnixTimeSeconds() * 1000),
+						label: "NOW",
+						labelFontColor: "#FF0000",
+						labelPlacement: "inside",//"inside",//"outside"
+						labelAlign: "near"//"far"//"center", "near"//useless when outside
+					}]
+				},
+				axisY: {
+					// title: "Доходность выплаты, %",
+					// titleFontSize: 17,
+					// labelFontSize: 14,
+					//suffix: "%",
+				},
+				// axisY2: {
+				// 	title: "Сумма выплат",
+				// 	titleFontSize: 17,
+				// 	labelFontSize: 14,
+				// },
+				// toolTip: {
+				// 	shared: true
+				// },
+				data: [
+					{
+						type: "bubble",
+						xValueType: "dateTime",
+						yValueFormatString: "####.##",
+						zValueFormatString: "####.##",
+						indexLabel: "{y}",
+						indexLabelFontWeight: "bold",
+						indexLabelFontSize: 10,
+						toolTipContent: "<b>{name}</b><br/>Дата закрытия: {x}<br/>Выплата: {z} руб.",
+						dataPoints: @Html.Raw(ViewBag.PaymentsChartItemArray)
+					},
+					// {
+					// 	type: "stepLine",
+					// 	color: "#F08080",
+					// 	axisYType: "secondary",
+					// 	toolTipContent: "Накопительный итог: {y}",
+					// 	yValueFormatString: "####.## руб",
+					// 	// indexLabel: "{y}",
+					// 	dataPoints: @Html.Raw(ViewBag.PossibleDivsChartVolumeDataPoints)
+					// }
+				]
+			});
+			chart2.render();
 		}
 	</script>
 }
 
 <div class="container">
-	<h3 style="text-align:center">Деньги на вкладах: @ViewBag.TotalSumm</h3>
-	<div id="chartContainer" style="width: 100%;"></div>
+	<h3 style="text-align:center">Деньги на банковских вкладах: @ViewBag.TotalSumm</h3>
+	<div id="chartContainer" style="width: 100%; height: 400px; display: inline-block;"></div>
+	<div id="chartContainerPayments" style="width: 100%; height: 300px;display: inline-block;margin-top:30px;"></div>
 </div>

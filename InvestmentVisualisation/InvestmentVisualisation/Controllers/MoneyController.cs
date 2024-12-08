@@ -90,8 +90,8 @@ namespace InvestmentVisualisation.Controllers
         public async Task<IActionResult> BankDepoChart(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController BankDepoChart called");
-
-            List<BankDepoDataBaseModel>? bankDepoDBModelItems = await _repository.GetBankDepoChartData(cancellationToken);
+            int backSpaceAtChart = -25;
+            List<BankDepoDBModel>? bankDepoDBModelItems = await _repository.GetBankDepoChartData(cancellationToken);
 
             if (bankDepoDBModelItems is not null)
             {
@@ -158,10 +158,47 @@ namespace InvestmentVisualisation.Controllers
 
                     сhartItems[i] = newChartItem;
                 }
-                ViewBag.ShowChartFrom = collectionOfAllDate[0].AddDays(-25).ToUnixTimeSeconds() * 1000;
+
+                // second chart - money income from bank
+                List<BankDepoDBPaymentData> ? bankDepoDBPayments = await _repository.GetBankDepositsEndedAfterDate(
+                    cancellationToken,
+                    collectionOfAllDate[0].AddDays(backSpaceAtChart).ToString("yyyy-MM-dd")
+                    );
+                if (bankDepoDBPayments is not null)
+                {
+                    List<ExtendedDataPointsOfChartItemModel> payments = new List<ExtendedDataPointsOfChartItemModel>();
+					foreach (BankDepoDBPaymentData paymentData in bankDepoDBPayments)
+                    {
+                        decimal summToPayWithTax =  
+                            (
+                                (paymentData.SummAmount * paymentData.Percent * paymentData.DaysOfDeposit)
+                                /365
+                            )
+                            /100;
+
+						ExtendedDataPointsOfChartItemModel newChartDataPoint = new ExtendedDataPointsOfChartItemModel(
+                            paymentData.DateClose.ToUnixTimeSeconds() * 1000,
+							summToPayWithTax,
+							summToPayWithTax,
+                            paymentData.Name + " (" + paymentData.SummAmount + ")"
+							);
+
+                        if (!paymentData.IsOpen && paymentData.IncomeSummAmount is not null)
+                        {
+							newChartDataPoint.y = (decimal)paymentData.IncomeSummAmount;
+							newChartDataPoint.z = (decimal)paymentData.IncomeSummAmount;
+						}
+
+                        payments.Add(newChartDataPoint);
+                    }
+                    ViewBag.PaymentsChartItemArray = JsonConvert.SerializeObject(payments);
+                }
+
+                ViewBag.ShowChartFrom = collectionOfAllDate[0].AddDays(backSpaceAtChart).ToUnixTimeSeconds() * 1000;
                 ViewBag.ShowChartTo = collectionOfAllDate[collectionOfAllDate.Count - 1].AddDays(15).ToUnixTimeSeconds() * 1000;
                 ViewBag.TotalSumm = totalSumm;
                 ViewBag.ChartItemArray = JsonConvert.SerializeObject(сhartItems);
+
                 ViewBag.ChartItemsCount = сhartItems.Length;// layout load script: @if (ViewBag.ChartItemsCount is not null)
             }
 
@@ -398,10 +435,10 @@ namespace InvestmentVisualisation.Controllers
         }
 
 
-        private List<DateTimeOffset> CreateAndSortCollectionOfAllDates(List<BankDepoDataBaseModel> bankDepoDBModelItems)
+        private List<DateTimeOffset> CreateAndSortCollectionOfAllDates(List<BankDepoDBModel> bankDepoDBModelItems)
         {
             List<DateTimeOffset> dates = new List<DateTimeOffset>();
-            foreach (BankDepoDataBaseModel item in bankDepoDBModelItems)
+            foreach (BankDepoDBModel item in bankDepoDBModelItems)
             {
                 if (!dates.Contains(item.DateOpen))
                 {

@@ -48,6 +48,9 @@
     <None Update="SqlQueries\Money\GetActualSecCodeAndNameAndPieces.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\Money\GetBankDepositsEndedAfterDate.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Money\GetMoneySpentAndIncomeModelChartData.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

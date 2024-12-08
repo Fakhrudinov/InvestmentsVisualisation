@@ -5,6 +5,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Collections.Generic;
 
 namespace DataBaseRepository
 {
@@ -213,7 +214,7 @@ namespace DataBaseRepository
             _commonRepo.FillFreeMoney();
         }
 
-		public async Task<List<BankDepoDataBaseModel>?> GetBankDepoChartData(CancellationToken cancellationToken)
+		public async Task<List<BankDepoDBModel>?> GetBankDepoChartData(CancellationToken cancellationToken)
 		{
 			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
 				$"GetBankDepoChartData start");
@@ -230,7 +231,7 @@ namespace DataBaseRepository
 			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                 $"GetBankDepoChartData query GetBankDepoChartData.sql text:\r\n{query}");
 
-            List<BankDepoDataBaseModel> bankDepoChartItems = new List<BankDepoDataBaseModel>();
+            List<BankDepoDBModel> bankDepoChartItems = new List<BankDepoDBModel>();
 
 			using (MySqlConnection con = new MySqlConnection(_connectionString))
 			{
@@ -246,7 +247,7 @@ namespace DataBaseRepository
 						{
 							while (await sdr.ReadAsync(cancellationToken))
 							{
-								BankDepoDataBaseModel newChartItem = new BankDepoDataBaseModel();
+								BankDepoDBModel newChartItem = new BankDepoDBModel();
 
 								newChartItem.DateOpen = sdr.GetDateTimeOffset("date_open");
 								newChartItem.DateClose = sdr.GetDateTimeOffset("date_close");
@@ -420,6 +421,100 @@ namespace DataBaseRepository
             }
 
             return сhartItems;
+        }
+
+        public async Task<List<BankDepoDBPaymentData>?> GetBankDepositsEndedAfterDate(
+            CancellationToken cancellationToken, 
+            string date)
+        {
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                 $"GetBankDepositsEndedAfterDate {date} start");
+
+            string filePath = Path.Combine(
+                Directory.GetCurrentDirectory(), 
+                "SqlQueries", 
+                "Money", 
+                "GetBankDepositsEndedAfterDate.sql");
+            if (!File.Exists(filePath))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
+                    $"File with SQL script not found at " + filePath);
+                return null;
+            }
+
+            List<BankDepoDBPaymentData> result = new List<BankDepoDBPaymentData>();
+            string query = File.ReadAllText(filePath);
+
+                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                    $"GetBankDepositsEndedAfterDate {date} execute query \r\n{query}");
+
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
+                {
+                    cmd.Connection = con;
+                    cmd.Parameters.AddWithValue("@data", date);
+
+                    try
+                    {
+                        await con.OpenAsync(cancellationToken);
+
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+                        {
+                            while (await sdr.ReadAsync(cancellationToken))
+                            {
+                                BankDepoDBPaymentData newChartItem = new BankDepoDBPaymentData();
+                                // select bd.name,
+                                // bd.date_close,
+                                // bd.summ,
+                                // bd.percent,
+                                // bd.isopen,
+                                // bd.income_summ, NULL !
+                                // DATEDIFF(bd.date_close,bd.date_open) as days
+                                newChartItem.Name = sdr.GetString("name");
+                                newChartItem.DateClose = sdr.GetDateTimeOffset("date_close");
+                                newChartItem.Percent = sdr.GetDecimal("percent");
+                                newChartItem.SummAmount = sdr.GetDecimal("summ");
+
+                                int isOpenInt = sdr.GetInt16("isopen");
+                                if (isOpenInt == 1)
+                                {
+                                    newChartItem.IsOpen = true;
+                                }
+
+                                int checkForNull1 = sdr.GetOrdinal("income_summ");
+                                if (!sdr.IsDBNull(checkForNull1))
+                                {
+                                    newChartItem.IncomeSummAmount = sdr.GetDecimal("income_summ");
+                                }
+
+                                newChartItem.DaysOfDeposit = sdr.GetInt16("days");
+
+
+                                result.Add(newChartItem);
+                            }
+                        }
+
+                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                            $"GetBankDepositsEndedAfterDate executed");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+                            $"GetBankDepositsEndedAfterDate Exception!\r\n{ex.Message}");
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
+                    }
+                }
+            }
+
+            if (result.Count == 0)
+            {
+                return null;
+            }
+            return result;
         }
     }
 }

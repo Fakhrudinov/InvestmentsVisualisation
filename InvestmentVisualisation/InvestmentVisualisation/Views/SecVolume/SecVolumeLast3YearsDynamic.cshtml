@@ -308,7 +308,12 @@
 
                     @if (ViewBag.SmartLab == true)
                     {
-                        string tiker = item.SecCode.Substring(0, 4);
+                        string tiker = item.SecCode;
+                        if (item.SecCode is not null && item.SecCode.Length >= 4)
+                        {
+                            tiker = item.SecCode.Substring(0, 4);
+                        }
+
                         string link = "https://smart-lab.ru/q/" + tiker + "/dividend/";
                         <td style="
                                     border-right-color:black; 
