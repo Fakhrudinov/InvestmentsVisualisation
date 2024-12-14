@@ -5,7 +5,6 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
-using System.Collections.Generic;
 
 namespace DataBaseRepository
 {
@@ -35,23 +34,15 @@ namespace DataBaseRepository
         public async Task<List<MoneyModel>> GetMoneyLastYearPage(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                $"GetMoneyLastYearPage start");            
+                $"GetMoneyLastYearPage start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetMoneyLastYearPage.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return _result;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                    $"GetMoneyLastYearPage execute query \r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetMoneyLastYearPage.sql");
+			if (query is null)
+			{
+				return _result;
+			}
 
-                return await GetMoneyPageByQuery(cancellationToken, query);
-            }
+			return await GetMoneyPageByQuery(cancellationToken, query);
         }
 
         public async Task<List<MoneyModel>> GetMoneyYearPage(CancellationToken cancellationToken, int year)
@@ -59,24 +50,14 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                 $"GetMoneyYearPage {year} start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetMoneyYearPage.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return _result;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetMoneyYearPage.sql");
+			if (query is null)
+			{
+				return _result;
+			}
 
-                query = query.Replace("@year", year.ToString());
-
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                    $"GetMoneyYearPage {year} execute query \r\n{query}");
-
-                return await GetMoneyPageByQuery(cancellationToken, query);
-            }
+			query = query.Replace("@year", year.ToString());
+			return await GetMoneyPageByQuery(cancellationToken, query);
         }
 
         private async Task<List<MoneyModel>> GetMoneyPageByQuery(CancellationToken cancellationToken, string query)
@@ -166,19 +147,9 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                 $"RecalculateMoney {data} start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "RecalculateMoney.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                    $"RecalculateMoney {data} execute query \r\n{query}");
-
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "RecalculateMoney.sql");
+			if (query is not null)
+			{
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query))
@@ -219,19 +190,13 @@ namespace DataBaseRepository
 			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
 				$"GetBankDepoChartData start");
 
-			string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Money", "GetBankDepoChartData.sql");
-			if (!File.Exists(filePath))
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetBankDepoChartData.sql");
+			if (query is null)
 			{
-				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-					$"File with SQL script not found at " + filePath);
 				return null;
 			}
 
-			string query = File.ReadAllText(filePath);
-			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                $"GetBankDepoChartData query GetBankDepoChartData.sql text:\r\n{query}");
-
-            List<BankDepoDBModel> bankDepoChartItems = new List<BankDepoDBModel>();
+			List<BankDepoDBModel> bankDepoChartItems = new List<BankDepoDBModel>();
 
 			using (MySqlConnection con = new MySqlConnection(_connectionString))
 			{
@@ -286,22 +251,13 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                 $"GetMoneySpentAndIncomeModelChartData start");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Money", 
-                "GetMoneySpentAndIncomeModelChartData.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return null;
-            }
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetMoneySpentAndIncomeModelChartData.sql");
+			if (query is null)
+			{
+				return null;
+			}
 
-            string query = File.ReadAllText(filePath);
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                $"GetMoneySpentAndIncomeModelChartData query GetMoneySpentAndIncomeModelChartData.sql text:\r\n{query}");
-
-            List<MoneySpentAndIncomeModel> сhartItems = new List<MoneySpentAndIncomeModel>();
+			List<MoneySpentAndIncomeModel> сhartItems = new List<MoneySpentAndIncomeModel>();
 
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
@@ -354,21 +310,12 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                 $"GetActualSecCodeAndNameAndPieces start with year={year}");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(),
-                "SqlQueries",
-                "Money",
-                "GetActualSecCodeAndNameAndPieces.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return null;
-            }
-
-            string query = File.ReadAllText(filePath);
-            query = query.Replace("@year", year.ToString());
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                $"GetActualSecCodeAndNameAndPieces query GetActualSecCodeAndNameAndPieces.sql text:\r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetActualSecCodeAndNameAndPieces.sql");
+			if (query is null)
+			{
+				return null;
+			}
+			query = query.Replace("@year", year.ToString());
 
             List<SecCodeAndNameAndPiecesModel> сhartItems = new List<SecCodeAndNameAndPiecesModel>();
 
@@ -392,14 +339,6 @@ namespace DataBaseRepository
                                 newChartItem.Pieces = sdr.GetInt32("pieces");
 
                                 сhartItems.Add(newChartItem);
-                                /*
-                                 SELECT si.seccode, si.name, sv.pieces_2024 as pieces-- , sv.volume_2024 
-	                                FROM money_test.seccode_info si 
-                                    right join money_test.sec_volume sv
-                                    on sv.seccode = si.seccode
-		                                where si.secboard = 1 
-                                        and si.expired_date is null;
-                                */
                             }
                         }
                     }
@@ -430,23 +369,13 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
                  $"GetBankDepositsEndedAfterDate {date} start");
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Money", 
-                "GetBankDepositsEndedAfterDate.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return null;
-            }
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetBankDepositsEndedAfterDate.sql");
+			if (query is null)
+			{
+				return null;
+			}
 
-            List<BankDepoDBPaymentData> result = new List<BankDepoDBPaymentData>();
-            string query = File.ReadAllText(filePath);
-
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                    $"GetBankDepositsEndedAfterDate {date} execute query \r\n{query}");
+			List<BankDepoDBPaymentData> result = new List<BankDepoDBPaymentData>();
 
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
@@ -464,13 +393,7 @@ namespace DataBaseRepository
                             while (await sdr.ReadAsync(cancellationToken))
                             {
                                 BankDepoDBPaymentData newChartItem = new BankDepoDBPaymentData();
-                                // select bd.name,
-                                // bd.date_close,
-                                // bd.summ,
-                                // bd.percent,
-                                // bd.isopen,
-                                // bd.income_summ, NULL !
-                                // DATEDIFF(bd.date_close,bd.date_open) as days
+
                                 newChartItem.Name = sdr.GetString("name");
                                 newChartItem.DateClose = sdr.GetDateTimeOffset("date_close");
                                 newChartItem.Percent = sdr.GetDecimal("percent");

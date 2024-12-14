@@ -53,18 +53,12 @@ namespace DataBaseRepository
 
         public async Task<int> GetIncomingCount(CancellationToken cancellationToken)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "GetIncomingCount.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return 0;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
-            }
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "GetIncomingCount.sql");
+			if (query is null)
+			{
+				return 0;
+			}
+			return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
         }
 
         public async Task<List<IncomingModel>> GetPageFromIncoming(
@@ -77,73 +71,61 @@ namespace DataBaseRepository
 
             List<IncomingModel> result = new List<IncomingModel>();
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "GetPageFromIncoming.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return result;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                    $"GetPageFromIncoming execute query \r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "GetPageFromIncoming.sql");
+			if (query is null)
+			{
+				return result;
+			}
 
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
                 {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    cmd.Connection = con;
+
+                    cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
+                    cmd.Parameters.AddWithValue("@page_number", pageNumber);
+
+                    try
                     {
-                        cmd.Connection = con;
+                        await con.OpenAsync(cancellationToken);
 
-                        cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
-                        cmd.Parameters.AddWithValue("@page_number", pageNumber);
-
-                        try
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                         {
-                            await con.OpenAsync(cancellationToken);
-
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+                            while (await sdr.ReadAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync(cancellationToken))
+                                IncomingModel newIncoming = new IncomingModel();
+
+                                newIncoming.Id = sdr.GetInt32("id");
+                                newIncoming.Date = sdr.GetDateTime("date");
+                                newIncoming.SecCode = sdr.GetString("seccode");
+                                newIncoming.SecBoard = sdr.GetInt32("secboard");
+                                newIncoming.Category= sdr.GetInt32("category");
+                                newIncoming.Value = sdr.GetDecimal("value").ToString();
+
+                                int checkForNull = sdr.GetOrdinal("comission");
+                                if (!sdr.IsDBNull(checkForNull))
                                 {
-                                    IncomingModel newIncoming = new IncomingModel();
-
-                                    newIncoming.Id = sdr.GetInt32("id");
-                                    newIncoming.Date = sdr.GetDateTime("date");
-                                    newIncoming.SecCode = sdr.GetString("seccode");
-                                    newIncoming.SecBoard = sdr.GetInt32("secboard");
-                                    newIncoming.Category= sdr.GetInt32("category");
-                                    newIncoming.Value = sdr.GetDecimal("value").ToString();
-
-                                    int checkForNull = sdr.GetOrdinal("comission");
-                                    if (!sdr.IsDBNull(checkForNull))
-                                    {
-                                        newIncoming.Comission = sdr.GetDecimal("comission").ToString();
-                                    }
-
-                                    result.Add(newIncoming);
+                                    newIncoming.Comission = sdr.GetDecimal("comission").ToString();
                                 }
+
+                                result.Add(newIncoming);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"GetPageFromIncoming Exception!\r\n{ex.Message}");
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"GetPageFromIncoming Exception!\r\n{ex.Message}");
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
                     }
                 }
-
-                return result;
             }
+
+            return result;
         }
 
         public async Task<string> CreateNewIncoming(CancellationToken cancellationToken, CreateIncomingModel newIncoming)
@@ -153,68 +135,61 @@ namespace DataBaseRepository
                 $"{newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} Category={newIncoming.Category} " +
                 $"Value={newIncoming.Value} Comission={newIncoming.Comission}");
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "Incoming", "CreateNewIncoming.sql");
-            if (!File.Exists(filePath))
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "CreateNewIncoming.sql");
+			if (query is null)
+			{
+				return "MySqlIncomingRepository Error! File with SQL script not found.";
+			}
+
+			if (newIncoming.Comission is null)
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
+                query = query.Replace(", `comission`", "");
+                query = query.Replace(", @comission", "");
             }
-            else
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                $"CreateNewIncoming execute query \r\n{query}");
+
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                string query = File.ReadAllText(filePath);
-                if (newIncoming.Comission is null)
+                using (MySqlCommand cmd = new MySqlCommand(query))
                 {
-                    query = query.Replace(", `comission`", "");
-                    query = query.Replace(", @comission", "");
-                }
+                    cmd.Connection = con;
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                    $"CreateNewIncoming execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
-                {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    //(@date_time, @seccode, @secboard, @category, @value, @comission);
+                    cmd.Parameters.AddWithValue("@date_time", newIncoming.Date);
+                    cmd.Parameters.AddWithValue("@seccode", newIncoming.SecCode);
+                    cmd.Parameters.AddWithValue("@secboard", newIncoming.SecBoard);
+                    cmd.Parameters.AddWithValue("@category", newIncoming.Category);
+                    cmd.Parameters.AddWithValue("@value", newIncoming.Value);
+                    if (newIncoming.Comission is not null)
                     {
-                        cmd.Connection = con;
-
-                        //(@date_time, @seccode, @secboard, @category, @value, @comission);
-                        cmd.Parameters.AddWithValue("@date_time", newIncoming.Date);
-                        cmd.Parameters.AddWithValue("@seccode", newIncoming.SecCode);
-                        cmd.Parameters.AddWithValue("@secboard", newIncoming.SecBoard);
-                        cmd.Parameters.AddWithValue("@category", newIncoming.Category);
-                        cmd.Parameters.AddWithValue("@value", newIncoming.Value);
-                        if (newIncoming.Comission is not null)
-                        {
-                            cmd.Parameters.AddWithValue("@comission", newIncoming.Comission);
-                        }
-
-                        try
-                        {
-                            await con.OpenAsync(cancellationToken);
-
-                            //Return Int32 Number of rows affected
-                            int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"CreateNewIncoming execution affected {insertResult} lines");
-
-                            return insertResult.ToString();
-
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"CreateNewIncoming Exception!\r\n{ex.Message}");
-                            return ex.Message;
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
+                        cmd.Parameters.AddWithValue("@comission", newIncoming.Comission);
                     }
-                }                
-            }
 
+                    try
+                    {
+                        await con.OpenAsync(cancellationToken);
+
+                        //Return Int32 Number of rows affected
+                        int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"CreateNewIncoming execution affected {insertResult} lines");
+
+                        return insertResult.ToString();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"CreateNewIncoming Exception!\r\n{ex.Message}");
+                        return ex.Message;
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
+                    }
+                }
+            }                
             //INSERT INTO `incoming` (`date`, `seccode`, `secboard`, `category`, `value`)
             //  VALUES ('2023-02-16', 'TRMK',         '1', '1', '4482.8');
             //INSERT INTO `incoming` (`date`, `seccode`, `secboard`, `category`, `value`, `comission`)
@@ -228,69 +203,56 @@ namespace DataBaseRepository
 
             IncomingModel result = new IncomingModel();
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "GetSingleIncomingById.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                
-                return result;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                    $"GetSingleIncomingById={id} execute query \r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "GetSingleIncomingById.sql");
+			if (query is null)
+			{
+				return result;
+			}
 
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
                 {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    cmd.Connection = con;
+
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    try
                     {
-                        cmd.Connection = con;
+                        await con.OpenAsync(cancellationToken);
 
-                        cmd.Parameters.AddWithValue("@id", id);
-
-                        try
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                         {
-                            await con.OpenAsync(cancellationToken);
-
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+                            while (await sdr.ReadAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync(cancellationToken))
-                                {
-                                    result.Id = sdr.GetInt32("id");
-                                    result.Date = sdr.GetDateTime("date");
-                                    result.SecCode = sdr.GetString("seccode");
-                                    result.SecBoard = sdr.GetInt32("secboard");
-                                    result.Category= sdr.GetInt32("category");
-                                    result.Value = sdr.GetDecimal("value").ToString();
+                                result.Id = sdr.GetInt32("id");
+                                result.Date = sdr.GetDateTime("date");
+                                result.SecCode = sdr.GetString("seccode");
+                                result.SecBoard = sdr.GetInt32("secboard");
+                                result.Category= sdr.GetInt32("category");
+                                result.Value = sdr.GetDecimal("value").ToString();
 
-                                    int checkForNull = sdr.GetOrdinal("comission");
-                                    if (!sdr.IsDBNull(checkForNull))
-                                    {
-                                        result.Comission = sdr.GetDecimal("comission").ToString();
-                                    }
+                                int checkForNull = sdr.GetOrdinal("comission");
+                                if (!sdr.IsDBNull(checkForNull))
+                                {
+                                    result.Comission = sdr.GetDecimal("comission").ToString();
                                 }
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"GetSingleIncomingById={id} Exception!\r\n{ex.Message}");
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"GetSingleIncomingById={id} Exception!\r\n{ex.Message}");
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
                     }
                 }
-
-                return result;
             }
+
+            return result;
         }
 
         public async Task<string> EditSingleIncoming(CancellationToken cancellationToken, IncomingModel newIncoming)
@@ -299,68 +261,55 @@ namespace DataBaseRepository
                 $"Id={newIncoming.Id} {newIncoming.Date} {newIncoming.SecCode} SecBoard={newIncoming.SecBoard} " +
                 $"Category={newIncoming.Category} Value={newIncoming.Value} Comission={newIncoming.Comission}");
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "EditSingleIncoming.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "EditSingleIncoming.sql");
+			if (query is null)
+			{
+				return "MySqlIncomingRepository Error! File with SQL script not found.";
+			}
 
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                    $"EditSingleIncoming execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
                 {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    cmd.Connection = con;                       
+
+                    //@id @date_time, @seccode, @secboard, @category, @value, @comission
+                    cmd.Parameters.AddWithValue("@id", newIncoming.Id);
+                    cmd.Parameters.AddWithValue("@date_time", newIncoming.Date);
+                    cmd.Parameters.AddWithValue("@seccode", newIncoming.SecCode);
+                    cmd.Parameters.AddWithValue("@secboard", newIncoming.SecBoard);
+                    cmd.Parameters.AddWithValue("@category", newIncoming.Category);
+                    cmd.Parameters.AddWithValue("@value", newIncoming.Value);
+                    if (newIncoming.Comission is not null)
                     {
-                        cmd.Connection = con;                       
+                        cmd.Parameters.AddWithValue("@comission", newIncoming.Comission);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@comission", null);
+                    }
 
-                        //@id @date_time, @seccode, @secboard, @category, @value, @comission
-                        cmd.Parameters.AddWithValue("@id", newIncoming.Id);
-                        cmd.Parameters.AddWithValue("@date_time", newIncoming.Date);
-                        cmd.Parameters.AddWithValue("@seccode", newIncoming.SecCode);
-                        cmd.Parameters.AddWithValue("@secboard", newIncoming.SecBoard);
-                        cmd.Parameters.AddWithValue("@category", newIncoming.Category);
-                        cmd.Parameters.AddWithValue("@value", newIncoming.Value);
-                        if (newIncoming.Comission is not null)
-                        {
-                            cmd.Parameters.AddWithValue("@comission", newIncoming.Comission);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("@comission", null);
-                        }
+                    try
+                    {
+                        await con.OpenAsync(cancellationToken);
 
-                        try
-                        {
-                            await con.OpenAsync(cancellationToken);
+                        //Return Int32 Number of rows affected
+                        int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                        _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"EditSingleIncoming execution affected {insertResult} lines");
 
-                            //Return Int32 Number of rows affected
-                            int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
-                            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"EditSingleIncoming execution affected {insertResult} lines");
+                        return insertResult.ToString();
 
-                            return insertResult.ToString();
-
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"EditSingleIncoming Exception!\r\n{ex.Message}");
-                            return ex.Message;
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"EditSingleIncoming Exception!\r\n{ex.Message}");
+                        return ex.Message;
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
                     }
                 }
             }
@@ -371,70 +320,48 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
                 $"DeleteSingleIncoming id={id} start");
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "DeleteSingleIncoming.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                query = query.Replace("@id", id.ToString());
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "DeleteSingleIncoming.sql");
+			if (query is null)
+			{
+				return "MySqlIncomingRepository Error! File with SQL script not found.";
+			}
 
-                return await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
-            }
+            query = query.Replace("@id", id.ToString());
+            return await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
         }
 
-        public async Task<string> GetSecCodeFromLastRecord(CancellationToken cancellationToken)
+		public async Task<string> GetSecCodeFromLastRecord(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
                 $"GetSecCodeFromLastRecord start");
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "GetSecCodeFromLastRecord.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return "MySqlIncomingRepository Error! File with SQL script not found at " + filePath;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                    $"GetSecCodeFromLastRecord execute query \r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "GetSecCodeFromLastRecord.sql");
+			if (query is null)
+			{
+				return "MySqlIncomingRepository Error! File with SQL script not found.";
+			}
 
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
                 {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    cmd.Connection = con;
+
+                    try
                     {
-                        cmd.Connection = con;
+                        await con.OpenAsync(cancellationToken);
 
-                        try
-                        {
-                            await con.OpenAsync(cancellationToken);
-
-                            return (string)await cmd.ExecuteScalarAsync(cancellationToken);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"GetSecCodeFromLastRecord Exception!\r\n{ex.Message}");
-                            return $"GetSecCodeFromLastRecord Exception! {ex.Message}";
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
+                        return (string)await cmd.ExecuteScalarAsync(cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"GetSecCodeFromLastRecord Exception!\r\n{ex.Message}");
+                        return $"GetSecCodeFromLastRecord Exception! {ex.Message}";
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
                     }
                 }
             }
@@ -442,27 +369,17 @@ namespace DataBaseRepository
 
         public async Task<int> GetIncomingSpecificSecCodeCount(CancellationToken cancellationToken, string secCode)
         {
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "GetIncomingSpecificSecCodeCount.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return 0;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                query = query.Replace("@secCode", secCode);
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "GetIncomingSpecificSecCodeCount.sql");
+			if (query is null)
+			{
+				return 0;
+			}
 
-                return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
-            }
+            query = query.Replace("@secCode", secCode);
+            return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
         }
 
-        public async Task<List<IncomingModel>> GetPageFromIncomingSpecificSecCode(
+		public async Task<List<IncomingModel>> GetPageFromIncomingSpecificSecCode(
             CancellationToken cancellationToken, 
             string secCode, 
             int itemsAtPage, 
@@ -474,74 +391,62 @@ namespace DataBaseRepository
 
             List<IncomingModel> result = new List<IncomingModel>();
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Incoming", 
-                "GetPageFromIncomingSpecificSecCode.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return result;
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                    $"GetPageFromIncomingSpecificSecCode execute query \r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "GetPageFromIncomingSpecificSecCode.sql");
+			if (query is null)
+			{
+				return result;
+			}
 
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand(query))
                 {
-                    using (MySqlCommand cmd = new MySqlCommand(query))
+                    cmd.Connection = con;
+
+                    cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
+                    cmd.Parameters.AddWithValue("@page_number", pageNumber);
+                    cmd.Parameters.AddWithValue("@secCode", secCode);
+
+                    try
                     {
-                        cmd.Connection = con;
+                        await con.OpenAsync(cancellationToken);
 
-                        cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
-                        cmd.Parameters.AddWithValue("@page_number", pageNumber);
-                        cmd.Parameters.AddWithValue("@secCode", secCode);
-
-                        try
+                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
                         {
-                            await con.OpenAsync(cancellationToken);
-
-                            using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+                            while (await sdr.ReadAsync(cancellationToken))
                             {
-                                while (await sdr.ReadAsync(cancellationToken))
+                                IncomingModel newIncoming = new IncomingModel();
+
+                                newIncoming.Id = sdr.GetInt32("id");
+                                newIncoming.Date = sdr.GetDateTime("date");
+                                newIncoming.SecCode = sdr.GetString("seccode");
+                                newIncoming.SecBoard = sdr.GetInt32("secboard");
+                                newIncoming.Category= sdr.GetInt32("category");
+                                newIncoming.Value = sdr.GetDecimal("value").ToString();
+
+                                int checkForNull = sdr.GetOrdinal("comission");
+                                if (!sdr.IsDBNull(checkForNull))
                                 {
-                                    IncomingModel newIncoming = new IncomingModel();
-
-                                    newIncoming.Id = sdr.GetInt32("id");
-                                    newIncoming.Date = sdr.GetDateTime("date");
-                                    newIncoming.SecCode = sdr.GetString("seccode");
-                                    newIncoming.SecBoard = sdr.GetInt32("secboard");
-                                    newIncoming.Category= sdr.GetInt32("category");
-                                    newIncoming.Value = sdr.GetDecimal("value").ToString();
-
-                                    int checkForNull = sdr.GetOrdinal("comission");
-                                    if (!sdr.IsDBNull(checkForNull))
-                                    {
-                                        newIncoming.Comission = sdr.GetDecimal("comission").ToString();
-                                    }
-
-                                    result.Add(newIncoming);
+                                    newIncoming.Comission = sdr.GetDecimal("comission").ToString();
                                 }
+
+                                result.Add(newIncoming);
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
-                                $"GetPageFromIncomingSpecificSecCode Exception!\r\n{ex.Message}");
-                        }
-                        finally
-                        {
-                            await con.CloseAsync();
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+                            $"GetPageFromIncomingSpecificSecCode Exception!\r\n{ex.Message}");
+                    }
+                    finally
+                    {
+                        await con.CloseAsync();
                     }
                 }
-
-                return result;
             }
+
+            return result;
         }
     }
 }
