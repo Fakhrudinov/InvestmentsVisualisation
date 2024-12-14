@@ -58,21 +58,11 @@ namespace DataBaseRepository
 
             List<WishListItemModel> result = new List<WishListItemModel>();
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "WishList",
-                sqlFileName);
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-                return result;
-            }
-
-            string query = File.ReadAllText(filePath);
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
-                $"GetFullWishList execute query \r\n{query}");
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", sqlFileName);
+			if (query is null)
+			{
+				return result;
+			}
 
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
@@ -129,22 +119,10 @@ namespace DataBaseRepository
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
                 $"DeleteWishBySecCode seccode={seccode} start");
 
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "WishList", 
-                "DeleteWishBySecCode.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", "DeleteWishBySecCode.sql");
+			if (query is not null)
+			{
                 query = query.Replace("@seccode", seccode);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
-                    $"DeleteWishBySecCode execute query\r\n{query}");
 
                 string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
@@ -154,24 +132,16 @@ namespace DataBaseRepository
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository AddNewWish " +
                 $"seccode={seccode} level={level} start");
-            //INSERT INTO `money_test`.`wish_list` (`seccode`, `wish_level`) VALUES ('PHOR', '5');
+			//INSERT INTO `money_test`.`wish_list` (`seccode`, `wish_level`) VALUES ('PHOR', '5');
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "WishList", "AddNewWish.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                StringBuilder queryStringBuilder = new StringBuilder(File.ReadAllText(filePath));
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", "AddNewWish.sql");
+			if (query is not null)
+			{
+                StringBuilder queryStringBuilder = new StringBuilder(query);
                 queryStringBuilder.Replace("@seccode", seccode);
                 queryStringBuilder.Replace("@level", level.ToString());
                 queryStringBuilder.Replace("@description", description);
-                string query = queryStringBuilder.ToString();
-
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
-                    $"AddNewWish execute query\r\n{query}");
+                query = queryStringBuilder.ToString();
 
                 string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
@@ -181,28 +151,16 @@ namespace DataBaseRepository
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository EditWishLevel " +
                 $"seccode={seccode} level={level} start");
-            //UPDATE `money_test`.`wish_list` SET `wish_level` = '3' WHERE (`seccode` = 'MGNT');
-
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "WishList", 
-                "EditWishLevelBySecCode.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                StringBuilder queryStringBuilder = new StringBuilder(File.ReadAllText(filePath));
+			//UPDATE `money_test`.`wish_list` SET `wish_level` = '3' WHERE (`seccode` = 'MGNT');
+			
+            string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", "EditWishLevelBySecCode.sql");
+			if (query is not null)
+			{
+				StringBuilder queryStringBuilder = new StringBuilder(query);
                 queryStringBuilder.Replace("@seccode", seccode);
                 queryStringBuilder.Replace("@level", level.ToString());
                 queryStringBuilder.Replace("@description", description);
-                string query = queryStringBuilder.ToString();
-
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
-                    $"EditWishLevel execute query\r\n{query}");
+                query = queryStringBuilder.ToString();
 
                 string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }

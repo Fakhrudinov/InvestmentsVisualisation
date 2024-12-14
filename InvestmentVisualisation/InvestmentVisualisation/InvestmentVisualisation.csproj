@@ -87,13 +87,13 @@
     <None Update="SqlQueries\Incoming\DeleteSingleIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\GetActualSecCodeAndSecBoard.sql">
+    <None Update="SqlQueries\CommonRepository\GetActualSecCodeAndSecBoard.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\GetAllFromCategory.sql">
+    <None Update="SqlQueries\CommonRepository\GetAllFromCategory.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\GetAllFromSecboard.sql">
+    <None Update="SqlQueries\CommonRepository\GetAllFromSecboard.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\Incoming\GetIncomingCount.sql">

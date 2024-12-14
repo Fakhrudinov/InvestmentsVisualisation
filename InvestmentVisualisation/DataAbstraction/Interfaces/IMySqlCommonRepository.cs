@@ -7,6 +7,7 @@
         void FillStaticCategories();
         void FillStaticSecBoards();
         void FillStaticSecCodes();
-        Task<int> GetTableCountBySqlQuery(CancellationToken cancellationToken, string query);
+		string? GetQueryTextByFolderAndFilename(string v1, string v2);
+		Task<int> GetTableCountBySqlQuery(CancellationToken cancellationToken, string query);
     }
 }

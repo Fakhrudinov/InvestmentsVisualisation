@@ -64,19 +64,11 @@ namespace DataBaseRepository
 
         public void FillStaticCategories()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromCategory.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                    $"FillStaticCategories execute query \r\n{query}");
 
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+			string? query = GetQueryTextByFolderAndFilename("CommonRepository", "GetAllFromCategory.sql");
+			if (query is not null)
+			{
+			    using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query))
                     {
@@ -114,19 +106,10 @@ namespace DataBaseRepository
 
         public void FillStaticSecBoards()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetAllFromSecboard.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                    $"FillStaticSecBoards execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+			string? query = GetQueryTextByFolderAndFilename("CommonRepository", "GetAllFromSecboard.sql");
+			if (query is not null)
+			{
+				using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query))
                     {
@@ -163,19 +146,10 @@ namespace DataBaseRepository
 
         public void FillStaticSecCodes()
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", "GetActualSecCodeAndSecBoard.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                    $"FillStaticSecCodes execute query \r\n{query}");
-
-                using (MySqlConnection con = new MySqlConnection(_connectionString))
+			string? query = GetQueryTextByFolderAndFilename("CommonRepository", "GetActualSecCodeAndSecBoard.sql");
+			if (query is not null)
+			{
+				using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query))
                     {
@@ -250,23 +224,10 @@ namespace DataBaseRepository
 
         public void FillFreeMoney()
         {
-            string filePath = Path.Combine(
-                Directory.GetCurrentDirectory(), 
-                "SqlQueries", 
-                "Money", 
-                "GetMoneyValueFromLastYearMonth.sql");
-            if (!File.Exists(filePath))
-            {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
-                    $"File with SQL script not found at " + filePath);
-            }
-            else
-            {
-                string query = File.ReadAllText(filePath);
-                query = query.Replace("@data_base", _connectionDBName);
-
-                _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
-                    $"FillFreeMoney execute query \r\n{query}");
+			string? query = GetQueryTextByFolderAndFilename("Money", "GetMoneyValueFromLastYearMonth.sql");
+			if (query is not null)
+			{
+				query = query.Replace("@data_base", _connectionDBName);
 
                 using (MySqlConnection con = new MySqlConnection(_connectionString))
                 {
@@ -295,5 +256,22 @@ namespace DataBaseRepository
                 }
             }
         }
-    }
+
+		public string? GetQueryTextByFolderAndFilename(string folderName, string queryFileName)
+		{
+			string filePath = Path.Combine(Directory.GetCurrentDirectory(), "SqlQueries", folderName, queryFileName);
+			if (!File.Exists(filePath))
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository Error! " +
+					$"File with SQL script not found at " + filePath);
+				return null;
+			}
+
+			string query = File.ReadAllText(filePath);
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} CommonRepository " +
+				$"GetQueryTextByFolderAndFilename query {queryFileName} text is:\r\n{query}");
+
+            return query;
+		}
+	}
 }
