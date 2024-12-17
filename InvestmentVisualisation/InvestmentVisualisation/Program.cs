@@ -17,6 +17,7 @@ builder.Services.AddTransient<IMySqlYearViewRepository, MySqlYearViewRepository>
 builder.Services.AddTransient<IMySqlSecCodesRepository, MySqlSecCodesRepository>();
 builder.Services.AddTransient<IMySqlSecVolumeRepository, MySqlSecVolumeRepository>();
 builder.Services.AddTransient<IMySqlWishListRepository, MySqlWishListRepository>();
+builder.Services.AddTransient<IMySqlBankDepositsRepository, MySqlBankDepositsRepository>();
 
 builder.Services.AddTransient<IWebDividents, WebDividents>();
 

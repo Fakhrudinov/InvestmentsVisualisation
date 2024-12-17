@@ -1,0 +1,179 @@
+﻿@using DataAbstraction.Models.BankDeposits
+
+@model BankDepositsWithPaginations
+
+@{
+    ViewData["Title"] = "Bank deposits";
+}
+
+<div class="container">
+
+    @if (ViewBag.ShowOnlyActive)
+    {
+        <h2>Активные банковские вклады</h2>
+    }
+    else
+    {
+        <h2>Банковские вклады</h2>
+    }
+
+    <p>
+        <a asp-controller="BankDeposits" asp-action="Create" class="btn btn-primary"> Добавить вклад</a>
+        @if (ViewBag.ShowOnlyActive)
+        {
+            <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary"
+               asp-route-showOnlyActive="false">
+                Показать все вклады, включая закрытые
+            </a>
+        }
+        else
+        {
+            <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary">
+                Показать только активные вклады
+            </a>
+        }
+    </p>
+
+    @if (TempData["Error"] is not null)
+    {
+        <strong style="color:red"> @TempData["Error"] </strong>
+    }
+
+    @if (Model is not null && Model.BankDeposits is not null && Model.BankDeposits.Count > 0)
+    {
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @* @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).isOpen) *@
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).Id)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).PlaceNameSign)
+                    </th>
+                    <th>
+                        Даты открытия/закрытия
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).Summ)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).Percent)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).SummIncome)
+                    </th>
+                    <th>@* buttons *@</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.BankDeposits)
+                {
+                    string dates =
+                    item.DateOpen.ToString("yyyy MMM dd") + 
+                    " / " +
+                    item.DateClose.ToString("yyyy MMM dd");
+
+                    string bank = "ФинУслуги";
+                    if (item.PlaceNameSign == 2)
+                    {
+                        bank = "Т-Банк";
+                    }
+
+                    <tr>
+                        <td>
+                            @if (item.IsOpen)
+                            {
+                                <span style="color: green">&#x2705;</span>
+                            }
+                            else
+                            {
+                                <span style="color: darkgray">&#x274C;</span>
+                            }
+                            @* @Html.DisplayFor(modelItem => item.isOpen) *@
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @bank
+                            @* @Html.DisplayFor(modelItem => item.PlaceNameSign) *@
+                        </td>
+                        <td>
+                            @dates
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Summ)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Percent)%
+                        </td>
+                        <form method="post" asp-action="Close">
+                            <td style="text-align:right; width:110px;">
+                                @* @Html.DisplayFor(modelItem => item.SummIncome) *@
+                                @{
+                                    string typeOfInput = "required";
+                                    if (!item.IsOpen){
+                                        typeOfInput = "readonly";
+                                    }
+                                }
+                            <input name="summIncome" value="@item.SummIncome" class="form-control form-control-sm"
+                                   style="text-align:right" @typeOfInput />
+                        </td>
+                        <td style="text-align:right;">
+                            @if (item.IsOpen)
+                            {
+                                <input type="number" name="id" value="@item.Id" hidden />
+                                <input type="number" name="page" value="@Model.PageViewModel.PageNumber" hidden />
+                                <input type="checkbox" name="showOnlyActive" value="@ViewBag.ShowOnlyActive" hidden />
+                                <input type="submit" class="btn btn-outline-danger btn-sm" value="Close" />
+                            }                            
+                            @Html.ActionLink(
+                                    "Edit", 
+                                    "Edit",
+                                         new { 
+                                             id = @item.Id, 
+                                             page = @Model.PageViewModel.PageNumber,
+                                             showOnlyActive = @ViewBag.ShowOnlyActive
+                                         },
+                                     new { @class = "btn btn-primary btn-sm"  })                            
+                        </td>
+                        </form>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.PageViewModel.HasNextPage)
+        {
+            @Html.ActionLink(
+                    "Назад",
+                    "Index",
+                    new { page = @Model.PageViewModel.PageNumber + 1, showOnlyActive = @ViewBag.ShowOnlyActive },
+                    new { @class = "btn btn-secondary" })
+        }
+
+        <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+
+        @if (Model.PageViewModel.HasPreviousPage)
+        {
+            @Html.ActionLink(
+                    "Вперед",
+                    "Index",
+                    new { page = @Model.PageViewModel.PageNumber - 1, showOnlyActive = @ViewBag.ShowOnlyActive },
+                    new { @class = "btn btn-secondary" })
+        }
+    }
+    else
+    {
+        <p>Что-то пошло не так. Список пуст. Проверь логи</p>
+    }
+</div>

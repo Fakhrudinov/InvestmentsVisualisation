@@ -125,10 +125,22 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a asp-controller="Money" asp-action="BankDepoChart" class="dropdown-item">
+                                <a asp-controller="BankDeposits" asp-action="index" class="dropdown-item">
+                                    Список активных банковских вкладов
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="BankDeposits" asp-action="index" class="dropdown-item"
+                                   asp-route-showOnlyActive="false">
+                                    Список всех банковских вкладов
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="BankDeposits" asp-action="Chart" class="dropdown-item">
                                     График банковских вкладов
                                 </a>
                             </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a asp-controller="Money" asp-action="MoneySpentAndIncomeOfLast12MonthChart" class="dropdown-item">
                                     График приходов/расходов за последний год

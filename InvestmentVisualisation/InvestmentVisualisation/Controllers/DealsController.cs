@@ -53,7 +53,7 @@ namespace InvestmentVisualisation.Controllers
             }
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Deals table size={count}");
 
-            DealsWithPaginations dealsWithPaginations = new DealsWithPaginations();
+			DealsWithPaginations dealsWithPaginations = new DealsWithPaginations();
 
             dealsWithPaginations.PageViewModel = new PaginationPageViewModel(
             count,

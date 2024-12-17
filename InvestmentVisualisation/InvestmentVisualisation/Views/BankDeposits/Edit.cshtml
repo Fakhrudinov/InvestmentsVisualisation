@@ -1,0 +1,128 @@
+﻿@using DataAbstraction.Models.BankDeposits
+@model BankDepositModel
+
+<div class="container">
+    <h4>Изменить значения вклада</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-5">
+
+            @if (ViewData["Message"] != null)
+            {
+                <strong style="color:red"> @ViewData["Message"] </strong>
+            }
+
+            <form method="post" asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-6">
+                        <br />
+                        <strong>ID @Model.Id</strong>                                                
+                        <input asp-for="Id" class="form-control" hidden />
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label asp-for="PlaceNameSign" class="control-label"></label>
+                            <input asp-for="PlaceNameSign" class="form-control" required />
+                            <span asp-validation-for="PlaceNameSign" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label asp-for="DateOpen" class="control-label"></label>
+                            @Html.TextBoxFor(model => model.DateOpen, "{0:yyyy-MM-ddTHH:mm:ss}",
+                                     new
+                                     {
+                                         @class = "form-control",
+                                         required = "required",
+                                         @type = "datetime-local"
+                                     })
+                            <span asp-validation-for="DateOpen" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label asp-for="DateClose" class="control-label"></label>
+                            @Html.TextBoxFor(model => model.DateClose, "{0:yyyy-MM-ddTHH:mm:ss}",
+                                     new
+                                     {
+                                         @class = "form-control",
+                                         required = "required",
+                                         @type = "datetime-local"
+                                     })
+                            <span asp-validation-for="DateClose" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:10px;">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label asp-for="Summ" class="control-label"></label>
+                            <input asp-for="Summ" class="form-control" required />
+                            <span asp-validation-for="Summ" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label asp-for="Percent" class="control-label"></label>
+                            <input asp-for="Percent" class="form-control" required />
+                            <span asp-validation-for="Percent" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <div class="col-6">
+                        <br />
+                        <div class="form-group">
+                            <label asp-for="IsOpen" class="control-label"></label>
+                            <input asp-for="IsOpen" class="form-check-input" type="checkbox" />
+                            <span asp-validation-for="IsOpen" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label asp-for="SummIncome" class="control-label"></label>
+                            <input asp-for="SummIncome" class="form-control" />
+                            <span asp-validation-for="SummIncome" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="number" name="page" value="@ViewBag.PageNumber" hidden />
+                <input type="checkbox" name="showOnlyActive" value="@ViewBag.ShowOnlyActive" hidden />
+
+                <div class="form-group btn-group" style="width: 100%; margin-top:20px;">
+                    <input type="submit" value="Save" class="btn btn-danger" />
+                    <a asp-action="Index" asp-route-page="@ViewBag.PageNumber" asp-route-showOnlyActive="@ViewBag.ShowOnlyActive"
+                       class="btn btn-outline-success">
+                        Назад к списку вкладов
+                    </a>
+                </div>
+            </form>
+        </div>
+        <div class="col-7">
+            <h6>Площадки</h6>
+            <ol>
+                <li>ФинУслуги</li>
+                <li>Т-Банк</li>
+            </ol>
+        </div>
+    </div>
+
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+</div>

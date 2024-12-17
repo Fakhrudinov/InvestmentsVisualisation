@@ -141,7 +141,7 @@ namespace DataBaseRepository
 			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Deals", "CreateNewDeal.sql");
 			if (query is null)
 			{
-				return "MySqlRepository Error! File with SQL script not found!"; 
+				return "MySqlDealsRepository Error! File with SQL script not found!"; 
 			}
 
 			if (model.Comission is null)
@@ -530,7 +530,7 @@ namespace DataBaseRepository
 			string? queryStr = _commonRepo.GetQueryTextByFolderAndFilename("Deals", "CreateNewDealsFromList.sql");
 			if (queryStr is null)
 			{
-				return "MySqlRepository Error! File with SQL script not found";
+				return "MySqlDealsRepository Error! File with SQL script not found";
 			}
 
 			StringBuilder query = new StringBuilder(queryStr);

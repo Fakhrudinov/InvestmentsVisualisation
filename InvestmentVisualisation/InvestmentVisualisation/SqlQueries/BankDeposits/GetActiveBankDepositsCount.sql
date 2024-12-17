@@ -1,0 +1,1 @@
+﻿SELECT count(*) FROM bank_deposits where isopen = 1;

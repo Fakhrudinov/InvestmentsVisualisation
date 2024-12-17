@@ -24,6 +24,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SqlQueries\BankDeposits\Close.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\Create.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\Edit.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\GetActiveBankDepositsCount.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\GetAnyBankDepositsCount.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\GetPageWithActiveBankDeposits.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\GetPageWithAnyBankDeposits.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\BankDeposits\GetBankDepositById.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Deals\CreateNewDealsFromList.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -48,13 +72,13 @@
     <None Update="SqlQueries\Money\GetActualSecCodeAndNameAndPieces.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\Money\GetBankDepositsEndedAfterDate.sql">
+    <None Update="SqlQueries\BankDeposits\GetBankDepositsEndedAfterDate.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\Money\GetMoneySpentAndIncomeModelChartData.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="SqlQueries\Money\GetBankDepoChartData.sql">
+    <None Update="SqlQueries\BankDeposits\GetBankDepoChartData.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\Money\GetMoneyValueFromLastYearMonth.sql">
