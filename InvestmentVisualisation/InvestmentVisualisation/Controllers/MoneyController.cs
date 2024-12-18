@@ -226,6 +226,19 @@ namespace InvestmentVisualisation.Controllers
             dohodDivs = sortedDohodDivs.ToList();
 
 
+			string[] pseudoRandomColorTable = new string[]
+            {
+					"rgba(10,200,10,0.3)",
+					"rgba(10,10,200,0.3)",
+					"rgba(200,10,10,0.3)",
+					"rgba(10,200,200,0.3)",
+					"rgba(200,200,10,0.3)",
+					"rgba(200,10,200,0.3)",
+					"rgba(200,200,200,0.3)",
+					"rgba(50,255,99,0.3)"
+            };
+			int couterColor = 0;
+
 			// Create list of chart items models
 			List<ExtendedDataPointsOfChartItemModel> extendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
             List<DataPointsOfChartItemModel> volumeDataPoints = new List<DataPointsOfChartItemModel>();
@@ -246,9 +259,14 @@ namespace InvestmentVisualisation.Controllers
 					dateOfDiv,
 					webDiv.DividentInPercents,
 					amountMinusTax,
-					webDiv.SecCode
+					webDiv.SecCode,
+					pseudoRandomColorTable[couterColor]
 					);
-
+				couterColor++;
+				if (couterColor == pseudoRandomColorTable.Length)
+				{
+					couterColor = 0;
+				}
 				extendedDataPoints.Add( newDataPoint );
 
                 DataPointsOfChartItemModel newVolumeDataPoint = new DataPointsOfChartItemModel(
@@ -259,25 +277,13 @@ namespace InvestmentVisualisation.Controllers
 
 			List<ExtendedDataPointsOfChartItemModel> possibleDivsExtendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
 			List<DataPointsOfChartItemModel> possibleDivsVolumeDataPoints = new List<DataPointsOfChartItemModel>();
-            int couterColor = 0;
+            
 			foreach (ExpectedDividentsFromWebModel webDiv in dohodDivs)
 			{
 				if (webDiv.IsConfirmed)
 				{
 					continue;
 				}
-
-                string[] pseudoRandomColorTable = new string [] 
-                {
-					"rgba(10,200,10,0.3)",
-					"rgba(10,10,200,0.3)",
-					"rgba(200,10,10,0.3)",
-					"rgba(10,200,200,0.3)",
-					"rgba(200,200,10,0.3)",
-					"rgba(200,10,200,0.3)",
-					"rgba(200,200,200,0.3)",
-					"rgba(50,255,99,0.3)"
-				};
 
 				long dateOfDiv = new DateTimeOffset(webDiv.Date.AddDays(18)).ToUnixTimeSeconds() * 1000;
 				decimal onePercent = (webDiv.DividentToOnePiece * webDiv.Pieces) / 100;
@@ -295,7 +301,6 @@ namespace InvestmentVisualisation.Controllers
                 if ( couterColor == pseudoRandomColorTable.Length)
                 {
                     couterColor = 0;
-
 				}
 				possibleDivsExtendedDataPoints.Add(newDataPoint);
 
