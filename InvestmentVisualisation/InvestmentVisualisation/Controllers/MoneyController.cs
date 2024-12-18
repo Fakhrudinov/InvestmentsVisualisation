@@ -240,20 +240,18 @@ namespace InvestmentVisualisation.Controllers
 			int couterColor = 0;
 
 			// Create list of chart items models
-			List<ExtendedDataPointsOfChartItemModel> extendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
-            List<DataPointsOfChartItemModel> volumeDataPoints = new List<DataPointsOfChartItemModel>();
-            int summ = 0;
-			foreach (ExpectedDividentsFromWebModel webDiv in dohodDivs)
-			{
-                if (!webDiv.IsConfirmed)
-                {
-                    continue;
-                }
+			List<ExtendedDataPointsOfChartItemModel> approovedDivsExtendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
+            List<DataPointsOfChartItemModel> approovedDivsVolumeDataPoints = new List<DataPointsOfChartItemModel>();
+            int summApprooved = 0;
+			int summPossible = 0;
+            List<ExtendedDataPointsOfChartItemModel> possibleDivsExtendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
+			List<DataPointsOfChartItemModel> possibleDivsVolumeDataPoints = new List<DataPointsOfChartItemModel>();
 
-                long dateOfDiv = new DateTimeOffset(webDiv.Date.AddDays(18)).ToUnixTimeSeconds() * 1000;
-                decimal onePercent = (webDiv.DividentToOnePiece * webDiv.Pieces) / 100;
-                decimal amountMinusTax = (webDiv.DividentToOnePiece * webDiv.Pieces) - (onePercent * 15);
-				summ = summ + (int)amountMinusTax;
+			foreach (ExpectedDividentsFromWebModel webDiv in dohodDivs) 
+            {
+				long dateOfDiv = new DateTimeOffset(webDiv.Date.AddDays(18)).ToUnixTimeSeconds() * 1000;
+				decimal onePercent = (webDiv.DividentToOnePiece * webDiv.Pieces) / 100;
+				decimal amountMinusTax = (webDiv.DividentToOnePiece * webDiv.Pieces) - (onePercent * 15);
 
 				ExtendedDataPointsOfChartItemModel newDataPoint = new ExtendedDataPointsOfChartItemModel(
 					dateOfDiv,
@@ -267,56 +265,36 @@ namespace InvestmentVisualisation.Controllers
 				{
 					couterColor = 0;
 				}
-				extendedDataPoints.Add( newDataPoint );
 
-                DataPointsOfChartItemModel newVolumeDataPoint = new DataPointsOfChartItemModel(
-					dateOfDiv,
-					summ);
-				volumeDataPoints.Add ( newVolumeDataPoint );
-			}
-
-			List<ExtendedDataPointsOfChartItemModel> possibleDivsExtendedDataPoints = new List<ExtendedDataPointsOfChartItemModel>();
-			List<DataPointsOfChartItemModel> possibleDivsVolumeDataPoints = new List<DataPointsOfChartItemModel>();
-            
-			foreach (ExpectedDividentsFromWebModel webDiv in dohodDivs)
-			{
-				if (webDiv.IsConfirmed)
-				{
-					continue;
-				}
-
-				long dateOfDiv = new DateTimeOffset(webDiv.Date.AddDays(18)).ToUnixTimeSeconds() * 1000;
-				decimal onePercent = (webDiv.DividentToOnePiece * webDiv.Pieces) / 100;
-				decimal amountMinusTax = (webDiv.DividentToOnePiece * webDiv.Pieces) - (onePercent * 15);
-				summ = summ + (int)amountMinusTax;
-
-				ExtendedDataPointsOfChartItemModel newDataPoint = new ExtendedDataPointsOfChartItemModel(
-					dateOfDiv,
-					webDiv.DividentInPercents,
-					amountMinusTax,
-					webDiv.SecCode,
-                    pseudoRandomColorTable[couterColor]
-					);
-                couterColor ++;
-                if ( couterColor == pseudoRandomColorTable.Length)
+                if (webDiv.IsConfirmed)
                 {
-                    couterColor = 0;
+					approovedDivsExtendedDataPoints.Add(newDataPoint);
+
+					summApprooved = summApprooved + (int)amountMinusTax;
+					DataPointsOfChartItemModel newVolumeDataPoint = new DataPointsOfChartItemModel(
+	                    dateOfDiv,
+	                    summApprooved);
+					approovedDivsVolumeDataPoints.Add(newVolumeDataPoint);
 				}
-				possibleDivsExtendedDataPoints.Add(newDataPoint);
+                else
+                {
+                    possibleDivsExtendedDataPoints.Add(newDataPoint);
 
-				DataPointsOfChartItemModel newVolumeDataPoint = new DataPointsOfChartItemModel(
-					dateOfDiv,
-					summ);
-				possibleDivsVolumeDataPoints.Add(newVolumeDataPoint);
-			}
+					summPossible = summPossible + (int)amountMinusTax;
+					DataPointsOfChartItemModel newVolumeDataPoint = new DataPointsOfChartItemModel(
+	                    dateOfDiv,
+	                    summPossible);
+					possibleDivsVolumeDataPoints.Add(newVolumeDataPoint);
+				}
+            }
 
-			ViewBag.ChartDataPoints = JsonConvert.SerializeObject(extendedDataPoints);
-			ViewBag.ChartVolumeDataPoints = JsonConvert.SerializeObject(volumeDataPoints);
+			ViewBag.ChartDataPoints = JsonConvert.SerializeObject(approovedDivsExtendedDataPoints);
+			ViewBag.ChartVolumeDataPoints = JsonConvert.SerializeObject(approovedDivsVolumeDataPoints);
 
 			ViewBag.PossibleDivsChartDataPoints = JsonConvert.SerializeObject(possibleDivsExtendedDataPoints);
 			ViewBag.PossibleDivsChartVolumeDataPoints = JsonConvert.SerializeObject(possibleDivsVolumeDataPoints);
 
-			ViewBag.ChartItemsCount = extendedDataPoints.Count;// layout load script: @if(ViewBag.ChartItemsCount != null)
+			ViewBag.ChartItemsCount = approovedDivsExtendedDataPoints.Count;// layout load script: @if(ViewBag.ChartItemsCount != null)
 
 			return View();
         }
