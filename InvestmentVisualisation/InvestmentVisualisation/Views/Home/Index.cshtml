@@ -4,25 +4,26 @@
     string prevYear = DateTime.Now.AddYears(-1).Year.ToString();
     string thisYear = DateTime.Now.Year.ToString();
     string nextYear = DateTime.Now.AddYears(1).Year.ToString();
+
+    DateTime thisDate = new DateTime(DateTime.Now.Year, 01, 01);
 }
 
 <div class="container">
     <h3>Добавление полей в базу данных при переходе на новый год</h3>
     <p>Делать в январе - или меняй даты</p>
     <h5>Таблица money_by_month - Тестовый контур</h5>
-    <p>INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '2' );
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '3');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '4');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '5');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '6');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '7');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '8');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '9');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '10');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '11');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '12');
-        <br />INSERT INTO `money_test`.`money_by_month` (`year`, `month`) VALUES ('@nextYear', '1');
-        <br />
+    <p>
+        @{            
+            for (int i = 1; i <= 12; i++)
+            {
+                DateTime newDate = thisDate.AddMonths(i);
+
+                <span>INSERT INTO `money_test`.`money_by_month` (`date`, `year`, `month`)
+                            VALUES ('@newDate.ToString("yyyy-MM-dd")', '@newDate.Year', '@newDate.Month');
+                    <br />
+                </span>
+            }
+        }
         <br />call money_test.MoneyMonthRecalculate('@prevYear-12-01');
         <br />call money_test.MoneyMonthRecalculate('@thisYear-01-01');
     </p>
@@ -35,24 +36,23 @@
         <br />
         <br />call money_test.SecVolumeFullRecalc('@thisYear');
     </p>
+    <br />
+    <br />
 
-    <br />
-    <br />
     <h5>Таблица money_by_month - Прод контур</h5>
     <p>
-        INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '2' );
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '3');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '4');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '5');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '6');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '7');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '8');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '9');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '10');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '11');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@thisYear', '12');
-        <br />INSERT INTO `money`.`money_by_month` (`year`, `month`) VALUES ('@nextYear', '1');
-        <br />
+        @{
+            for (int i = 1; i <= 12; i++)
+            {
+                DateTime newDate = thisDate.AddMonths(i);
+
+                <span>
+                    INSERT INTO `money`.`money_by_month` (`date`, `year`, `month`)
+                        VALUES ('@newDate.ToString("yyyy-MM-dd")', '@newDate.Year', '@newDate.Month');
+                        <br />
+                </span>
+            }
+        }
         <br />call money.MoneyMonthRecalculate('@prevYear-12-01');
         <br />call money.MoneyMonthRecalculate('@thisYear-01-01');
     </p>
@@ -65,9 +65,34 @@
         <br />
         <br />call money.SecVolumeFullRecalc('@thisYear');
     </p>
+    <br />
+    <br />
 
+    <h5>Заливка тестового контура данными прода</h5>
+    <p>TRUNCATE TABLE money_test.deals;
+        <br />INSERT INTO money_test.deals SELECT * FROM money.deals ;
+        <br />
+        <br />TRUNCATE TABLE money_test.incoming;
+        <br />INSERT INTO money_test.incoming SELECT * FROM money.incoming;
+        <br />
+        <br />TRUNCATE TABLE money_test.seccode_info;
+        <br />INSERT INTO money_test.seccode_info SELECT * FROM money.seccode_info;
+        <br />
+        <br />TRUNCATE TABLE money_test.sec_volume;
+        <br />INSERT INTO money_test.sec_volume  SELECT * FROM money.sec_volume;
+        <br />
+        <br />TRUNCATE TABLE money_test.money_by_month;
+        <br />INSERT INTO money_test.money_by_month  SELECT * FROM money.money_by_month;
+        <br />
+        <br />TRUNCATE TABLE money_test.wish_list;
+        <br />INSERT INTO money_test.wish_list  SELECT * FROM money.wish_list;
+        <br />
+        <br />TRUNCATE TABLE money_test.bank_deposits;
+        <br />INSERT INTO money_test.bank_deposits  SELECT * FROM money.bank_deposits;
+    </p>
     <br />
     <br />
+
     <h5>Градиенты зелёного</h5>
     <div style="background-color: #E8F5E9;">Color test #E8F5E9</div>
     <div style="background-color: #C8E6C9;">Color test #C8E6C9</div>
@@ -79,30 +104,12 @@
     <div style="background-color: #388E3C; color:white;">Color test #388E3C</div>
     <div style="background-color: #2E7D32; color:white;">Color test #2E7D32</div>
     <div style="background-color: #1B5E20; color:white;">Color test #1B5E20</div>
-
-    <br />
-    <br />
-    <h5>Заливка тестового контура данными прода</h5>
-    <p>TRUNCATE TABLE money_test.deals;
-        <br />INSERT INTO money_test.deals SELECT * FROM money.deals ;
-        <br />TRUNCATE TABLE money_test.incoming;
-        <br />INSERT INTO money_test.incoming SELECT * FROM money.incoming;
-        <br />TRUNCATE TABLE money_test.incoming;
-        <br />INSERT INTO money_test.incoming SELECT * FROM money.incoming;
-        <br />TRUNCATE TABLE money_test.money_by_month;
-        <br />INSERT INTO money_test.money_by_month  SELECT * FROM money.money_by_month;
+    <p>
+        <a href="https://colordesigner.io/gradient-generator" target="_blank">
+            https://colordesigner.io/gradient-generator
+        </a>
     </p>
-
-    <br />
-    <br />
-    <h5></h5>
-    <p></p>
-    <p></p>
-    <p></p>
-    <p></p>
 @*
-    https://colordesigner.io/gradient-generator
-
     gradient from black to red   
     #000000
     #220c12

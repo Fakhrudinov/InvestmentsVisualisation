@@ -66,7 +66,41 @@ namespace InvestmentVisualisation.Controllers
             ViewData["Navigation"] = objSt;
             ViewBag.year = year;
 
-            return View(moneyList);
+			decimal averageDivident = 0;
+			decimal averageBrokComission = 0;
+            int counter = 0;
+			DateTime dateNowFirstDay = new DateTime(currentYear, DateTime.Now.Month, 1);
+
+			foreach (MoneyModel money in moneyList)
+            {
+				DateTime dateFromBD = new DateTime(money.Year, money.Month, 1);
+                if (dateNowFirstDay <= dateFromBD)
+                {
+                    continue;
+                }
+
+				if (money.Divident is not null)
+                {
+					averageDivident += (decimal)money.Divident;
+				}
+
+				if (money.BrokComission is not null)
+				{
+					averageBrokComission += (decimal)money.BrokComission;
+				}
+                counter++;
+			}
+
+            if (counter > 0)
+            {
+                averageDivident = averageDivident/counter;
+                averageBrokComission = averageBrokComission/counter;
+			}
+
+            ViewBag.AverageDivident = averageDivident.ToString("### ### ###.00");
+            ViewBag.AverageBrokComission = averageBrokComission.ToString("### ### ###.00");
+
+			return View(moneyList);
         }
         public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0, int month = 0)
         {

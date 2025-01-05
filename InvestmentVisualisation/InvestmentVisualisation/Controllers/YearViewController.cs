@@ -38,7 +38,7 @@ namespace InvestmentVisualisation.Controllers
             }
             else
             {
-                // add recalc money ???????? обычно деньги я сам считаю, чтобы убедиться что всё совпадает
+                // add recalc money
                 await _secVolumeRepository.RecalculateSecVolumeForYear(cancellationToken, currentYear);
                 await _repository.RecalculateYearView(cancellationToken, currentYear, sortedByVolume);
                 year = currentYear;

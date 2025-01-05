@@ -28,7 +28,7 @@ namespace DataAbstraction.Models.MoneyByMonth
         [Display(Name = "Уплачено брокерской комиссии")]
         public decimal ? BrokComission { get; set; }
 
-        [Display(Name = "Итого остаток денег")]
+        [Display(Name = "Итого остаток денег на конец месяца")]
         public decimal ? MoneySum { get; set; }
     }
 }

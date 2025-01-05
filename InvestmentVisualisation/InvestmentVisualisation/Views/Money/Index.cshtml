@@ -19,8 +19,16 @@
             }
         </div>
         <div class="col-sm-5 align-right">
-             @Html.ActionLink("Recalculate previous month", "Recalculate", new {  year = prev.Year, month = prev.Month }, new { @class = "btn btn-block btn-danger" })
-            @Html.ActionLink("Recalculate current month", "Recalculate", new {  year = DateTime.Now.Year, month = DateTime.Now.Month }, new { @class = "btn btn-block btn-danger" })
+            @Html.ActionLink(
+                                  "Recalculate previous month", 
+                                  "Recalculate", 
+                                  new {  year = prev.Year, month = prev.Month }, 
+                                  new { @class = "btn btn-block btn-danger" })
+            @Html.ActionLink(
+                                  "Recalculate current month", 
+                                  "Recalculate", 
+                                  new {  year = DateTime.Now.Year, month = DateTime.Now.Month }, 
+                                  new { @class = "btn btn-block btn-danger" })
         </div>
     </div>
 
@@ -54,60 +62,122 @@
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.MoneySum)
                 </th>
-                <!--<th></th>-->
             </tr>
         </thead>
         <tbody>
-    @foreach (var item in Model) {
-            <tr>
+            @{
+                decimal summMonthIn = 0;
+                decimal summDivident = 0;
+                decimal summBrokComission = 0;
+
+                foreach (var item in Model) 
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Year)
+                        </td>
+                        <td>
+                            @StaticData.MonthNames[StaticData.MonthNames.FindIndex(sb => sb.Id == item.Month)].Name
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.TotalIn)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.MonthIn)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Divident)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Dosrochnoe)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.DealsSum)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.BrokComission)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.MoneySum)
+                        </td>
+                    </tr>
+
+                    if (item.MonthIn is not null)
+                    {
+					    summMonthIn = summMonthIn + (decimal)item.MonthIn;
+				    }
+
+                    if (item.Divident is not null)
+                    {
+					    summDivident = summDivident + (decimal)item.Divident;
+				    } 
+                    
+                    if (item.BrokComission is not null)
+                    {
+					    summBrokComission = summBrokComission + (decimal)item.BrokComission;
+				    }
+                    
+                }
+            }
+            <tr style="font-weight: bold;">
+                <td colspan="3">
+                    Итого, суммарно:
+                </td>
+                <td style="text-align:right;">
+                    @summMonthIn.ToString("### ### ###.00")
+                </td>
+                <td style="text-align:right;">
+                    @summDivident.ToString("### ### ###.00")
+                </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Year)
+                    @* Dosrochnoe *@
                 </td>
                 <td>
-                    @StaticData.MonthNames[StaticData.MonthNames.FindIndex(sb => sb.Id == item.Month)].Name
+                    @* DealsSum *@
                 </td>
                 <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.TotalIn)
+                    @summBrokComission.ToString("### ###.00")
+                </td>
+                <td>
+                    @* MoneySum *@
+                </td>
+            </tr>
+            <tr style="font-weight: bold;">
+                <td colspan="3">
+                    Итого, в среднем:
+                </td>
+                <td>
+                    @* MonthIn *@
                 </td>
                 <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.MonthIn)
+                    @ViewBag.AverageDivident
+                </td>
+                <td>
+                    @* Dosrochnoe *@
+                </td>
+                <td>
+                    @* DealsSum *@
                 </td>
                 <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.Divident)
+                    @ViewBag.AverageBrokComission
                 </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.Dosrochnoe)
+                <td>
+                    @* MoneySum *@
                 </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.DealsSum)
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.BrokComission)
-                </td>
-                <td style="text-align:right; font-weight: bold">
-                    @Html.DisplayFor(modelItem => item.MoneySum)
-                </td>
-                <!--<td>
-                    @Html.ActionLink("Recalculate", "Recalculate", new {  year = item.Year, month = item.Month }, new { @class = "btn btn-block btn-primary btn-sm"  })
-                </td>-->
-            </tr>}
+            </tr>
         </tbody>
     </table>
 
     @{
-         if(ViewBag.year == 0)
-         {
-             <div class="btn btn-default" style="border-color: #ddd;">Показать последний год</div> 
-         }
-         else
-         {
-             <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
-         }
-     } 
-
-    
-
-    @{  
+        if(ViewBag.year == 0)
+        {
+            <div class="btn btn-default" style="border-color: #ddd;">Показать последний год</div> 
+        }
+        else
+        {
+            <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
+        }
+ 
         if(ViewData["Navigation"]!=null)     
         {  
             if(ViewData.Values !=null && ViewData.Values.Count()>0)  
@@ -120,7 +190,8 @@
                      }
                      else
                      {
-                         <a asp-action="Index" asp-route-year="@item" class="btn btn-success" style="border-color: #ddd;">@item</a>
+                         <a asp-action="Index" asp-route-year="@item" class="btn btn-success" 
+                            style="border-color: #ddd;">@item</a>
                      }
                 }  
             }  
