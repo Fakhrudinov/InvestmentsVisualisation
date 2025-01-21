@@ -468,11 +468,25 @@ namespace InvestmentVisualisation.Controllers
 
         private async Task<CreateDealsModel?> TryParseStringToDeaL(string text, CancellationToken cancellationToken)
         {
-            if (text is null || !text.Contains("\t"))
+			// pdf format:
+			// "11989899733 57858315808 Покупка ЦБ на бирже
+			// 10.01.2025 15:06:41 Банк СПб, ПАО ао03, 10300436B RU0009100945 1.00 20.00 366.15 RUB RUB 7 323.00 1.10
+			// 13.01.2025 13.01.2025 13.01.2025 13.01.2025 ПАО Московская Биржа НКО АО НРД"
+
+			/*
+             * строка длинная
+             * содержит Покупка
+             * от неё отсчет по дате
+             * есть запись 12 символов начинающаяся с RU
+             * от нее отсчет по цене количеству и комиссиям== комиссии это всё между RUB(вторым) и датой поставки
+             * ПРОВЕРИТЬ ЧТО ЗА ХРЕНЬ С РАСПОЛОЖЕНИЕМ второго РУБ - он точно перед объемом сделки?
+             */
+
+
+			if (text is null || !text.Contains("\t"))
             {
                 ViewData["Message"] = "Чтение строки не удалось, строка пустая или не содержит табуляций-разделителей: " + 
                     text;
-                //return View("Create", new CreateDealsModel());
                 return null;
             }
 
@@ -482,7 +496,6 @@ namespace InvestmentVisualisation.Controllers
             {
                 ViewData["Message"] = "Чтение строки не удалось, " +
                     "получено менее 13 элементов (12х табуляций-разделителей) в строке: " + text;
-                //return View("Create", new CreateDealsModel());
                 return null;
             }
 

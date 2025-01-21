@@ -68,7 +68,7 @@ namespace UserInputService
         // default delimeter is point = '.'
         public string CleanPossibleNumber(string ? text)
         {
-            if (text is null)
+			if (text is null)
             {
                 return "";
             }
@@ -172,8 +172,8 @@ namespace UserInputService
             //31,000.00
             string textCleaned = CleanPossibleNumber(text);
 
-            int dotIndex = text.IndexOf('.');
-            int commaIndex = text.IndexOf(",");
+            int dotIndex = textCleaned.IndexOf('.');
+            int commaIndex = textCleaned.IndexOf(",");
 
             if (dotIndex > 0)
             {
@@ -189,19 +189,15 @@ namespace UserInputService
             {
                 return true;
             }
-            //else if (Int32.TryParse(textCleanedWitoutTail.Replace(".", ","), out int parsedWithComma))
-            //{
-            //    return true;
-            //}
 
             return false;
         }
         public int GetInt32FromString(string text)
         {
-            string textCleaned = CleanPossibleNumber(text);
+			string textCleaned = CleanPossibleNumber(text);
             
-            int dotIndex = text.IndexOf('.');
-            int commaIndex = text.IndexOf(",");
+            int dotIndex = textCleaned.IndexOf('.');
+            int commaIndex = textCleaned.IndexOf(",");
 
             if (dotIndex > 0)
             {

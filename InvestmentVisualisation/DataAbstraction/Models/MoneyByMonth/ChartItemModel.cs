@@ -89,7 +89,10 @@ namespace DataAbstraction.Models.MoneyByMonth
 		public string ? indexLabel;
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "indexLabelFontWeight")]
-		public string indexLabelFontWeight = "bold";
+		public string indexLabelFontWeight = "normal";
+
+		[DataMember(Name = "indexLabelFontSize")]
+		public int indexLabelFontSize = 12;
 	}
 
 	[DataContract]

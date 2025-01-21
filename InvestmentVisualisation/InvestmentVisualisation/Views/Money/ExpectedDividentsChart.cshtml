@@ -10,17 +10,17 @@
 			var chart = new CanvasJS.Chart("chartContainerApprooved", {
 				zoomEnabled: true,
 				title: {
-					text: "Дивиденты, одобренные советом директоров",
+					text: "Дивиденды, одобренные советом директоров",
 					fontSize: 20,
 				},
 				axisX: {
-					xValueType: "dateTime",					
+					xValueType: "dateTime",
+					valueFormatString: "DD MMM"
 				},
 				axisY: {
 					title: "Доходность выплаты, %",
 					titleFontSize: 17,
 					labelFontSize: 14,
-					//suffix: "%",
 				},
 				axisY2: {
 					title: "Сумма выплат",
@@ -56,7 +56,7 @@
 			var chart2 = new CanvasJS.Chart("chartContainerPossible", {
 				zoomEnabled: true,
 				title: {
-					text: "Возможные дивиденты, неподтвержденные советом директоров",
+					text: "Возможные дивиденды, неподтвержденные советом директоров",
 					fontSize: 20,
 				},
 				axisX: {
@@ -76,9 +76,6 @@
 					titleFontSize: 17,
 					labelFontSize: 14,
 				},
-				// toolTip: {
-				// 	shared: true
-				// },
 				data: [
 					{
 						type: "bubble",
@@ -86,7 +83,6 @@
 						yValueFormatString: "####.##",
 						zValueFormatString: "####.##",
 						indexLabel: "{name}",
-						//indexLabelFontWeight: "bold",
 						indexLabelFontSize: 10,
 						toolTipContent: "<b>{name}</b><br/>дата: {x} <br/>доходность: {y}%<br/>сумма: {z} руб.",
 						dataPoints: @Html.Raw(ViewBag.PossibleDivsChartDataPoints)
@@ -97,7 +93,6 @@
 						axisYType: "secondary",
 						toolTipContent: "Накопительный итог: {y}",
 						yValueFormatString: "####.## руб",
-						// indexLabel: "{y}",
 						dataPoints: @Html.Raw(ViewBag.PossibleDivsChartVolumeDataPoints)
 					}
 
@@ -109,7 +104,7 @@
 }
 
 <div class="container">
-	<h3 style="text-align:center">Ожидаемый в будущем приход дивидентов</h3>
+	<h3 style="text-align:center">Ожидаемый в будущем приход дивидендов</h3>
 	<div id="chartContainerApprooved" style="width: 100%; height: 400px; display: inline-block;"></div>
 	<div id="chartContainerPossible" style="width: 100%; height: 550px;display: inline-block;margin-top:30px;"></div>
 </div>

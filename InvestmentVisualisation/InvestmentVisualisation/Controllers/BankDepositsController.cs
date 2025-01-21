@@ -348,7 +348,8 @@ namespace InvestmentVisualisation.Controllers
 					DataPointsOfChartItemModel dataPointStart = new DataPointsOfChartItemModel(
 						bankDepoDBModelItems[i].DateOpen.ToUnixTimeSeconds() * 1000,
 						i + 1,
-						bankDepoDBModelItems[i].Percent.ToString() + "% " + bankDepoDBModelItems[i].SummAmount + "руб; " +
+						//bankDepoDBModelItems[i].Percent.ToString() + "% " + 
+						bankDepoDBModelItems[i].SummAmount.ToString("### ### ### ###") + " " +
 						bankDepoDBModelItems[i].Name);
 					dataPoints.Add(dataPointStart);
 
@@ -373,6 +374,7 @@ namespace InvestmentVisualisation.Controllers
 					DataPointsOfChartItemModel dataPointEnd = new DataPointsOfChartItemModel(
 						bankDepoDBModelItems[i].DateClose.ToUnixTimeSeconds() * 1000,
 						i + 1,
+						bankDepoDBModelItems[i].Percent.ToString() + "% " +
 						bankDepoDBModelItems[i].DateClose.ToString("до dd MMM yyyy"));
 					dataPoints.Add(dataPointEnd);
 
@@ -429,6 +431,8 @@ namespace InvestmentVisualisation.Controllers
 						{
 							newChartDataPoint.y = (decimal)paymentData.IncomeSummAmount;
 							newChartDataPoint.z = (decimal)paymentData.IncomeSummAmount;
+
+							newChartDataPoint.color = "#eeeeee";
 						}
 
 						payments.Add(newChartDataPoint);
