@@ -38,71 +38,97 @@ namespace DataBaseRepository
         public async Task<List<SecCodeInfo>> GetPageFromSecCodes(
             CancellationToken cancellationToken, 
             int itemsAtPage, 
-            int pageNumber)
+            int offset)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
-                $"GetPageFromSecCodes start with itemsAtPage={itemsAtPage} page={pageNumber}");
-
-            List<SecCodeInfo> result = new List<SecCodeInfo>();
+                $"GetPageFromSecCodes start with itemsAtPage={itemsAtPage} offset={offset}");            
 
 			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecCodes", "GetPageFromSecCodes.sql");
 			if (query is null)
 			{
+				List<SecCodeInfo> result = new List<SecCodeInfo>();
+				return result;
+			}
+			return await GetPageFromSecCodesByQuery(cancellationToken, itemsAtPage, offset, query);
+		}
+
+		public async Task<List<SecCodeInfo>> GetPageFromOnlyActiveSecCodes(
+            CancellationToken cancellationToken, 
+            int itemsAtPage, 
+            int offset)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+				$"GetPageFromOnlyActiveSecCodes start with itemsAtPage={itemsAtPage} offset={offset}");			
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecCodes", "GetPageFromOnlyActiveSecCodes.sql");
+			if (query is null)
+			{
+				List<SecCodeInfo> result = new List<SecCodeInfo>();
 				return result;
 			}
 
+            return await GetPageFromSecCodesByQuery(cancellationToken, itemsAtPage, offset, query);
+		}
+
+		private async Task<List<SecCodeInfo>> GetPageFromSecCodesByQuery(
+            CancellationToken cancellationToken, 
+            int itemsAtPage, 
+            int offset, 
+            string query)
+		{
+			List<SecCodeInfo> result = new List<SecCodeInfo>();
 			using (MySqlConnection con = new MySqlConnection(_connectionString))
-            {
-                using (MySqlCommand cmd = new MySqlCommand(query))
-                {
-                    cmd.Connection = con;
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
 
-                    cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
-                    cmd.Parameters.AddWithValue("@page_number", pageNumber);
+					cmd.Parameters.AddWithValue("@lines_count", itemsAtPage);
+					cmd.Parameters.AddWithValue("@offset", offset);
 
-                    try
-                    {
-                        await con.OpenAsync(cancellationToken);
+					try
+					{
+						await con.OpenAsync(cancellationToken);
 
-                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
-                        {
-                            while (await sdr.ReadAsync(cancellationToken))
-                            {
-                                SecCodeInfo secCode = new SecCodeInfo();
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								SecCodeInfo secCode = new SecCodeInfo();
 
-                                secCode.SecCode = sdr.GetString("seccode");
-                                secCode.SecBoard = sdr.GetInt32("secboard");
+								secCode.SecCode = sdr.GetString("seccode");
+								secCode.SecBoard = sdr.GetInt32("secboard");
 
-                                secCode.Name = sdr.GetString("name");
-                                secCode.FullName = sdr.GetString("full_name");
-                                secCode.ISIN = sdr.GetString("isin");
+								secCode.Name = sdr.GetString("name");
+								secCode.FullName = sdr.GetString("full_name");
+								secCode.ISIN = sdr.GetString("isin");
 
-                                int checkForNull = sdr.GetOrdinal("expired_date");
-                                if (!sdr.IsDBNull(checkForNull))
-                                {
-                                    secCode.ExpiredDate = sdr.GetDateTime("expired_date");
-                                }
+								int checkForNull = sdr.GetOrdinal("expired_date");
+								if (!sdr.IsDBNull(checkForNull))
+								{
+									secCode.ExpiredDate = sdr.GetDateTime("expired_date");
+								}
 
-                                result.Add(secCode);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
-                            $"GetPageFromSecCodes Exception!\r\n{ex.Message}");
-                    }
-                    finally
-                    {
-                        await con.CloseAsync();
-                    }
-                }
-            }
+								result.Add(secCode);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+							$"GetPageFromSecCodes Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
 
-            return result;
-        }
+			return result;
+		}
 
-        public async Task<int> GetSecCodesCount(CancellationToken cancellationToken)
+		public async Task<int> GetSecCodesCount(CancellationToken cancellationToken)
         {
 			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecCodes", "GetSecCodesCount.sql");
 			if (query is null)
@@ -112,8 +138,18 @@ namespace DataBaseRepository
 
 			return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
 		}
+		public async Task<int> GetOnlyActiveSecCodesCount(CancellationToken cancellationToken)
+		{
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecCodes", "GetOnlyActiveSecCodesCount.sql");
+			if (query is null)
+			{
+				return 0;
+			}
 
-        public async Task<string> CreateNewSecCode(CancellationToken cancellationToken, SecCodeInfo model)
+			return await _commonRepo.GetTableCountBySqlQuery(cancellationToken, query);
+		}
+
+		public async Task<string> CreateNewSecCode(CancellationToken cancellationToken, SecCodeInfo model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
                 $"CreateNewSecCode start, newModel is\r\n{model.SecCode} {model.Name} SecBoard={model.SecBoard} " +
@@ -343,5 +379,5 @@ namespace DataBaseRepository
             // и наполним снова
             _commonRepo.FillStaticSecCodes();
         }
-    }
+	}
 }

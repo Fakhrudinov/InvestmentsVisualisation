@@ -1,0 +1,1 @@
+﻿SELECT count(*) FROM seccode_info where expired_date is null;

@@ -173,7 +173,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a asp-controller="YearView" asp-action="Index" class="dropdown-item" asp-route-sortedByVolume="true">
+                                <a asp-controller="YearView" asp-action="Index" class="dropdown-item" 
+                                    asp-route-sortedByVolume="true">
                                     Этот год с сортировкой по объему
                                 </a>
                             </li>
@@ -202,6 +203,12 @@
                             <li>
                                 <a asp-controller="SecCodes" asp-action="Index" class="dropdown-item">
                                     Список инструментов
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="SecCodes" asp-action="Index" class="dropdown-item"
+                                   asp-route-showOnlyActive="true">
+                                    Список только активных инструментов
                                 </a>
                             </li>
                             <li>

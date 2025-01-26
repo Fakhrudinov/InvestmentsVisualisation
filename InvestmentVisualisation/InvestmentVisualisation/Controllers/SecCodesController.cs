@@ -23,12 +23,21 @@ namespace InvestmentVisualisation.Controllers
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
         }
 
-        public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, bool showOnlyActive = false)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecCodesController GET " +
-                $"Index called, page={page}");
+                $"Index called, page={page}, showOnlyActive={showOnlyActive}");
 
-            int count = await _repository.GetSecCodesCount(cancellationToken);
+            int count = 0;
+            if (showOnlyActive)
+            {
+				count = await _repository.GetOnlyActiveSecCodesCount(cancellationToken);
+			}
+            else
+            {
+                count = await _repository.GetSecCodesCount(cancellationToken);
+
+			}
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecCodesController SecCodes table size={count}");
 
             SecCodesWithPaginations dealsWithPaginations = new SecCodesWithPaginations();
@@ -38,10 +47,23 @@ namespace InvestmentVisualisation.Controllers
                 page,
                 _itemsAtPage);
 
-            dealsWithPaginations.SecCodes = await _repository
-                .GetPageFromSecCodes(cancellationToken, _itemsAtPage, (page - 1) * _itemsAtPage);
+			if (showOnlyActive)
+			{
+				dealsWithPaginations.SecCodes = await _repository.GetPageFromOnlyActiveSecCodes(
+					cancellationToken,
+					_itemsAtPage,
+					(page - 1) * _itemsAtPage);
+			}
+            else
+            {
+				dealsWithPaginations.SecCodes = await _repository.GetPageFromSecCodes(
+                    cancellationToken, 
+                    _itemsAtPage, 
+                    (page - 1) * _itemsAtPage);
+			}
 
-            return View(dealsWithPaginations);
+            ViewBag.Active = showOnlyActive;
+			return View(dealsWithPaginations);
         }
 
         public ActionResult Create()
