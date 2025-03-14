@@ -44,7 +44,7 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Index called, year={year}");
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController GET Index called, year={year}");
 
             int currentYear = DateTime.Now.Year;
 
@@ -73,7 +73,7 @@ namespace InvestmentVisualisation.Controllers
 
 			foreach (MoneyModel money in moneyList)
             {
-				DateTime dateFromBD = new DateTime(money.Year, money.Month, 1);
+				DateTime dateFromBD = money.Date;
                 if (dateNowFirstDay <= dateFromBD)
                 {
                     continue;
@@ -104,7 +104,7 @@ namespace InvestmentVisualisation.Controllers
         }
         public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0, int month = 0)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Recalculate called, " +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController GET Recalculate called, " +
                 $"year={year} month={month}");
 
             if (year >= _minimumYear && (month >= 1 && month <= 12))
@@ -123,7 +123,7 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> MoneySpentAndIncomeOfLast12MonthChart(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController " +
                 $"MoneySpentAndIncomeOfLast12MonthChart called");
 
             List<MoneySpentAndIncomeModel>? moneySpentAndIncomeDBModelItems = await _repository
@@ -208,7 +208,7 @@ namespace InvestmentVisualisation.Controllers
 
         public async Task<IActionResult> ExpectedDividentsChart(CancellationToken cancellationToken)
         {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
+            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController " +
                 $"ExpectedDividentsFromDohodChart called");
 
             // get web site data

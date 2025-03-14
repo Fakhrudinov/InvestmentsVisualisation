@@ -1,5 +1,5 @@
-﻿SELECT *, STR_TO_DATE(concat(month,'/',year), '%m/%Y') as date_to_sort 
+﻿SELECT * 
 	FROM money_by_month
-        having  date_to_sort >= adddate(sysdate(), INTERVAL - 1 year)
-			and date_to_sort <= sysdate()
-	order by date_to_sort desc;
+        having  `date_year_month` >= adddate(sysdate(), INTERVAL - 1 year)
+			and `date_year_month` <= sysdate()
+	order by `date_year_month` desc;

@@ -4,13 +4,10 @@ namespace DataAbstraction.Models.MoneyByMonth
 {
     public class MoneyModel
     {
-        [Display(Name = "Год")]
-        public int Year { get; set; }
+		[Display(Name = "Дата")]
+		public DateTime Date { get; set; }
 
-        [Display(Name = "Месяц")]
-        public int Month { get; set; }
-
-        [Display(Name = "Всего зачислил")]
+		[Display(Name = "Всего зачислил")]
         public decimal ? TotalIn { get; set; }
 
         [Display(Name = "За месяц зачислил")]

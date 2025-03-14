@@ -1,3 +1,3 @@
-﻿SELECT money_sum FROM @data_base.money_by_month
-	where year = year(curdate())
-		and month = month(curdate());
+﻿SELECT money_sum 
+	FROM money_by_month 
+		where `date_year_month` = DATE_FORMAT(current_date, '%Y-%m-01');

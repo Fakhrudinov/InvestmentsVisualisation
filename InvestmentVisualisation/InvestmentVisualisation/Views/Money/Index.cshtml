@@ -35,11 +35,8 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Year)
-                </th>
-                <th>
-                    @Html.DisplayNameFor(model => model.Month)
+                <th style="width:100px;">
+                    @Html.DisplayNameFor(model => model.Date)
                 </th>
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.TotalIn)
@@ -74,10 +71,7 @@
                 {
                     <tr>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Year)
-                        </td>
-                        <td>
-                            @StaticData.MonthNames[StaticData.MonthNames.FindIndex(sb => sb.Id == item.Month)].Name
+                            @Convert.ToDateTime(item.Date).ToString("yyyy MMM")
                         </td>
                         <td style="text-align:right;">
                             @Html.DisplayFor(modelItem => item.TotalIn)
@@ -120,7 +114,7 @@
                 }
             }
             <tr style="font-weight: bold;">
-                <td colspan="3">
+                <td colspan="2">
                     Итого, суммарно:
                 </td>
                 <td style="text-align:right;">
@@ -143,7 +137,7 @@
                 </td>
             </tr>
             <tr style="font-weight: bold;">
-                <td colspan="3">
+                <td colspan="2">
                     Итого, в среднем:
                 </td>
                 <td>

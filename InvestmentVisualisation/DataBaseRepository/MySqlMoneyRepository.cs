@@ -78,8 +78,7 @@ namespace DataBaseRepository
                             {
                                 MoneyModel newMoney = new MoneyModel();
 
-                                newMoney.Year = sdr.GetInt32("year");
-                                newMoney.Month = sdr.GetInt32("month");
+                                newMoney.Date = sdr.GetDateTime("date_year_month");
 
                                 int checkForNull1 = sdr.GetOrdinal("total_in");
                                 if (!sdr.IsDBNull(checkForNull1))
@@ -214,10 +213,15 @@ namespace DataBaseRepository
                             while (await sdr.ReadAsync(cancellationToken))
                             {
                                 MoneySpentAndIncomeModel newChartItem = new MoneySpentAndIncomeModel();
-                                newChartItem.Date = sdr.GetDateTimeOffset("date");
+                                newChartItem.Date = sdr.GetDateTimeOffset("date_year_month");
                                 newChartItem.Divident = sdr.GetInt32("div_round");
                                 newChartItem.AverageDivident = sdr.GetInt32("avrg_div_round");
-                                newChartItem.MoneySpent = sdr.GetInt32("spent_round");
+
+								int checkForNull4 = sdr.GetOrdinal("spent_round");
+								if (!sdr.IsDBNull(checkForNull4))
+								{
+									newChartItem.MoneySpent = sdr.GetInt32("spent_round");
+								}
 
                                 сhartItems.Add(newChartItem);
                             }

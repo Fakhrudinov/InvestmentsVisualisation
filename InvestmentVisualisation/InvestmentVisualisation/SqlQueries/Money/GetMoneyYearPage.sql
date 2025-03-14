@@ -1,1 +1,1 @@
-﻿SELECT * FROM money_by_month where year = @year;
+﻿SELECT * FROM money_test.money_by_month where year(`date_year_month`) = @year;
