@@ -18,18 +18,21 @@
                 prev = prev.AddMonths(-1);
             }
         </div>
-        <div class="col-sm-5 align-right">
-            @Html.ActionLink(
-                                  "Recalculate previous month", 
-                                  "Recalculate", 
-                                  new {  year = prev.Year, month = prev.Month }, 
-                                  new { @class = "btn btn-block btn-danger" })
-            @Html.ActionLink(
-                                  "Recalculate current month", 
-                                  "Recalculate", 
-                                  new {  year = DateTime.Now.Year, month = DateTime.Now.Month }, 
-                                  new { @class = "btn btn-block btn-danger" })
-        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-sm-5 align-right">
+                @Html.ActionLink(
+                    "Recalculate previous month", 
+                    "Recalculate", 
+                    new {  year = prev.Year, month = prev.Month }, 
+                    new { @class = "btn btn-block btn-danger" })
+                @Html.ActionLink(
+                    "Recalculate current month", 
+                    "Recalculate", 
+                    new {  year = DateTime.Now.Year, month = DateTime.Now.Month }, 
+                    new { @class = "btn btn-block btn-danger" })
+            </div>
+        }
     </div>
 
     <table class="table table-hover">
@@ -162,34 +165,32 @@
         </tbody>
     </table>
 
-    @{
-        if(ViewBag.year == 0)
-        {
-            <div class="btn btn-default" style="border-color: #ddd;">Показать последний год</div> 
-        }
-        else
-        {
-            <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
-        }
+    @if(ViewBag.year == 0)
+    {
+        <div class="btn btn-default" style="border-color: #ddd;">Показать последний год</div> 
+    }
+    else
+    {
+        <a asp-action="Index" class="btn btn-success">Показать последний год</a> 
+    }
  
-        if(ViewData["Navigation"]!=null)     
+    @if(ViewData["Navigation"]!=null)     
+    {  
+        if(ViewData.Values !=null && ViewData.Values.Count()>0)  
         {  
-            if(ViewData.Values !=null && ViewData.Values.Count()>0)  
-            {  
-                foreach (int item in ViewData["Navigation"] as List<int>)  
+            foreach (int item in ViewData["Navigation"] as List<int>)  
+            {
+                if(ViewBag.year == item)
                 {
-                     if(ViewBag.year == item)
-                     {
-                         <div class="btn btn-default" style="border-color: #ddd;">@item</div> 
-                     }
-                     else
-                     {
-                         <a asp-action="Index" asp-route-year="@item" class="btn btn-success" 
-                            style="border-color: #ddd;">@item</a>
-                     }
-                }  
-            }  
-        }  
-    } 
+                    <div class="btn btn-default" style="border-color: #ddd;">@item</div> 
+                }
+                else
+                {
+                    <a asp-action="Index" asp-route-year="@item" class="btn btn-success" 
+                    style="border-color: #ddd;">@item</a>
+                }
+            }
+        }
+    }
 
 </div>

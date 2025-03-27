@@ -7,6 +7,7 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.BaseModels;
 using System.Globalization;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -41,8 +42,8 @@ namespace InvestmentVisualisation.Controllers
             }
         }
 
-
-        public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0)
+		[Authorize]
+		public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController GET Index called, year={year}");
 
@@ -102,7 +103,8 @@ namespace InvestmentVisualisation.Controllers
 
 			return View(moneyList);
         }
-        public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0, int month = 0)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0, int month = 0)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController GET Recalculate called, " +
                 $"year={year} month={month}");
@@ -121,6 +123,7 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Index");
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> MoneySpentAndIncomeOfLast12MonthChart(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController " +
@@ -206,6 +209,7 @@ namespace InvestmentVisualisation.Controllers
             return View("MoneySpentAndIncomeChart");
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> ExpectedDividentsChart(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController " +

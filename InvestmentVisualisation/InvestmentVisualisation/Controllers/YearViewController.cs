@@ -1,6 +1,7 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.YearView;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -25,7 +26,8 @@ namespace InvestmentVisualisation.Controllers
             _secVolumeRepository = secVolumeRepository;
         }
 
-        public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0, bool sortedByVolume = false)
+		[Authorize]
+		public async Task<IActionResult> Index(CancellationToken cancellationToken, int year = 0, bool sortedByVolume = false)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController " +
                 $"GET Index called, year={year}");
@@ -58,7 +60,8 @@ namespace InvestmentVisualisation.Controllers
             return View(yearViews);
         }
 
-        public async Task<IActionResult> Last12Month(CancellationToken cancellationToken)
+		[Authorize]
+		public async Task<IActionResult> Last12Month(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} YearViewController Last12Month");
 

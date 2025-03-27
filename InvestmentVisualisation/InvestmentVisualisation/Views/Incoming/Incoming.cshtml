@@ -20,12 +20,17 @@
     }
 
     <p>
-        <a asp-area="" asp-controller="Incoming" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-area="" asp-controller="Incoming" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
+        }
         <a asp-area="" asp-controller="Incoming" asp-action="HelpPage" class="btn btn-primary"> Help </a>
         @{
             if (ViewBag.secCode is not null)
             {
-                <a asp-area="" asp-controller="Incoming" asp-action="Incoming" class="btn btn-outline-success">Назад к списку зачислений</a>
+                <a asp-area="" asp-controller="Incoming" asp-action="Incoming" class="btn btn-outline-success">
+                    Назад к списку зачислений
+                </a>
             }
         }        
     </p>
@@ -53,53 +58,72 @@
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.Incomings.ElementAt(0).Comission)
                 </th>
-                <th></th>
+                <th>@* buttons *@</th>
             </tr>
         </thead>
         <tbody>
-    @foreach (var item in Model.Incomings) {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
-                </td>
-                <td>
-                    @if (item.SecCode.Equals("0"))
-                    {
-                        <span>Деньги</span>
-                    }
-                    else
-                    {
-                        @Html.DisplayFor(modelItem => item.SecCode)
-                    }
-                </td>
-                <td>
-                    @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
-                </td>
-                <td>
-                    @StaticData.Categories[StaticData.Categories.FindIndex(cat => cat.Id == item.Category)].Name
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.Value)
-                </td>
-                    <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.Comission)
-                </td>
-                    <td style="text-align:right;">
-                        @{
-                            if (ViewBag.secCode is null){
-                                @Html.ActionLink("Show All " + item.SecCode, "Incoming", new { secCode = item.SecCode }, new { @class = "btn btn-outline-success btn-sm"  })
-                            }
-                        }
-                        
-                        @Html.ActionLink(" + ", "CreateSpecificIncoming", new { data = item.Date, tiker = item.SecCode, category = item.Category }, new { @class = "btn btn-primary btn-sm"  }) 
-                        @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  }) 
-                        @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
+            @foreach (var item in Model.Incomings) 
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
                     </td>
-            </tr>
-    }
+                    <td>
+                        @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
+                    </td>
+                    <td>
+                        @if (item.SecCode.Equals("0"))
+                        {
+                            <span>Деньги</span>
+                        }
+                        else
+                        {
+                            @Html.DisplayFor(modelItem => item.SecCode)
+                        }
+                    </td>
+                    <td>
+                        @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
+                    </td>
+                    <td>
+                        @StaticData.Categories[StaticData.Categories.FindIndex(cat => cat.Id == item.Category)].Name
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.Value)
+                    </td>
+                        <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.Comission)
+                    </td>
+                    <td style="text-align:right;">
+                        @if (ViewBag.secCode is null)
+                        {
+                            @Html.ActionLink(
+                                "Show All " + item.SecCode, 
+                                "Incoming", 
+                                new { secCode = item.SecCode }, 
+                                new { @class = "btn btn-outline-success btn-sm"  })
+
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            @Html.ActionLink(
+                                " + ", 
+                                "CreateSpecificIncoming", 
+                                new { data = item.Date, tiker = item.SecCode, category = item.Category }, 
+                                new { @class = "btn btn-primary btn-sm" })
+                            @Html.ActionLink(
+                                "Edit", 
+                                "Edit", 
+                                new { id = item.Id }, 
+                                new { @class = "btn btn-primary btn-sm" })
+                            @Html.ActionLink(
+                                "Delete", 
+                                "Delete", 
+                                new { id = item.Id }, 
+                                new { @class = "btn btn-danger btn-sm" })
+                        }
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 
@@ -107,11 +131,19 @@
     {
         if (ViewBag.secCode is not null)
         {
-            @Html.ActionLink("Назад", "Incoming", new { page = @Model.PageViewModel.PageNumber + 1, secCode = ViewBag.secCode }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Назад", 
+                "Incoming", 
+                new { page = @Model.PageViewModel.PageNumber + 1, secCode = ViewBag.secCode }, 
+                new { @class = "btn btn-secondary"  })
         }
         else
         {
-            @Html.ActionLink("Назад", "Incoming", new { page = @Model.PageViewModel.PageNumber + 1 }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Назад", 
+                "Incoming", 
+                new { page = @Model.PageViewModel.PageNumber + 1 }, 
+                new { @class = "btn btn-secondary"  })
         }
         //<a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>        
     }
@@ -122,11 +154,19 @@
     {
         if (ViewBag.secCode is not null)
         {
-            @Html.ActionLink("Вперед", "Incoming", new { page = @Model.PageViewModel.PageNumber - 1, secCode = ViewBag.secCode }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Вперед", 
+                "Incoming", 
+                new { page = @Model.PageViewModel.PageNumber - 1, secCode = ViewBag.secCode }, 
+                new { @class = "btn btn-secondary"  })
         }
         else
         {
-            @Html.ActionLink("Вперед", "Incoming", new { page = @Model.PageViewModel.PageNumber - 1 }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Вперед", 
+                "Incoming", 
+                new { page = @Model.PageViewModel.PageNumber - 1 }, 
+                new { @class = "btn btn-secondary"  })
         }
         //<a asp-action="Incoming" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
     }

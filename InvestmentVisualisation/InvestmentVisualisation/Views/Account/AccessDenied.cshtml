@@ -1,0 +1,56 @@
+﻿@model InvestmentVisualisation.Models.AppUser
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> signInManager
+
+@{
+    
+
+    ViewData["Title"] = "AccessDenied";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-9">
+            <h3>Access Denied!</h3>
+            <p>Только пользователь с правами администратора может выполнять такие действия!</p>
+        </div>
+
+
+
+        <div class="col-3" style="padding:0px;">
+            <div style ="border: 1px solid lightgray; border-radius: .5rem; padding:10px;">
+
+                @if (TempData["Error"] is not null)
+                {
+                    <p style="color:red;">@TempData["Error"]</p>
+                }
+
+                @if (signInManager is not null && signInManager.IsSignedIn(User))
+                {
+                    <h5>Logged in as @User.Identity.Name</h5>
+                    <a class="btn btn-primary" asp-controller="Account" asp-action="Logout">Logout</a>
+                }
+                else
+                {
+                    <h5>Logon</h5>
+                    <form asp-controller="Account" asp-action="Login">
+                        <div class="form-group col-sm-12">
+                            <label for="Username">Username</label>
+                            <input type="text" class="form-control"
+                                   id="Username" asp-for="UserName"
+                                   placeholder="Enter username">
+                        </div>
+                        <div class="form-group col-sm-12">
+                            <label for="Password">Password</label>
+                            <input type="password" class="form-control" id="Password"
+                                   asp-for="Password" placeholder="Enter password">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    </form>
+                }
+             </div>            
+        </div>
+    </div>
+</div>

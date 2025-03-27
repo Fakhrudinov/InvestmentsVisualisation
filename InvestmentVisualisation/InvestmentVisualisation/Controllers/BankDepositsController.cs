@@ -3,6 +3,7 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.BankDeposits;
 using DataAbstraction.Models.MoneyByMonth;
 using DataAbstraction.Models.Settings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -30,6 +31,7 @@ namespace InvestmentVisualisation.Controllers
 			_helper = helper;
 		}
 
+		[Authorize]
 		public async Task<IActionResult> Index(
 			CancellationToken cancellationToken, 
 			int page = 1, 
@@ -76,6 +78,7 @@ namespace InvestmentVisualisation.Controllers
 			return View(bankDepositsWithPaginations);
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Close(
@@ -122,7 +125,7 @@ namespace InvestmentVisualisation.Controllers
 			return RedirectToAction("Index", new { page = page, showOnlyActive = showOnlyActive });
 		}
 
-
+		[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> Edit(
 			int id,
 			int page,
@@ -147,6 +150,7 @@ namespace InvestmentVisualisation.Controllers
 			return View(editedItem);
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(
@@ -237,6 +241,7 @@ namespace InvestmentVisualisation.Controllers
 			return View(model);
 		}
 
+		[Authorize(Roles = "Admin")]
 		public ActionResult Create(
 			NewBankDepositModel model,
 			int page,
@@ -264,6 +269,7 @@ namespace InvestmentVisualisation.Controllers
 			return View(model);
 		}
 
+		[Authorize(Roles = "Admin")]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(
@@ -328,7 +334,7 @@ namespace InvestmentVisualisation.Controllers
 		}
 
 
-
+		[AllowAnonymous]
 		public async Task<IActionResult> Chart(CancellationToken cancellationToken)
 		{
 			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} BankDepositsController Chart called");

@@ -6,10 +6,11 @@ using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.Deals;
 using UserInputService;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InvestmentVisualisation.Controllers
 {
-    public class DealsController : Controller
+	public class DealsController : Controller
     {
         private readonly ILogger<DealsController> _logger;
         private IMySqlDealsRepository _repository;
@@ -34,8 +35,8 @@ namespace InvestmentVisualisation.Controllers
             _inMemoryRepository = inMemoryRepository;
         }
 
-
-        public async Task<IActionResult> Deals(CancellationToken cancellationToken, int page = 1, string secCode = "")
+		[Authorize]
+		public async Task<IActionResult> Deals(CancellationToken cancellationToken, int page = 1, string secCode = "")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
                 $"Deals called, page={page} secCode={secCode}");
@@ -75,7 +76,8 @@ namespace InvestmentVisualisation.Controllers
             return View(dealsWithPaginations);
         }
 
-        public ActionResult Create(CreateDealsModel model)
+		[Authorize(Roles = "Admin")]
+		public ActionResult Create(CreateDealsModel model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Create called");
 
@@ -88,7 +90,9 @@ namespace InvestmentVisualisation.Controllers
 
             return View(model);
         }
-        public ActionResult CreateSpecific(DateTime data, string tiker, string price, int pieces)
+
+		[Authorize(Roles = "Admin")]
+		public ActionResult CreateSpecific(DateTime data, string tiker, string price, int pieces)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET CreateSpecific called " +
                 $"with parametres {data} {tiker} price={price} pieces={pieces}");
@@ -100,7 +104,9 @@ namespace InvestmentVisualisation.Controllers
             model.Pieces = pieces;
             return View("Create", model);
         }
-        [HttpPost]
+
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public async Task<IActionResult> CreateFromText(CancellationToken cancellationToken, string text)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
@@ -119,7 +125,8 @@ namespace InvestmentVisualisation.Controllers
             return View("Create", model);
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult RecalculateComission(CreateDealsModel model)
         {
@@ -137,7 +144,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Create", model);
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateDealsModel model, CancellationToken cancellationToken)
         {
@@ -183,7 +191,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Deals");
         }
 
-        public async Task<IActionResult> Edit(CancellationToken cancellationToken, int id)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET Edit id={id} called");
 
@@ -191,7 +200,9 @@ namespace InvestmentVisualisation.Controllers
 
             return View(editedItem);
         }
-        [HttpPost]
+
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CancellationToken cancellationToken, DealModel model)
         {
@@ -217,7 +228,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Deals");
         }
 
-        public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
                 $"Delete id={id} called");
@@ -229,7 +241,9 @@ namespace InvestmentVisualisation.Controllers
 
             return View(deleteItem);
         }
-        [HttpPost]
+
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAction(CancellationToken cancellationToken, int id)
         {
@@ -246,7 +260,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Deals");
         }
 
-        public ActionResult CreateNewDeals(List<IndexedDealModel> ? model)
+		[Authorize(Roles = "Admin")]
+		public ActionResult CreateNewDeals(List<IndexedDealModel> ? model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController GET " +
                 $"CreateNewDeals called");
@@ -262,7 +277,9 @@ namespace InvestmentVisualisation.Controllers
 
             return View(model);
         }
-        public IActionResult DeleteDealById(string id, CancellationToken cancellationToken)
+
+		[Authorize(Roles = "Admin")]
+		public IActionResult DeleteDealById(string id, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
                 $"DeleteDealById id={id} called");
@@ -273,7 +290,8 @@ namespace InvestmentVisualisation.Controllers
             return View("CreateNewDeals", model);
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public IActionResult EditDealById(
             Guid id,
             DateTime date,
@@ -351,7 +369,8 @@ namespace InvestmentVisualisation.Controllers
             return View("CreateNewDeals", model);
         }
 
-        public async Task<IActionResult> AddSingleDealById(string id, CancellationToken cancellationToken)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> AddSingleDealById(string id, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
                 $"AddSingleDealById id={id} called");
@@ -367,7 +386,8 @@ namespace InvestmentVisualisation.Controllers
             return View("CreateNewDeals", model);
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public async Task<IActionResult> CreateDealsFromText(string excelData, CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
@@ -439,8 +459,8 @@ namespace InvestmentVisualisation.Controllers
             return View("CreateNewDeals", model);
         }
 
-
-        public async Task<IActionResult> AddAllDealsFromInMemoryRepository(CancellationToken cancellationToken)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> AddAllDealsFromInMemoryRepository(CancellationToken cancellationToken)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController " +
                 $"AddAllDealsFromInMemoryRepository called");

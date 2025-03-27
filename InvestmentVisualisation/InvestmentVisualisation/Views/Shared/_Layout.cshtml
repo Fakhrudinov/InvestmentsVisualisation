@@ -1,4 +1,6 @@
 ﻿@using DataAbstraction.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> signInManager
 
 @{
     int currentYear = DateTime.Now.Year;
@@ -39,17 +41,23 @@
                             Входящие деньги
                         </button>
                         <ul class="dropdown-menu">
-                            <li>
-                                <a asp-controller="Incoming" asp-action="Incoming" class="dropdown-item">
-                                    Список входящих
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Incoming" asp-action="CreateIncoming" class="dropdown-item">
-                                    Добавить входящие деньги
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
+                            @if (signInManager is not null && signInManager.IsSignedIn(User))
+                            {
+                                <li>
+                                    <a asp-controller="Incoming" asp-action="Incoming" class="dropdown-item">
+                                        Список входящих
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a asp-controller="Incoming" asp-action="CreateIncoming" class="dropdown-item">
+                                            Добавить входящие деньги
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                            }
                             <li>
                                 <a asp-controller="Incoming" asp-action="HelpPage" class="dropdown-item">
                                     Как закрывать позиции
@@ -58,30 +66,36 @@
                         </ul>
                     </div>
 
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-primary dropdown-toggle 
+                    @if (signInManager is not null && signInManager.IsSignedIn(User))
+                    {
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary dropdown-toggle
                                     @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" ? "active" : "")"
-                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Сделки
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a asp-controller="Deals" asp-action="Deals" class="dropdown-item">
-                                    Список сделок
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Deals" asp-action="Create" class="dropdown-item">
-                                    Добавить сделку
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Deals" asp-action="CreateNewDeals" class="dropdown-item">
-                                    Добавить сделки
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Сделки
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a asp-controller="Deals" asp-action="Deals" class="dropdown-item">
+                                        Список сделок
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a asp-controller="Deals" asp-action="Create" class="dropdown-item">
+                                            Добавить сделку
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Deals" asp-action="CreateNewDeals" class="dropdown-item">
+                                            Добавить сделки
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
 
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
@@ -90,51 +104,57 @@
                             Деньги
                         </button>
                         <ul class="dropdown-menu">
-                            <li>
-                                <a asp-controller="Money" asp-action="Index" class="dropdown-item">
-                                    Показать последние 12 месяцев
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Money" asp-action="Index" asp-route-year="@currentYear" class="dropdown-item">
-                                    Показать @currentYear год
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Money" asp-action="Index" asp-route-year="@prevYear" class="dropdown-item">
-                                    Показать @prevYear год
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Money" asp-action="Index" asp-route-year="@prevPrevYear" class="dropdown-item">
-                                    Показать @prevPrevYear год
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="Money" asp-action="Recalculate" class="dropdown-item" 
-                                        asp-route-year="@currentYear" asp-route-month="@currentMonth">
-                                    Пересчитать этот месяц
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="Money" asp-action="Recalculate" class="dropdown-item"
-                                        asp-route-year="@prevMonthYear" asp-route-month="@prevMonth">
-                                    Пересчитать предыдущий месяц
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="BankDeposits" asp-action="index" class="dropdown-item">
-                                    Список активных банковских вкладов
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="BankDeposits" asp-action="index" class="dropdown-item"
-                                   asp-route-showOnlyActive="false">
-                                    Список всех банковских вкладов
-                                </a>
-                            </li>
+                            @if (signInManager is not null && signInManager.IsSignedIn(User))
+                            {
+                                <li>
+                                    <a asp-controller="Money" asp-action="Index" class="dropdown-item">
+                                        Показать последние 12 месяцев
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="Money" asp-action="Index" asp-route-year="@currentYear" class="dropdown-item">
+                                        Показать @currentYear год
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="Money" asp-action="Index" asp-route-year="@prevYear" class="dropdown-item">
+                                        Показать @prevYear год
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="Money" asp-action="Index" asp-route-year="@prevPrevYear" class="dropdown-item">
+                                        Показать @prevPrevYear год
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a asp-controller="Money" asp-action="Recalculate" class="dropdown-item"
+                                           asp-route-year="@currentYear" asp-route-month="@currentMonth">
+                                            Пересчитать этот месяц
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Money" asp-action="Recalculate" class="dropdown-item"
+                                           asp-route-year="@prevMonthYear" asp-route-month="@prevMonth">
+                                            Пересчитать предыдущий месяц
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li>
+                                    <a asp-controller="BankDeposits" asp-action="index" class="dropdown-item">
+                                        Список активных банковских вкладов
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="BankDeposits" asp-action="index" class="dropdown-item"
+                                       asp-route-showOnlyActive="false">
+                                        Список всех банковских вкладов
+                                    </a>
+                                </li>
+                            }
                             <li>
                                 <a asp-controller="BankDeposits" asp-action="Chart" class="dropdown-item">
                                     График банковских вкладов
@@ -154,42 +174,45 @@
                         </ul>
                     </div>
 
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-outline-primary dropdown-toggle 
+                    @if (signInManager is not null && signInManager.IsSignedIn(User))
+                    {
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary dropdown-toggle
                                     @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" ? "active" : "")"
-                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Таблица за год
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a asp-controller="YearView" asp-action="Last12Month" class="dropdown-item">
-                                   Последние 12 месяцев
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="YearView" asp-action="Index" class="dropdown-item">
-                                    Этот год с сортировкой по тикеру
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="YearView" asp-action="Index" class="dropdown-item" 
-                                    asp-route-sortedByVolume="true">
-                                    Этот год с сортировкой по объему
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="YearView" asp-action="Index" asp-route-year="@prevYear" class="dropdown-item">
-                                    Предыдущий год
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="YearView" asp-action="Index" asp-route-year="@prevPrevYear" class="dropdown-item">
-                                    2 года назад
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Таблица за год
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a asp-controller="YearView" asp-action="Last12Month" class="dropdown-item">
+                                        Последние 12 месяцев
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a asp-controller="YearView" asp-action="Index" class="dropdown-item">
+                                        Этот год с сортировкой по тикеру
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="YearView" asp-action="Index" class="dropdown-item"
+                                       asp-route-sortedByVolume="true">
+                                        Этот год с сортировкой по объему
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="YearView" asp-action="Index" asp-route-year="@prevYear" class="dropdown-item">
+                                        Предыдущий год
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="YearView" asp-action="Index" asp-route-year="@prevPrevYear" class="dropdown-item">
+                                        2 года назад
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
 
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
@@ -211,23 +234,29 @@
                                     Список только активных инструментов
                                 </a>
                             </li>
-                            <li>
-                                <a asp-controller="SecCodes" asp-action="Create" class="dropdown-item">
-                                    Добавить инструмент
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="WishList" asp-action="WishList" class="dropdown-item">
-                                    Показать Wish list
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="WishList" asp-action="WishList" class="dropdown-item"
-                                   asp-route-sortMode="byLevel">
-                                    Показать Wish list сортированный по уровню
-                                </a>
-                            </li>
+                            @if (signInManager is not null && signInManager.IsSignedIn(User))
+                            {
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a asp-controller="SecCodes" asp-action="Create" class="dropdown-item">
+                                            Добавить инструмент
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a asp-controller="WishList" asp-action="WishList" class="dropdown-item">
+                                        Показать Wish list
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="WishList" asp-action="WishList" class="dropdown-item"
+                                       asp-route-sortMode="byLevel">
+                                        Показать Wish list сортированный по уровню
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
 
@@ -243,55 +272,61 @@
                                     График объемов позиций
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item">
-                                   Динамика позиций за 3 года сортированная по тикеру
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" 
-                                    asp-route-sortMode="byVolume">
-                                   Динамика позиций за 3 года сортированная по объему
-                               </a>
-                            </li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" \
-                                    asp-route-sortMode="byTime">
-                                    Динамика  позиций за 3 года  сортированная по времени
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" \
-                                   asp-route-sortMode="byTimeFiltered">
-                                    Динамика только моих позиций за 3 года сортированная по времени
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" \
-                                   asp-route-sortMode="byWish">
-                                    Динамика позиций за 3 года сортированная по уровню wish
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="Index" class="dropdown-item">
-                                    Список позиций
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="Recalculate" asp-route-year="@currentYear" 
-                                    class="dropdown-item">
-                                    Пересчитать позиции за @currentYear
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="SecVolume" asp-action="Recalculate" asp-route-year="@prevYear" 
-                                class="dropdown-item">
-                                    Пересчитать позиции за @prevYear
-                                </a>
-                            </li>
+                            @if (signInManager is not null && signInManager.IsSignedIn(User))
+                            {
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item">
+                                        Динамика позиций за 3 года сортированная по тикеру
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item"
+                                       asp-route-sortMode="byVolume">
+                                        Динамика позиций за 3 года сортированная по объему
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" \
+                                       asp-route-sortMode="byTime">
+                                        Динамика  позиций за 3 года  сортированная по времени
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" \
+                                       asp-route-sortMode="byTimeFiltered">
+                                        Динамика только моих позиций за 3 года сортированная по времени
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="SecVolume" asp-action="SecVolumeLast3YearsDynamic" class="dropdown-item" \
+                                       asp-route-sortMode="byWish">
+                                        Динамика позиций за 3 года сортированная по уровню wish
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a asp-controller="SecVolume" asp-action="Index" class="dropdown-item">
+                                        Список позиций
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a asp-controller="SecVolume" asp-action="Recalculate" asp-route-year="@currentYear"
+                                           class="dropdown-item">
+                                            Пересчитать позиции за @currentYear
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="SecVolume" asp-action="Recalculate" asp-route-year="@prevYear"
+                                           class="dropdown-item">
+                                            Пересчитать позиции за @prevYear
+                                        </a>
+                                    </li>
+                                }
+                            }
                         </ul>
                     </div>
 

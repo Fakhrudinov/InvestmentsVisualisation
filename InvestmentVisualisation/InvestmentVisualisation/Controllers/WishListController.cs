@@ -2,6 +2,7 @@
 using DataAbstraction.Models;
 using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.WishList;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InvestmentVisualisation.Controllers
@@ -21,7 +22,8 @@ namespace InvestmentVisualisation.Controllers
             _repository = repository;
         }
 
-        public async Task<IActionResult> WishList(
+		[Authorize]
+		public async Task<IActionResult> WishList(
             CancellationToken cancellationToken,
             string sortMode = "bySecCode")
         {
@@ -68,7 +70,8 @@ namespace InvestmentVisualisation.Controllers
             return secCodesList;
         }
 
-        public async Task<IActionResult> Delete(
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Delete(
             CancellationToken cancellationToken, 
             string seccode, 
             string sortMode = "bySecCode")
@@ -81,7 +84,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("WishList", new { sortMode = sortMode });
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public async Task<IActionResult> CreateNewWish(
             CancellationToken cancellationToken, 
             string seccode, 
@@ -97,7 +101,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("WishList", new { sortMode = sortMode });
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public async Task<IActionResult> EditWishLevel(
             CancellationToken cancellationToken, 
             string seccode, 
