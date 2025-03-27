@@ -56,33 +56,36 @@
                 }
             </div>
         </div>
-        <div class="col-4">
-            <h5 style="text-align:center">Добавить в Wish list</h5>
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="col-4">
+                <h5 style="text-align:center">Добавить в Wish list</h5>
 
-            <form method="post" action="/WishList/CreateNewWish">
-                <div class="row">
-                    <div class="col-6" style="margin-right:0px;padding-right:0px;">
-                        @Html.DropDownList(
-                                 "seccode",
-                                 new SelectList(@secCodesList, "SecCode", "SecCode"),
-                                 new
-                                 {
-                                     @class = "form-select form-select-sm"
-                                 })
+                <form method="post" action="/WishList/CreateNewWish">
+                    <div class="row">
+                        <div class="col-6" style="margin-right:0px;padding-right:0px;">
+                            @Html.DropDownList(
+                                     "seccode",
+                                     new SelectList(@secCodesList, "SecCode", "SecCode"),
+                                     new
+                                     {
+                                         @class = "form-select form-select-sm"
+                                     })
+                        </div>
+                        <div class="col-1" style="text-align:left; margin:0px; padding:0px;">
+                            <input type="number" style="width: 50px; border: 1px solid lightgray"
+                                   class="form-control form-control-sm" name="level" min="-5" max="5" value="1">
+                        </div>
+                        <div class="col" style="text-align:right;">
+                            <input name="sortMode" value="@ViewBag.SortMode" hidden />
+                            <input type="submit" class="btn btn-primary btn-sm" style="width: 100%;" value="Добавить" />
+                        </div>
                     </div>
-                    <div class="col-1" style="text-align:left; margin:0px; padding:0px;">
-                        <input type="number" style="width: 50px; border: 1px solid lightgray"
-                               class="form-control form-control-sm" name="level" min="-5" max="5" value="1">
-                    </div>
-                    <div class="col" style="text-align:right;">
-                        <input name="sortMode" value="@ViewBag.SortMode" hidden />
-                        <input type="submit" class="btn btn-primary btn-sm" style="width: 100%;" value="Добавить" />
-                    </div>
-                </div>
-                <textarea class="form-control" name="description" rows="4" 
-                          placeholder="Введите описание, max lenght 300"></textarea>
-            </form>
-        </div>
+                    <textarea class="form-control" name="description" rows="4"
+                              placeholder="Введите описание, max lenght 300"></textarea>
+                </form>
+            </div>
+        }
     </div>
 
     <div class="row">
@@ -92,8 +95,6 @@
                 <thead>
                     <tr>
                         <th>
-                            @* @Html.DisplayNameFor(model => model.SecCode) *@
-
                             @*тикер*@
                             @if (ViewBag.SortMode == "bySecCode")
                             {
@@ -134,12 +135,15 @@
                                 </div>
                             }
                         </th>
-                        <th>
-                            @* edit button *@
-                        </th>
-                        <th width="100">
-                            @* del button *@
-                        </th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>
+                                @* edit button *@
+                            </th>
+                            <th width="100">
+                                @* del button *@
+                            </th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -149,36 +153,46 @@
                             <td>
                                 @Html.DisplayFor(modelItem => item.SecCode)
                             </td>
-
-                            <form method="post" action="/WishList/EditWishLevel">
-                            <td>
-                                <textarea name="description" rows="1"
-                                          style=" min-width:500px; max-width:100%;width:100%;"
-                                          placeholder="Введите описание">@item.Description</textarea>
-                            </td>
-                            <td>
-                                <input name="seccode" value="@item.SecCode" hidden>
-                                <input type="number" class="form-control form-control-sm" style="width: 50px;"
-                                       name="level" min="-5" max="5" value="@item.Level">
-                            </td>
-                            <td>
-                                <input name="sortMode" value="@ViewBag.SortMode" hidden />
-                                <input type="submit" class="btn btn-outline-secondary btn-sm" 
-                                       style="width: 100%;" value="Сохранить" />
-                            </td>
-                            </form>
-
-                            <td>
-                                @Html.ActionLink(
-                                    "Удалить", 
-                                    "Delete",
-                                         new { seccode = item.SecCode, sortMode = ViewBag.SortMode },
-                                    new 
-                                    { 
-                                        @class = "btn btn-outline-danger btn-sm", 
-                                        @style = "width: 100%;" 
-                                    })
-                            </td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <form method="post" action="/WishList/EditWishLevel">
+                                <td>
+                                    <textarea name="description" rows="1"
+                                              style=" min-width:500px; max-width:100%;width:100%;"
+                                              placeholder="Введите описание">@item.Description</textarea>
+                                </td>
+                                <td>
+                                    <input name="seccode" value="@item.SecCode" hidden>
+                                    <input type="number" class="form-control form-control-sm" style="width: 50px;"
+                                           name="level" min="-5" max="5" value="@item.Level">
+                                </td>
+                                <td>
+                                    <input name="sortMode" value="@ViewBag.SortMode" hidden />
+                                    <input type="submit" class="btn btn-outline-secondary btn-sm"
+                                           style="width: 100%;" value="Сохранить" />
+                                </td>
+                                </form>
+                                <td>
+                                    @Html.ActionLink(
+                                        "Удалить",
+                                        "Delete",
+                                        new { seccode = item.SecCode, sortMode = ViewBag.SortMode },
+                                        new
+                                        {
+                                            @class = "btn btn-outline-danger btn-sm",
+                                            @style = "width: 100%;"
+                                        })
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td align="center">
+                                    @Html.DisplayFor(modelItem => item.Level)
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>

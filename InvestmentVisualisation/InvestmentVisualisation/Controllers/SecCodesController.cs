@@ -4,6 +4,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using DataAbstraction.Models.SecCodes;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -23,6 +24,7 @@ namespace InvestmentVisualisation.Controllers
             _itemsAtPage = paginationSettings.Value.PageItemsCount;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, bool showOnlyActive = false)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecCodesController GET " +
@@ -66,14 +68,16 @@ namespace InvestmentVisualisation.Controllers
 			return View(dealsWithPaginations);
         }
 
-        public ActionResult Create()
+		[Authorize(Roles = "Admin")]
+		public ActionResult Create()
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecCodesController GET Create called");
 
             SecCodeInfo model = new SecCodeInfo();
             return View(model);
         }
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CancellationToken cancellationToken, SecCodeInfo model)
         {
@@ -91,7 +95,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> Edit(CancellationToken cancellationToken, string secCode)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(CancellationToken cancellationToken, string secCode)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecCodesController GET " +
                 $"Edit secCode={secCode} called");
@@ -100,7 +105,9 @@ namespace InvestmentVisualisation.Controllers
 
             return View(editedItem);
         }
-        [HttpPost]
+
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CancellationToken cancellationToken, SecCodeInfo model)
         {

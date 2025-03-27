@@ -22,18 +22,18 @@
     }
 
     <p>
-        <a asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
-        <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary">Добавить несколько</a>
-
-        @{
-            if (ViewBag.secCode is not null)
-            {
-                <a asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">
-                    Назад к списку всех сделок
-                </a>
-            }
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
+            <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary">Добавить несколько</a>
         }
 
+        @if (ViewBag.secCode is not null)
+        {
+            <a asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">
+                Назад к списку всех сделок
+            </a>
+        }
     </p>
     <table class="table table-hover">
         <thead>
@@ -47,12 +47,10 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Deals.ElementAt(0).SecCode)
                 </th>
-
                 <th>
                     @* @Html.DisplayNameFor(model => model.Deals.ElementAt(0).SecBoard) *@
                     Тип
                 </th>
-
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.Deals.ElementAt(0).AvPrice)
                 </th>
@@ -68,32 +66,32 @@
                 <th style="text-align:right;">
                     @Html.DisplayNameFor(model => model.Deals.ElementAt(0).NKD)
                 </th>
-                <th></th>
+                <th>@* buttons *@</th>
             </tr>
         </thead>
         <tbody>
-    @foreach (var item in Model.Deals) 
-    {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
-                </td>
-                <td>
-                        <strong>@Html.DisplayFor(modelItem => item.SecCode)</strong>
-                </td>
-                <td>
-                    @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.AvPrice)
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.Pieces)
-                </td>
-                <td style="text-align:right;">
+            @foreach (var item in Model.Deals) 
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
+                    </td>
+                    <td>
+                            <strong>@Html.DisplayFor(modelItem => item.SecCode)</strong>
+                    </td>
+                    <td>
+                        @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.AvPrice)
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.Pieces)
+                    </td>
+                    <td style="text-align:right;">
                         @{
                             decimal volume = 0;
                             InputHelper helper = new InputHelper();
@@ -103,35 +101,45 @@
                             }
                         }
                         <strong>@volume.ToString("# ##0.00")</strong>
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.Comission)
-                </td>
-                <td style="text-align:right;">
-                    @Html.DisplayFor(modelItem => item.NKD)
-                </td>
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.Comission)
+                    </td>
+                    <td style="text-align:right;">
+                        @Html.DisplayFor(modelItem => item.NKD)
+                    </td>
 
-                <td style="text-align:right;">
-                    @{
-                        if (ViewBag.secCode is null)
+                    <td style="text-align:right;">
+                        @if (ViewBag.secCode is null)
                         {
-                            @Html.ActionLink("Show All " + item.SecCode, "Deals", new { secCode = item.SecCode }, new { @class = "btn btn-outline-success btn-sm"  })
+                            @Html.ActionLink(
+                                "Show All " + item.SecCode, 
+                                "Deals", 
+                                new { secCode = item.SecCode }, 
+                                new { @class = "btn btn-outline-success btn-sm"  })
                         }
-                    }
 
-                    @Html.ActionLink("+ ", "CreateSpecific",
-                        new 
-                        { 
-                            data = item.Date, 
-                            tiker = item.SecCode, 
-                            price = item.AvPrice,
-                            pieces = item.Pieces                        
-                        }, new { @class = "btn btn-primary btn-sm"  })
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-primary btn-sm"  }) 
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id }, new { @class = "btn btn-danger btn-sm"  })
-                </td>
-            </tr>
-    }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            @Html.ActionLink(
+                                "+ ", 
+                                "CreateSpecific",
+                                new { data = item.Date, tiker = item.SecCode, price = item.AvPrice, pieces = item.Pieces }, 
+                                new { @class = "btn btn-primary btn-sm" })
+                            @Html.ActionLink(
+                                "Edit", 
+                                "Edit", 
+                                new { id = item.Id }, 
+                                new { @class = "btn btn-primary btn-sm" })
+                            @Html.ActionLink(
+                                "Delete", 
+                                "Delete", 
+                                new { id = item.Id }, 
+                                new { @class = "btn btn-danger btn-sm" })
+                        }
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 
@@ -139,11 +147,19 @@
     {
         if (ViewBag.secCode is not null)
         {
-            @Html.ActionLink("Назад", "Deals", new { page = @Model.PageViewModel.PageNumber + 1, secCode = ViewBag.secCode }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Назад", 
+                "Deals", 
+                new { page = @Model.PageViewModel.PageNumber + 1, secCode = ViewBag.secCode }, 
+                new { @class = "btn btn-secondary" })
         }
         else
         {
-            @Html.ActionLink("Назад", "Deals", new { page = @Model.PageViewModel.PageNumber + 1 }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Назад", 
+                "Deals", 
+                new { page = @Model.PageViewModel.PageNumber + 1 }, 
+                new { @class = "btn btn-secondary" })
         }
         //<a asp-action="Deals" asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="btn btn-secondary"> Назад </a>
     }
@@ -154,11 +170,19 @@
     {
         if (ViewBag.secCode is not null)
         {
-            @Html.ActionLink("Вперед", "Deals", new { page = @Model.PageViewModel.PageNumber - 1, secCode = ViewBag.secCode }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Вперед", 
+                "Deals", 
+                new { page = @Model.PageViewModel.PageNumber - 1, secCode = ViewBag.secCode }, 
+                new { @class = "btn btn-secondary"  })
         }
         else
         {
-            @Html.ActionLink("Вперед", "Deals", new { page = @Model.PageViewModel.PageNumber - 1 }, new { @class = "btn btn-secondary"  })
+            @Html.ActionLink(
+                "Вперед", 
+                "Deals", 
+                new { page = @Model.PageViewModel.PageNumber - 1 }, 
+                new { @class = "btn btn-secondary"  })
         }
        //<a asp-action="Deals" asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="btn btn-secondary"> Вперед</a>
     }

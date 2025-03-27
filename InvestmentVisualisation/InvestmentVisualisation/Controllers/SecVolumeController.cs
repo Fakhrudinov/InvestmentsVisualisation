@@ -8,6 +8,7 @@ using DataAbstraction.Models.BaseModels;
 using Newtonsoft.Json;
 using DataAbstraction.Models.WishList;
 using UserInputService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -47,7 +48,8 @@ namespace InvestmentVisualisation.Controllers
             _helper = helper;
         }
 
-        public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, int year = 0)
+		[Authorize]
+		public async Task<IActionResult> Index(CancellationToken cancellationToken, int page = 1, int year = 0)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController " +
                 $"GET Index called, page={page} year={year}");
@@ -84,7 +86,8 @@ namespace InvestmentVisualisation.Controllers
             return View(secVolumesWithPaginations);
         }
 
-        public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Recalculate(CancellationToken cancellationToken, int year = 0)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController GET " +
                 $"Recalculate called, year={year}");
@@ -101,7 +104,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Index", new { year = year });
         }
 
-        public async Task<IActionResult> SecVolumeLast3YearsDynamic(
+		[Authorize]
+		public async Task<IActionResult> SecVolumeLast3YearsDynamic(
             CancellationToken cancellationToken, 
             string sortMode = "byTiker")
         {
@@ -203,6 +207,7 @@ namespace InvestmentVisualisation.Controllers
             }
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> VolumeChart(CancellationToken cancellationToken)
         {
             // get data from wishsettings.json 

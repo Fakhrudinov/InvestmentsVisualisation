@@ -3,6 +3,7 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.Incoming;
 using DataAbstraction.Models.Settings;
 using InvestmentVisualisation.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
@@ -33,7 +34,8 @@ namespace InvestmentVisualisation.Controllers
             _helper = helper;
         }
 
-        public async Task<IActionResult> Incoming(CancellationToken cancellationToken, int page = 1, string secCode = "")
+		[Authorize]
+		public async Task<IActionResult> Incoming(CancellationToken cancellationToken, int page = 1, string secCode = "")
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET " +
                 $"Incoming called, page={page} secCode={secCode}");
@@ -73,7 +75,8 @@ namespace InvestmentVisualisation.Controllers
             return View(incomingWithPaginations);
         }
 
-        public IActionResult CreateIncoming()
+		[Authorize(Roles = "Admin")]
+		public IActionResult CreateIncoming()
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET CreateIncoming called");
 
@@ -83,7 +86,8 @@ namespace InvestmentVisualisation.Controllers
 
             return View(model);
         }
-        public IActionResult CreateSpecificIncoming(DateTime data, string tiker, int category)
+		[Authorize(Roles = "Admin")]
+		public IActionResult CreateSpecificIncoming(DateTime data, string tiker, int category)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET CreateIncoming called " +
                 $"with parameters {data} {tiker} category={category}");
@@ -95,7 +99,9 @@ namespace InvestmentVisualisation.Controllers
 
             return View("CreateIncoming", model);
         }
-        [HttpPost]
+
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         public async Task<IActionResult> CreateFromText(CancellationToken cancellationToken, string text)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController HttpPost " +
@@ -294,19 +300,6 @@ namespace InvestmentVisualisation.Controllers
             }
 
 
-            //// try calculate comission
-            //if (model.Category == 1 && !model.Value.Equals("0"))
-            //{
-            //    decimal comission = _helper.GetDecimalFromString(model.Value) / 100;
-            //    decimal comissionRounded = Math.Round(comission, 2);
-
-            //    model.Comission = comissionRounded.ToString();
-
-            //    ViewData["ComissionMessage"] = "Comission calculated manually! Recheck!";
-            //}
-
-
-
             //ISIN to seccode
             if (model.Category != 0 && model.Category != 3) // это не зачисленные мной деньги или не списанная брок комиссия
             {
@@ -351,7 +344,8 @@ namespace InvestmentVisualisation.Controllers
         }
 
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateIncoming(CancellationToken cancellationToken, CreateIncomingModel newIncoming)
         {
@@ -412,7 +406,8 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Incoming");
         }
 
-        public async Task<IActionResult> Edit(CancellationToken cancellationToken, int id)
+		[Authorize(Roles = "Admin")]
+		public async Task<IActionResult> Edit(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET Edit id={id} called");
 
@@ -421,7 +416,8 @@ namespace InvestmentVisualisation.Controllers
             return View(editedItem);
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CancellationToken cancellationToken, IncomingModel newIncoming)
         {
@@ -442,7 +438,9 @@ namespace InvestmentVisualisation.Controllers
 
             return RedirectToAction("Incoming");
         }
-        [HttpGet]
+
+		[Authorize(Roles = "Admin")]
+		[HttpGet]
         public async Task<IActionResult> Delete(CancellationToken cancellationToken, int id)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController " +
@@ -458,7 +456,8 @@ namespace InvestmentVisualisation.Controllers
             return View(deleteItem);
         }
 
-        [HttpPost]
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAction(CancellationToken cancellationToken, int id)
         {
@@ -475,7 +474,7 @@ namespace InvestmentVisualisation.Controllers
             return RedirectToAction("Incoming");
         }
 
-
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -483,6 +482,7 @@ namespace InvestmentVisualisation.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [AllowAnonymous]
         public IActionResult HelpPage()
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IncomingController GET HelpPage called");

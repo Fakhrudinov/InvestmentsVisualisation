@@ -1,5 +1,4 @@
 ﻿@using DataAbstraction.Models.BankDeposits
-
 @model BankDepositsWithPaginations
 
 @{
@@ -18,7 +17,10 @@
     }
 
     <p>
-        <a asp-controller="BankDeposits" asp-action="Create" class="btn btn-primary"> Добавить вклад</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="BankDeposits" asp-action="Create" class="btn btn-primary"> Добавить вклад</a>
+        }
         @if (ViewBag.ShowOnlyActive)
         {
             <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary"
@@ -45,7 +47,7 @@
             <thead>
                 <tr>
                     <th>
-                        @* @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).isOpen) *@
+                        @* isOpen *@
                     </th>
                     <th>
                         @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).Id)
@@ -68,7 +70,10 @@
                     <th style="text-align:right;">
                         @Html.DisplayNameFor(model => model.BankDeposits.ElementAt(0).SummIncome)
                     </th>
-                    <th>@* buttons *@</th>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th>@* buttons *@</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -95,7 +100,6 @@
                             {
                                 <span style="color: darkgray">&#x274C;</span>
                             }
-                            @* @Html.DisplayFor(modelItem => item.isOpen) *@
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Id)
@@ -105,7 +109,6 @@
                         </td>
                         <td>
                             @bank
-                            @* @Html.DisplayFor(modelItem => item.PlaceNameSign) *@
                         </td>
                         <td>
                             @dates
@@ -116,37 +119,47 @@
                         <td style="text-align:right;">
                             @Html.DisplayFor(modelItem => item.Percent)%
                         </td>
-                        <form method="post" asp-action="Close">
-                            <td style="text-align:right; width:110px;">
-                                @* @Html.DisplayFor(modelItem => item.SummIncome) *@
-                                @{
-                                    string typeOfInput = "required";
-                                    if (!item.IsOpen){
-                                        typeOfInput = "readonly";
-                                    }
-                                }
-                            <input name="summIncome" value="@item.SummIncome" class="form-control form-control-sm"
-                                   style="text-align:right" @typeOfInput />
-                        </td>
-                        <td style="text-align:right;">
-                            @if (item.IsOpen)
-                            {
-                                <input type="number" name="id" value="@item.Id" hidden />
-                                <input type="number" name="page" value="@Model.PageViewModel.PageNumber" hidden />
-                                <input type="checkbox" name="showOnlyActive" value="@ViewBag.ShowOnlyActive" hidden />
-                                <input type="submit" class="btn btn-outline-danger btn-sm" value="Close" />
-                            }                            
-                            @Html.ActionLink(
-                                    "Edit", 
-                                    "Edit",
-                                         new { 
-                                             id = @item.Id, 
-                                             page = @Model.PageViewModel.PageNumber,
-                                             showOnlyActive = @ViewBag.ShowOnlyActive
-                                         },
-                                     new { @class = "btn btn-primary btn-sm"  })                            
-                        </td>
-                        </form>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <form method="post" asp-action="Close">
+                                <td style="text-align:right; width:110px;">
+                                        @{
+                                            string typeOfInput = "required";
+                                            if (!item.IsOpen)
+                                            {
+                                                typeOfInput = "readonly";
+                                            }
+                                        }
+                                    <input name="summIncome" value="@item.SummIncome" class="form-control form-control-sm"
+                                           style="text-align:right" @typeOfInput />
+                                </td>
+                                <td style="text-align:right;">
+                                        @if (item.IsOpen)
+                                        {
+                                        <input type="number" name="id" value="@item.Id" hidden />
+                                        <input type="number" name="page" value="@Model.PageViewModel.PageNumber" hidden />
+                                        <input type="checkbox" name="showOnlyActive" value="@ViewBag.ShowOnlyActive" hidden />
+                                        <input type="submit" class="btn btn-outline-danger btn-sm" value="Close" />
+                                        }
+                                        @Html.ActionLink(
+                                                 "Edit",
+                                                 "Edit",
+                                                 new
+                                                 {
+                                                     id = @item.Id,
+                                                     page = @Model.PageViewModel.PageNumber,
+                                                     showOnlyActive = @ViewBag.ShowOnlyActive
+                                                 },
+                                                 new { @class = "btn btn-primary btn-sm" })
+                                </td>
+                            </form>
+                        }
+                        else
+                        {
+                            <td style="text-align:right;">
+                                @Html.DisplayFor(modelItem => item.SummIncome)
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
