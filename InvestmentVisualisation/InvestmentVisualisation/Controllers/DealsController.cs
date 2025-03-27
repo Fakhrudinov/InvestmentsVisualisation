@@ -7,6 +7,7 @@ using DataAbstraction.Models.Deals;
 using UserInputService;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace InvestmentVisualisation.Controllers
 {
@@ -160,6 +161,10 @@ namespace InvestmentVisualisation.Controllers
                 ViewData["Message"] = $"Сделка по тикеру Деньги не возможна!";
                 return View(model);
             }
+            if (model.NKD is not null && model.NKD.Equals("")) // fix error when NKD not null, but empty
+            {
+                model.NKD = null;
+			}
             if (model.SecBoard == 1 && model.NKD is not null)
             {
                 _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController Create error " +
@@ -379,7 +384,7 @@ namespace InvestmentVisualisation.Controllers
             if (newDeal is not null)
             {
                 return await Create(newDeal, cancellationToken);
-            }
+			}
 
             ViewData["Message"] = "В репозитории 'IInMemoryRepository' не удалось найти запись с ID " + id;
             List<IndexedDealModel> model = _inMemoryRepository.GetAllDeals();
