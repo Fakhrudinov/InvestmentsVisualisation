@@ -80,10 +80,13 @@
                         @Convert.ToDateTime(item.Date).ToString("yyyy-MM-dd")
                     </td>
                     <td>
-                            <strong>@Html.DisplayFor(modelItem => item.SecCode)</strong>
+                        <strong>@Html.DisplayFor(modelItem => item.SecCode)</strong>
                     </td>
                     <td>
-                        @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name
+                        @{
+                            string type = @StaticData.SecBoards[StaticData.SecBoards.FindIndex(sb => sb.Id == item.SecBoard)].Name;
+                        }
+                        @type
                     </td>
                     <td style="text-align:right;">
                         @Html.DisplayFor(modelItem => item.AvPrice)
@@ -97,7 +100,16 @@
                             InputHelper helper = new InputHelper();
                             if (helper.IsDecimal(item.AvPrice))
                             {
-                                volume = Math.Round(item.Pieces * helper.GetDecimalFromString(item.AvPrice), 2);
+                                if (type.Equals("Облигации"))
+                                {
+                                    volume = Math.Round(
+                                        item.Pieces * (helper.GetDecimalFromString(item.AvPrice)*10)
+                                        , 2);
+                                }
+                                else
+                                {
+                                    volume = Math.Round(item.Pieces * helper.GetDecimalFromString(item.AvPrice), 2);
+                                }                                
                             }
                         }
                         <strong>@volume.ToString("# ##0.00")</strong>
