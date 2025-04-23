@@ -296,10 +296,17 @@ namespace DataBaseRepository
 						{
 							while (await sdr.ReadAsync(cancellationToken))
 							{
+                                decimal modelValue = 0;
+								int checkForNull = sdr.GetOrdinal("VOLUME");
+								if (!sdr.IsDBNull(checkForNull))
+								{
+									modelValue = sdr.GetDecimal("VOLUME");
+								}
+
 								ChartItemModel model = new ChartItemModel
                                     (
                                         sdr.GetString("NAME"),
-										sdr.GetDecimal("VOLUME")
+										modelValue
 									);
 								result.Add(model);
 							}

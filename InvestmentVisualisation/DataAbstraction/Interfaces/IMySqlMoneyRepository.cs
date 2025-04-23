@@ -10,7 +10,6 @@ namespace DataAbstraction.Interfaces
             CancellationToken cancellationToken, 
             int year);
         Task<List<MoneyModel>> GetMoneyLastYearPage(CancellationToken cancellationToken);
-        Task<List<MoneySpentAndIncomeModel>?> GetMoneySpentAndIncomeModelChartData(CancellationToken cancellationToken);
         Task<List<MoneyModel>> GetMoneyYearPage(CancellationToken cancellationToken, int year);
         Task RecalculateMoney(CancellationToken cancellationToken, string date);
     }

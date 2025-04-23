@@ -8,7 +8,7 @@ using MySqlConnector;
 
 namespace DataBaseRepository
 {
-    public class MySqlMoneyRepository : IMySqlMoneyRepository
+	public class MySqlMoneyRepository : IMySqlMoneyRepository
     {
         private ILogger<MySqlMoneyRepository> _logger;
         private readonly string _connectionString;
@@ -184,68 +184,6 @@ namespace DataBaseRepository
             _commonRepo.FillFreeMoney();
         }
 
-        public async Task<List<MoneySpentAndIncomeModel>?> GetMoneySpentAndIncomeModelChartData(
-            CancellationToken cancellationToken)
-        {
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                $"GetMoneySpentAndIncomeModelChartData start");
-
-			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetMoneySpentAndIncomeModelChartData.sql");
-			if (query is null)
-			{
-				return null;
-			}
-
-			List<MoneySpentAndIncomeModel> сhartItems = new List<MoneySpentAndIncomeModel>();
-
-            using (MySqlConnection con = new MySqlConnection(_connectionString))
-            {
-                using (MySqlCommand cmd = new MySqlCommand(query))
-                {
-                    cmd.Connection = con;
-
-                    try
-                    {
-                        await con.OpenAsync(cancellationToken);
-
-                        using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
-                        {
-                            while (await sdr.ReadAsync(cancellationToken))
-                            {
-                                MoneySpentAndIncomeModel newChartItem = new MoneySpentAndIncomeModel();
-                                newChartItem.Date = sdr.GetDateTimeOffset("date_year_month");
-                                newChartItem.Divident = sdr.GetInt32("div_round");
-                                newChartItem.AverageDivident = sdr.GetInt32("avrg_div_round");
-
-								int checkForNull4 = sdr.GetOrdinal("spent_round");
-								if (!sdr.IsDBNull(checkForNull4))
-								{
-									newChartItem.MoneySpent = sdr.GetInt32("spent_round");
-								}
-
-                                сhartItems.Add(newChartItem);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
-                            $"GetMoneySpentAndIncomeModelChartData Exception!\r\n{ex.Message}");
-                    }
-                    finally
-                    {
-                        await con.CloseAsync();
-                    }
-                }
-            }
-
-            if (сhartItems.Count == 0)
-            {
-                return null;
-            }
-
-            return сhartItems;
-        }
 
         public async Task<List<SecCodeAndNameAndPiecesModel>?> GetActualSecCodeAndNameAndPieces(
             CancellationToken cancellationToken, 

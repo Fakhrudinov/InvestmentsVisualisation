@@ -1,0 +1,75 @@
+﻿@using DataAbstraction.Models.MoneySpent
+@using System.Globalization
+@model MoneySpentByMonthModel
+
+@{
+    ViewData["Title"] = "Edit Money Spent Single Record";
+}
+
+<div class="container">
+    <h4>Изменить значения</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+
+            @if (ViewData["Message"] != null)
+            {
+                <strong style="color:red"> @ViewData["Message"] </strong>
+            }
+
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                @{
+                    // var qqq = System.Globalization.CultureInfo.CurrentCulture;
+                    // var qq1q = System.Globalization.CultureInfo.CurrentUICulture;
+                    var date = DateTime.Parse(Model.Date, new CultureInfo("ru-RU", true));
+                }
+                <h4>@date.ToString("MMMM yyyy")</h4>
+                <input asp-for="Date" class="form-control" hidden />
+
+                <div class="form-group">
+                    <label asp-for="Total" class="control-label"></label>
+                    <input asp-for="Total" class="form-control" />
+                    <span asp-validation-for="Total" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Appartment" class="control-label"></label>
+                    <input asp-for="Appartment" class="form-control" />
+                    <span asp-validation-for="Appartment" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Electricity" class="control-label"></label>
+                    <input asp-for="Electricity" class="form-control" />
+                    <span asp-validation-for="Electricity" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Internet" class="control-label"></label>
+                    <input asp-for="Internet" class="form-control" />
+                    <span asp-validation-for="Internet" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Phone" class="control-label"></label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+
+                <br />
+                <div class="form-group btn-group" style="width: 100%;">
+                    <input type="submit" value="Save" class="btn btn-danger" />
+                    <a asp-action="Index" class="btn btn-outline-success">Назад к списку</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</div>

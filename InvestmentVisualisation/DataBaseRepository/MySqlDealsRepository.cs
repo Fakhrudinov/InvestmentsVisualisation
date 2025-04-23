@@ -184,7 +184,7 @@ namespace DataBaseRepository
                         await con.OpenAsync(cancellationToken);
 
                         //Return Int32 Number of rows affected
-                        var insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+                        int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
                         _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlDealsRepository " +
                             $"CreateNewDeal execution affected {insertResult} lines");
 

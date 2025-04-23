@@ -161,11 +161,22 @@
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
+                            @if (signInManager is not null && signInManager.IsSignedIn(User))
+                            {
+                                <li>
+                                    <a asp-controller="MoneySpent" asp-action="index" class="dropdown-item"
+                                       asp-route-showOnlyActive="false">
+                                        Список приходов/расходов
+                                    </a>
+                                </li>
+                            }
                             <li>
-                                <a asp-controller="Money" asp-action="MoneySpentAndIncomeOfLast12MonthChart" class="dropdown-item">
+                                <a asp-controller="MoneySpent" asp-action="MoneySpentAndIncomeOfLast12MonthChart" 
+                                        class="dropdown-item">
                                     График приходов/расходов за последний год
                                 </a>
                             </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a asp-controller="Money" asp-action="ExpectedDividentsChart" class="dropdown-item">
                                     График ожидаемых приходов дивидентов

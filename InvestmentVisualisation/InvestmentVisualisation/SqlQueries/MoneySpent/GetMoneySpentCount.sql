@@ -1,0 +1,1 @@
+﻿SELECT count(*) FROM money_spent_by_month;

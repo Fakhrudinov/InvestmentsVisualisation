@@ -1,0 +1,115 @@
+﻿@using DataAbstraction.Models
+@using DataAbstraction.Models.Deals
+@using System.Globalization
+@using UserInputService
+
+@model MoneySpentWithPaginations
+
+@{
+    ViewData["Title"] = "MoneySpent List";
+}
+
+<div class="container">
+
+    <h2>Таблица доходов/расходов</h2>
+
+
+    @if (TempData["Message"] != null)
+    {
+        <strong style="color:red"> @TempData["Message"] </strong>
+    }
+    
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-controller="MoneySpent" asp-action="Create" class="btn btn-primary"> Добавить </a>
+    }       
+
+    @if(Model.DataByMonths is not null)
+    {
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Date)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Total)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Appartment)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Electricity)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Internet)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Phone)
+                    </th>
+                    <th>@* buttons *@</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DataByMonths)
+                {
+                    <tr>
+                        <td>
+                            @{
+                                DateTime date = DateTime.Parse(item.Date, new CultureInfo("ru-RU", true));
+                            }
+                            <strong>@date.ToString("MMMM yyyy")</strong>
+                        </td>
+                        <td style="text-align:right;">
+                            <strong>@Html.DisplayFor(modelItem => item.Total)</strong>
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Appartment)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Electricity)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Internet)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Phone)
+                        </td>
+
+                        <td style="text-align:right;">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                @Html.ActionLink(
+                                         "Edit",
+                                         "Edit",
+                                         new { date = item.Date },
+                                         new { @class = "btn btn-primary btn-sm" })
+                            }                    
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        @Html.ActionLink(
+                "Назад",
+                "Index",
+                new { page = @Model.PageViewModel.PageNumber + 1 },
+                new { @class = "btn btn-secondary" })
+    }
+
+    <span> Page #</span> @Model.PageViewModel.PageNumber <span> From </span> @Model.PageViewModel.TotalPages <span> </span>
+
+    @if (Model.PageViewModel.HasPreviousPage)
+    {
+        @Html.ActionLink(
+                "Вперед",
+                "Index",
+                new { page = @Model.PageViewModel.PageNumber - 1 },
+                new { @class = "btn btn-secondary" })
+    }
+
+</div>
