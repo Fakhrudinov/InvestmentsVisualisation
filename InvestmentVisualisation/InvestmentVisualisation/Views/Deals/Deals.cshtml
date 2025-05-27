@@ -96,21 +96,8 @@
                     </td>
                     <td style="text-align:right;">
                         @{
-                            decimal volume = 0;
                             InputHelper helper = new InputHelper();
-                            if (helper.IsDecimal(item.AvPrice))
-                            {
-                                if (type.Equals("Облигации"))
-                                {
-                                    volume = Math.Round(
-                                        item.Pieces * (helper.GetDecimalFromString(item.AvPrice)*10)
-                                        , 2);
-                                }
-                                else
-                                {
-                                    volume = Math.Round(item.Pieces * helper.GetDecimalFromString(item.AvPrice), 2);
-                                }                                
-                            }
+                            decimal volume = helper.GetDecimalVolumeByInstrumentType(item.AvPrice, item.Pieces, type);
                         }
                         <strong>@volume.ToString("# ##0.00")</strong>
                     </td>

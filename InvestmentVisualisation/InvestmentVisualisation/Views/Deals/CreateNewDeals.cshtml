@@ -61,14 +61,15 @@
                                 <td><input value="@deal.Pieces" name="pieces" type="number" 
                                     class="form-control form-control-sm" style="width:100px" /></td>
                                 <td style="text-align:right;">
-                                        @{
-                                            decimal volume = 0;
-                                            InputHelper helper = new InputHelper();
-                                            if (helper.IsDecimal(deal.AvPrice))
-                                            {
-                                                volume = Math.Round(deal.Pieces * helper.GetDecimalFromString(deal.AvPrice), 2);
-                                            }
-                                        }
+                                    
+                                    @{
+                                        InputHelper helper = new InputHelper();
+                                            decimal volume = helper.GetDecimalVolumeByInstrumentType(
+                                                deal.AvPrice,
+                                                deal.Pieces,
+                                                deal.SecBoard.ToString());
+                                    }
+
                                     <strong>@volume.ToString("# ##0.00")</strong>
                                 </td>
                                 <td><input value="@deal.NKD" name="nkd" 

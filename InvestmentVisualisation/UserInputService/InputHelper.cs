@@ -216,5 +216,28 @@ namespace UserInputService
 
             return -1;
         }
-    }
+
+        public decimal GetDecimalVolumeByInstrumentType(string price, int pieces, string type)
+        {
+			decimal volume = 0;
+
+			if (IsDecimal(price))
+			{
+                if (type.Equals("2") || type.Equals("Облигации"))
+				{
+					volume = Math.Round(
+						pieces * (GetDecimalFromString(price) * 10),
+						2);
+				}
+				else
+				{
+					volume = Math.Round(
+						pieces * GetDecimalFromString(price),
+						2);
+				}
+			}
+
+			return volume;
+		}
+	}
 }

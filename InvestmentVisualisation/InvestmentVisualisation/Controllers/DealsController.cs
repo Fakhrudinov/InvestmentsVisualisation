@@ -7,7 +7,6 @@ using DataAbstraction.Models.Deals;
 using UserInputService;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace InvestmentVisualisation.Controllers
 {
