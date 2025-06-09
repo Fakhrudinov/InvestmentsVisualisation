@@ -5,6 +5,8 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Text;
+using UserInputService;
 
 namespace DataBaseRepository
 {
@@ -13,16 +15,19 @@ namespace DataBaseRepository
         private ILogger<MySqlIncomingRepository> _logger;
         private readonly string _connectionString;
         private IMySqlCommonRepository _commonRepo;
+		private InputHelper _helper;
 
-        public MySqlIncomingRepository(
+		public MySqlIncomingRepository(
             IOptions<DataBaseConnectionSettings> connection, 
             ILogger<MySqlIncomingRepository> logger,
-            IMySqlCommonRepository commonRepo)
+            IMySqlCommonRepository commonRepo,
+			InputHelper helper)
         {
             _logger = logger;
             _commonRepo = commonRepo;
-           
-            _connectionString = $"" +
+			_helper=helper;
+
+			_connectionString = $"" +
                 $"Server={connection.Value.Server};" +
                 $"User ID={connection.Value.UserId};" +
                 $"Password={connection.Value.Password};" +
@@ -448,5 +453,104 @@ namespace DataBaseRepository
 
             return result;
         }
-    }
+
+		public async Task<string> CreateNewIncomingsFromList(
+            CancellationToken cancellationToken, 
+            List<IndexedIncomingModel> model)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+				$"CreateNewIncomingsFromList start");
+
+			string query = GetSqlRequestForNewIncomingsFromList(model.Count);
+			if (!query.ToUpper().StartsWith("INSERT"))
+			{
+				return query;
+			}
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					///@date_time{i}, @seccode{i}, @secboard{i}, @category{i}, @value{i}, @comission{i}
+					for (int i = 0; i < model.Count(); i++)
+					{
+						cmd.Parameters.AddWithValue("@date_time" + i, model[i].Date);
+						cmd.Parameters.AddWithValue("@seccode" + i, model[i].SecCode);
+						cmd.Parameters.AddWithValue("@secboard" + i, model[i].SecBoard);
+						cmd.Parameters.AddWithValue("@category" + i, model[i].Category);
+						cmd.Parameters.AddWithValue("@value" + i, _helper.CleanPossibleNumber(model[i].Value));
+
+						if (model[i].Comission is not null && !model[i].Comission.Equals(""))
+						{
+							cmd.Parameters.AddWithValue("@comission" + i, _helper.CleanPossibleNumber(model[i].Comission));
+						}
+						else
+						{
+							cmd.Parameters.AddWithValue("@comission" + i, DBNull.Value);
+						}
+					}
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						//Return Int32 Number of rows affected
+						int insertResult = await cmd.ExecuteNonQueryAsync(cancellationToken);
+						_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+							$"CreateNewIncomingsFromList execution affected {insertResult} lines");
+
+						return insertResult.ToString();
+
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+							$"CreateNewIncomingsFromList Exception!\r\n{ex.Message}");
+						return ex.Message;
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+		}
+
+		private string GetSqlRequestForNewIncomingsFromList(int count)
+		{
+			/// INSERT INTO `incoming` 
+			///     (`date`, `seccode`, `secboard`, `category`, `value`, `comission`) 
+			/// VALUES 
+			/// (
+			///     `date`, `seccode`, `secboard`, `category`, `value`, `comission`
+			///     ) , (
+			///     `date`, `seccode`, `secboard`, `category`, `value`, `comissionNULL`
+			/// );
+			string? queryStr = _commonRepo.GetQueryTextByFolderAndFilename("Incoming", "CreateNewIncomingsFromList.sql");
+			if (queryStr is null)
+			{
+				return "MySqlIncomingRepository Error! File with SQL script not found";
+			}
+
+			StringBuilder query = new StringBuilder(queryStr);
+			StringBuilder parameters = new StringBuilder();
+
+			for (int i = 0; i < count; i++)
+			{
+				parameters.Append($"),\r\n(" +
+					$"@date_time{i}, @seccode{i}, @secboard{i}, @category{i}, @value{i}, @comission{i}");
+			}
+			parameters.Remove(0, 5);
+			string parametersStr = parameters.ToString();
+
+			query.Replace("@values", parametersStr);
+
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlIncomingRepository " +
+				$"GetSqlRequestForNewIncomingsFromList execute query CreateNewIncomingsFromList.sql\r\n{query}");
+
+			return query.ToString();
+		}
+	}
 }

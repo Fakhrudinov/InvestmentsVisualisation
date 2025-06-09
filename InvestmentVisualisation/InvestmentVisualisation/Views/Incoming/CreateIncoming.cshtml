@@ -11,7 +11,11 @@
 
             @if (ViewData["Message"] != null)
             {
-                <strong style="color:red"> @ViewData["Message"] </strong>
+                <strong style="color:red">@Html.Raw(ViewData["Message"])</strong>
+            }
+            @if (Model is not null && Model.IsRecognized is not null)
+            {
+                <strong style="color:red">@Html.Raw(Model.IsRecognized)</strong>
             }
 
             <form method="post" action="/Incoming/CreateFromText">
