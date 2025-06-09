@@ -1,0 +1,142 @@
+﻿@using DataAbstraction.Models
+@using DataAbstraction.Models.Incoming
+@using UserInputService
+@model List<IndexedIncomingModel>
+@{
+    ViewData["Title"] = "Add many incoming money";
+    SelectList categoryList = new SelectList(StaticData.Categories, "Id", "Name");
+    SelectList secBoardList = new SelectList(StaticData.SecBoards, "Id", "Name");
+    InputHelper helper = new InputHelper();
+}
+
+
+<div class="container">
+    <h4>Добавить несколько входящих</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+
+            @if (ViewData["Message"] != null)
+            {
+                <strong style="color:red">@Html.Raw(ViewData["Message"])</strong>
+            }
+
+            <form method="post" action="/Incoming/CreateIncomingsFromText">
+                <div class="input-group mb-3">
+                    <textarea type="text" name="excelData" class="form-control" rows="1"
+                    placeholder="Вставьте строки из отчета"></textarea>
+                    <button class="btn btn-outline-secondary" type="submit">Анализировать</button>
+                </div>
+            </form>
+
+
+            @if (Model is not null && Model.Count > 0)
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>SecBoard</th>
+                            <th>SecCode</th>
+                            <th style ="text-align:right;">Объём</th>
+                            <th style="text-align:right;">Комиссия</th>
+                            <th style="text-align:right;">Категория начисления</th>
+                            <th>@* Buttons *@</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (IndexedIncomingModel income in Model)
+                        {
+                            string? toolTipText = null;
+                            string trClass = null;
+                            if (income.IsRecognized is not null)
+                            {
+                                toolTipText = income.IsRecognized;
+                                trClass = "table-danger";
+                            }
+
+                            <tr class="@trClass" data-bs-toggle="tooltip" data-bs-placement="top" title="@toolTipText">
+                                <form method="post" action="EditIncomingById">
+                                <input value="@income.Id" name="id" hidden />                                
+                                <input value="@income.SecCode" name="seccode" hidden />
+                                <td>
+                                    <input type="datetime-local"
+                                        class="form-control form-control-sm"
+                                        name="date"
+                                        value="@income.Date.ToString("yyyy-MM-ddTHH:mm")"
+                                        max="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" /> 
+                                </td>
+                                <td align="center">
+                                    <select asp-for="@income.SecBoard" class="form-select" asp-items="@secBoardList"
+                                        name="secBoard"></select>
+                                </td>
+                                <td style="font-weight:bold;">@income.SecCode</td>
+                                <td style="width:130px;">
+                                    @{
+                                        string? valueStr = null;
+                                        if (income.Value is not null)
+                                        {
+                                            valueStr = helper.GetDecimalFromString(income.Value).ToString("# ### ##0.00");
+                                        }
+                                    }
+                                    <input value="@valueStr" name="value" class="form-control form-control-sm"
+                                        style="text-align:right;" />
+                                </td>
+                                <td style="width:100px;">
+                                    @{
+                                        string ? comisStr = null;
+                                        if (income.Comission is not null)
+                                        {
+                                            comisStr = helper.GetDecimalFromString(income.Comission).ToString("# ### ##0.00");
+                                        }
+                                    }
+                                    <input value="@comisStr" name="comission" class="form-control form-control-sm"
+                                        style="text-align:right;" />
+                                </td>
+                                <td>
+                                    <select asp-for="@income.Category" class="form-select" asp-items="@categoryList"
+                                            name="category"></select>
+                                </td>                                
+                                <td align="right">
+                                    <input type="submit" value="Изменить" class="btn btn-primary btn-sm" />
+
+                                    @Html.ActionLink(
+                                                "Удалить",
+                                                "InMemoryRepositoryDeleteIncomingById",
+                                                new { id = income.Id },
+                                                new { @class = "btn btn-danger btn-sm" })
+                                    @Html.ActionLink(
+                                                "Добавить 'одну'",
+                                                "AddSingleIncomingById",
+                                                new { id = income.Id },
+                                                new { @class = "btn btn-success btn-sm" })
+                                </td>
+                                </form>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @Html.ActionLink(
+                         "Добавить все",
+                         "AddAllIncomingsFromInMemoryRepository",
+                         "Incoming",
+                         null,
+                         new { @class = "btn btn-success btn-lg" })
+            }
+
+            @Html.ActionLink(
+                     "Назад к списку входящих",
+                     "Incoming",
+                     "Incoming",
+                     null,
+                     new { @class = "btn btn-outline-secondary btn-lg" })
+
+        </div>
+    </div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+</div>

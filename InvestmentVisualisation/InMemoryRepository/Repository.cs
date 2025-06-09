@@ -1,7 +1,7 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models.Deals;
+using DataAbstraction.Models.Incoming;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
 using UserInputService;
 
@@ -11,12 +11,14 @@ namespace InMemoryRepository
     {
         private readonly ILogger<Repository> _logger;
         private ConcurrentDictionary<Guid, IndexedDealModel> _dictionaryDeals;
-        private InputHelper _helper;
+		private ConcurrentDictionary<Guid, IndexedIncomingModel> _dictionaryIncomings;
+		private InputHelper _helper;
 
         public Repository(ILogger<Repository> logger, InputHelper helper)
         {
             _dictionaryDeals = new ConcurrentDictionary<Guid, IndexedDealModel>();
-            _logger = logger;
+			_dictionaryIncomings = new ConcurrentDictionary<Guid, IndexedIncomingModel>();
+			_logger = logger;
             _helper = helper;
         }
 
@@ -158,5 +160,102 @@ namespace InMemoryRepository
                 return _helper.CleanPossibleNumber(stringOne) + _helper.CleanPossibleNumber(stringTwo);
             }
         }
-    }
+
+		public void AddNewIncoming(CreateIncomingModel newIncoming)
+		{
+			IndexedIncomingModel newDictionaryIncom = new IndexedIncomingModel
+			{
+				Id = Guid.NewGuid(),
+				SecBoard = newIncoming.SecBoard,
+				SecCode = newIncoming.SecCode,
+				Category = newIncoming.Category,
+				Value = newIncoming.Value,
+				Comission = newIncoming.Comission,
+				Date = newIncoming.Date,
+                IsRecognized = newIncoming.IsRecognized,
+			};
+
+			_dictionaryIncomings.TryAdd(newDictionaryIncom.Id, newDictionaryIncom);
+		}
+
+		public void DeleteAllIncomings()
+		{
+			_dictionaryIncomings.Clear();
+		}
+
+		public void DeleteSingleIncomingByStringId(string id)
+		{
+			try
+			{
+				Guid guid = new Guid(id);
+				_dictionaryIncomings.TryRemove(guid, out IndexedIncomingModel ? someIncom);
+			}
+			catch (System.FormatException)
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IInMemoryRepository " +
+				$"DeleteSingleIncomingByStringId error - GUID can't parse {id}");
+			}
+		}
+
+		public List<IndexedIncomingModel>? GetAllIncomings()
+		{
+			return _dictionaryIncomings.Values.ToList(); 
+		}
+
+		public CreateIncomingModel? GetCreateIncomingModelByGuid(Guid guid)
+		{
+			_dictionaryIncomings.TryGetValue(guid, out IndexedIncomingModel? someIncom);
+
+			if (someIncom is not null)
+			{
+                CreateIncomingModel result = new CreateIncomingModel
+                {
+                    Comission = someIncom.Comission,
+                    SecBoard = someIncom.SecBoard,
+                    SecCode = someIncom.SecCode,
+                    Date = someIncom.Date,
+                    Category = someIncom.Category,
+                    Value = someIncom.Value,
+                    IsRecognized = someIncom.IsRecognized,
+                };
+				return result;
+			}
+
+			return null;
+		}
+
+		public CreateIncomingModel? GetCreateIncomingModelById(string id)
+		{
+			try
+			{
+				Guid guid = new Guid(id);
+				return GetCreateIncomingModelByGuid(guid);
+			}
+			catch (System.FormatException)
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} IInMemoryRepository " +
+				$"GetCreateIncomingModelById error - GUID can't parse {id}");
+			}
+
+			return null;
+		}
+
+		public int ReturnIncomingsCount()
+		{
+			return _dictionaryIncomings.Count;
+		}
+
+		public void EditSingleIncoming(IndexedIncomingModel model)
+		{
+			_dictionaryIncomings.TryGetValue(model.Id, out IndexedIncomingModel? someDeal);
+
+			if (someDeal is not null)
+			{
+				//model.SecCode = someDeal.SecCode;
+				//model.SecBoard = someDeal.SecBoard;
+
+				_dictionaryIncomings.TryUpdate(model.Id, model, someDeal);
+			}
+		}
+	}
 }

@@ -5,7 +5,8 @@ namespace DataAbstraction.Interfaces
     public interface IMySqlIncomingRepository
     {
         Task<string> CreateNewIncoming(CancellationToken cancellationToken, CreateIncomingModel newIncoming);
-        Task<string> DeleteSingleIncoming(CancellationToken cancellationToken, int id);
+		Task<string> CreateNewIncomingsFromList(CancellationToken cancellationToken, List<IndexedIncomingModel> model);
+		Task<string> DeleteSingleIncoming(CancellationToken cancellationToken, int id);
         Task<string> EditSingleIncoming(CancellationToken cancellationToken, IncomingModel newIncoming);
         Task<int> GetIncomingCount(CancellationToken cancellationToken);
         Task<int> GetIncomingSpecificSecCodeCount(CancellationToken cancellationToken, string secCode);

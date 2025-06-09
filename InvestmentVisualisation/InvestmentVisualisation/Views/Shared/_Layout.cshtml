@@ -26,26 +26,36 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3"
-             style="background-image: url(@Url.Content("~/images/inv_cat.png"));
+        style="background-image: url(@Url.Content("~/images/inv_cat.png"));
                     background-repeat: no-repeat; 
                     background-position-y:bottom">
             <div class="container">
-                <!--container-fluid-->
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">Мои инвестиции</a>
 
                 <div class="btn-group" role="group" aria-label="TopMenu">
                     <div class="btn-group" role="group">
-                        <button class="btn btn-outline-primary dropdown-toggle 
-                                    @(ViewContext.RouteData.Values["controller"].ToString() == "Incoming" ? "active" : "")"
+                        @{
+                            string isActive = "";
+                            if (ViewContext is not null && 
+                                ViewContext.RouteData is not null && 
+                                ViewContext.RouteData.Values is not null && (
+                                ViewContext.RouteData.Values["controller"].ToString() == "Incoming" || 
+                                ViewContext.RouteData.Values["controller"].ToString() == "Deals"))
+                            {
+                                isActive = "active";
+                            }
+                        }
+
+                        <button class="btn btn-outline-primary dropdown-toggle @isActive"
                                 type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Входящие деньги
+                            Операции
                         </button>
                         <ul class="dropdown-menu">
                             @if (signInManager is not null && signInManager.IsSignedIn(User))
                             {
                                 <li>
                                     <a asp-controller="Incoming" asp-action="Incoming" class="dropdown-item">
-                                        Список входящих
+                                        Список движений денег
                                     </a>
                                 </li>
                                 @if (User.IsInRole("Admin"))
@@ -55,9 +65,33 @@
                                             Добавить входящие деньги
                                         </a>
                                     </li>
+                                    <li>
+                                        <a asp-controller="Incoming" asp-action="CreateSeveralIncomings" class="dropdown-item">
+                                            Добавить несколько входящих
+                                        </a>
+                                    </li>
                                 }
                                 <li><hr class="dropdown-divider"></li>
-                            }
+                                <li>
+                                    <a asp-controller="Deals" asp-action="Deals" class="dropdown-item">
+                                        Список сделок
+                                    </a>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a asp-controller="Deals" asp-action="Create" class="dropdown-item">
+                                            Добавить сделку
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="Deals" asp-action="CreateNewDeals" class="dropdown-item">
+                                            Добавить несколько сделок
+                                        </a>
+                                    </li>
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                            }                            
                             <li>
                                 <a asp-controller="Incoming" asp-action="HelpPage" class="dropdown-item">
                                     Как закрывать позиции
@@ -66,7 +100,7 @@
                         </ul>
                     </div>
 
-                    @if (signInManager is not null && signInManager.IsSignedIn(User))
+@*                     @if (signInManager is not null && signInManager.IsSignedIn(User))
                     {
                         <div class="btn-group" role="group">
                             <button class="btn btn-outline-primary dropdown-toggle
@@ -95,7 +129,7 @@
                                 }
                             </ul>
                         </div>
-                    }
+                    } *@
 
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
@@ -191,7 +225,7 @@
                             <button class="btn btn-outline-primary dropdown-toggle
                                     @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" ? "active" : "")"
                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Таблица за год
+                                Дивиденды за год
                             </button>
                             <ul class="dropdown-menu">
                                 <li>
@@ -350,7 +384,6 @@
         </nav>
     </header>
     <div>
-        <!-- class="container"-->
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

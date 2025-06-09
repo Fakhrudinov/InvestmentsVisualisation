@@ -60,6 +60,9 @@
     <None Update="SqlQueries\Deals\GetPageFromDealsSpecificSecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\Incoming\CreateNewIncomingsFromList.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Incoming\EditSingleIncoming.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -240,6 +243,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Views\Incoming\CreateSeveralIncomings.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="wishsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
