@@ -11,7 +11,6 @@ namespace InvestmentVisualisation.Controllers
     {
         private readonly ILogger<WishListController> _logger;
         private IMySqlWishListRepository _repository;
-        private WishListSettings ? _wishListSettings;
 
         public WishListController(
             ILogger<WishListController> logger, 
@@ -30,12 +29,10 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController WishList called" +
                 $"sortMode={sortMode}");
 
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .AddJsonFile("wishsettings.json")
-                .Build();
-            _wishListSettings = configuration.GetSection("WishListSettings").Get<WishListSettings>();
+			int[]? wishListSettings = await _repository.GetWishLevelsWeight(cancellationToken);
 
-            string sqlFileSelector = "GetFullWishList.sql";
+
+			string sqlFileSelector = "GetFullWishList.sql";
             if (sortMode.Equals("byLevel"))
             {
                 sqlFileSelector = "GetFullWishListOrderByLevel.sql";
@@ -46,9 +43,9 @@ namespace InvestmentVisualisation.Controllers
                 sqlFileSelector);
 
             ViewBag.WishList = GetSecCodesListWithoutExistingInWish(result);
-            if (_wishListSettings is not null && _wishListSettings.LevelsWeight is not null)
+            if (wishListSettings is not null)
             {
-                ViewBag.WishLevels = _wishListSettings.LevelsWeight;
+                ViewBag.WishLevels = wishListSettings;
             }            
             ViewBag.SortMode = sortMode;
             return View(result);
@@ -117,5 +114,36 @@ namespace InvestmentVisualisation.Controllers
 
             return RedirectToAction("WishList", new { sortMode = sortMode });
         }
-    }
+
+
+		[Authorize(Roles = "Admin")]
+		[HttpGet]
+		public async Task<IActionResult> EditWishLevelsWeight(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController EditWishLevelsWeight " +
+				$"called");
+
+			int[]? wishWeight = await _repository.GetWishLevelsWeight(cancellationToken);
+
+			return View(wishWeight);
+		}
+
+		[Authorize(Roles = "Admin")]
+		[HttpPost]
+		public async Task<IActionResult> EditWishLevelWeight(int level, int weight, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WishListController EditWishLevelWeight " +
+				$"called with level={level} weight={weight}");
+
+            // do action
+            string ? result = await _repository.EditWishLevelWeight(level, weight, cancellationToken);
+            if (result is not null)
+            {
+				ViewData["Message"] = result;
+			}
+
+			int[]? wishWeight = await _repository.GetWishLevelsWeight(cancellationToken);
+			return View("EditWishLevelsWeight", wishWeight);
+		}
+	}
 }

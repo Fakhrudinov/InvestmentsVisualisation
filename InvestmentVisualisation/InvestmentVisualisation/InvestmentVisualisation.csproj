@@ -213,10 +213,16 @@
     <None Update="SqlQueries\WishList\EditWishLevelBySecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\WishList\EditWishLevelWeight.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\WishList\GetFullWishList.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\WishList\GetFullWishListOrderByLevel.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\WishList\GetWishLevelsWeight.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SqlQueries\YearView\CallFillViewShowLast12Month.sql">
@@ -246,9 +252,6 @@
     <Content Update="Views\Incoming\CreateSeveralIncomings.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Update="wishsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\images\invest_cat.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

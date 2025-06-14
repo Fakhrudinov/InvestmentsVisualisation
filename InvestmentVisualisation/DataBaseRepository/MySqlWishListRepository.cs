@@ -165,5 +165,78 @@ namespace DataBaseRepository
                 string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
             }
         }
-    }
+
+		public async Task<int[]?> GetWishLevelsWeight(CancellationToken cancellationToken)
+		{
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", "GetWishLevelsWeight.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+			// it must be always 6 level array - from 0 to 5
+			int[] wishListSettings = new int[6];
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								int level = sdr.GetInt16("level");
+                                wishListSettings[level] = sdr.GetInt32("weight");
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
+							$"GetWishLevelsWeight Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return wishListSettings;
+		}
+
+		public async Task<string?> EditWishLevelWeight(int level, int weight, CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository EditWishLevelWeight " +
+				$"level={level} weight={weight} start");
+			//UPDATE `money_test`.`wish_list` SET `wish_level` = '3' WHERE (`seccode` = 'MGNT');
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", "EditWishLevelWeight.sql");
+			if (query is not null)
+			{
+                StringBuilder queryStringBuilder = new StringBuilder(query);
+                queryStringBuilder.Replace("@level", level.ToString());
+                queryStringBuilder.Replace("@weight", weight.ToString());
+                query = queryStringBuilder.ToString();
+
+                string result = await _commonRepo.ExecuteNonQueryAsyncByQueryText(cancellationToken, query);
+                if (!result.Equals("1"))
+                {
+					return result;
+				}
+            }
+            else
+            {
+                return "Error - query EditWishLevelWeight.sql not found.";
+            }
+
+            return null;
+		}
+	}
 }

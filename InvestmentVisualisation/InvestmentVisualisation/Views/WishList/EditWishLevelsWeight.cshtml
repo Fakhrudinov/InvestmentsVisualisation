@@ -1,0 +1,71 @@
+﻿@model int[]
+
+<div class="container">
+    <h4>Изменить значения уровня Wish</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+
+            @if (ViewData["Message"] != null)
+            {
+                <strong style="color:red"> @ViewData["Message"] </strong>
+            }
+
+            <form asp-action="EditWishLevelWeight">
+                <input value="1" name="level" hidden />
+                <div class="input-group">
+                    <span class="input-group-text col-5">Уровень 1</span>                    
+                    <input value="@Model[1]" name="weight" class="form-control text-end col-4"
+                           min="100000" max="@Model[2]" step="10000" type="number" />
+                    <input type="submit" value="Save" class="btn btn-outline-danger col-3" />
+                </div>
+            </form>
+
+            <form asp-action="EditWishLevelWeight">
+                <input value="2" name="level" hidden />
+                <div class="input-group">
+                    <span class="input-group-text col-5">Уровень 2</span>
+                    <input value="@Model[2]" name="weight" class="form-control text-end col-4"
+                           min="@Model[1]" max="@Model[3]" step="10000" type="number" />
+                    <input type="submit" value="Save" class="btn btn-outline-danger col-3" />
+                </div>
+            </form>
+
+            <form asp-action="EditWishLevelWeight">
+                <input value="3" name="level" hidden />
+                <div class="input-group">
+                    <span class="input-group-text col-5">Уровень 3</span>
+                    <input value="@Model[3]" name="weight" class="form-control text-end col-4"
+                           min="@Model[2]" max="@Model[4]" step="10000" type="number" />
+                    <input type="submit" value="Save" class="btn btn-outline-danger col-3" />
+                </div>
+            </form>
+
+            <form asp-action="EditWishLevelWeight">
+                <input value="4" name="level" hidden />
+                <div class="input-group">
+                    <span class="input-group-text col-5">Уровень 4</span>
+                    <input value="@Model[4]" name="weight" class="form-control text-end col-4"
+                           min="@Model[3]" max="@Model[5]" step="10000" type="number" />
+                    <input type="submit" value="Save" class="btn btn-outline-danger col-3" />
+                </div>
+            </form>
+
+            <form asp-action="EditWishLevelWeight">
+                <input value="5" name="level" hidden />
+                <div class="input-group">
+                    <span class="input-group-text col-5">Уровень 5</span>
+                    <input value="@Model[5]" name="weight" class="form-control text-end col-4"
+                           min="@Model[4]" step="10000" type="number" />
+                    <input type="submit" value="Save" class="btn btn-outline-danger col-3" />
+                </div>
+            </form>
+
+        </div>
+    </div>
+@* 
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    } *@
+</div>

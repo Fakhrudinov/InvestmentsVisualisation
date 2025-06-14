@@ -1,0 +1,1 @@
+﻿SELECT `level`, `weight` FROM wish_levels;

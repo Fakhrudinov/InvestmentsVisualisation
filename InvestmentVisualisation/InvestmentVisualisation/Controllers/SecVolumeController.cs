@@ -21,7 +21,6 @@ namespace InvestmentVisualisation.Controllers
         private IWebDividents _webRepository;
         private IMySqlWishListRepository _wishListRepository;
         private InputHelper _helper;
-        private WishListSettings ? _wishListSettings;
 
         private enum WebSites
         {
@@ -218,12 +217,9 @@ namespace InvestmentVisualisation.Controllers
             // summ AO and AP
             // sort data
 
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .AddJsonFile("wishsettings.json")
-                .Build();
-            _wishListSettings = configuration.GetSection("WishListSettings").Get<WishListSettings>();
+			int[]? wishListSettings = await _wishListRepository.GetWishLevelsWeight(cancellationToken);
 
-            List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData(cancellationToken);
+			List<ChartItemModel> chartItemsRaw = await _repository.GetVolumeChartData(cancellationToken);
             List<ChartItemModel> chartItemsRawCopy= new List<ChartItemModel>(chartItemsRaw);
             // calculate 1%
             decimal totalVolume = 0;
@@ -367,9 +363,9 @@ namespace InvestmentVisualisation.Controllers
                         ChartItemModel? rawIndexSecond = chartItemsRaw.Find(r => r.Label.Equals(splittedLabel[1]));
 
                         if (wishIndexFirst is not null && rawIndexFirst is not null && rawIndexSecond is not null &&
-                            _wishListSettings is not null && _wishListSettings.LevelsWeight is not null)
+                            wishListSettings is not null)
                         {
-                            int settingsValue = _wishListSettings.LevelsWeight[wishIndexFirst.Level];
+                            int settingsValue = wishListSettings[wishIndexFirst.Level];
                             decimal differ = settingsValue - (rawIndexFirst.Y + rawIndexSecond.Y);
                             if (differ > 0)
                             {
@@ -393,9 +389,9 @@ namespace InvestmentVisualisation.Controllers
                     WishListItemModel? wishIndex = wishValues.Find(w => w.SecCode.Equals(chartItem.Label));
                     ChartItemModel? rawIndex = chartItemsRaw.Find(r => r.Label.Equals(chartItem.Label));
                     if (wishIndex is not null && rawIndex is not null && 
-                        _wishListSettings is not null && _wishListSettings.LevelsWeight is not null)
+                        wishListSettings is not null)
                     {
-                        int settingsValue = _wishListSettings.LevelsWeight[wishIndex.Level];
+                        int settingsValue = wishListSettings[wishIndex.Level];
                         decimal differ = settingsValue - rawIndex.Y;
                         if (differ > 0)
                         {
