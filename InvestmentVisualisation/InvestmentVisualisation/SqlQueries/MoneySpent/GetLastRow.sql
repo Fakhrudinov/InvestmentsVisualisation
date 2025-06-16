@@ -1,4 +1,4 @@
-SELECT `date_year_month`, `internet`, `phone`
+SELECT `event_date`, `internet`, `phone`
 	FROM money_spent_by_month
-		ORDER BY date_year_month desc
+		ORDER BY event_date desc
 	limit 1;

@@ -1,6 +1,6 @@
 ﻿UPDATE bank_deposits 
 	SET `isopen` = @isopen, 
-		`date_open` = @date_open, 
+		`event_date` = @date_open, 
 		`date_close` = @date_close, 
 		`name` = @name, 
 		`placed_name` = @placed_name, 

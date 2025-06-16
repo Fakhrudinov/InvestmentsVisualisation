@@ -102,7 +102,7 @@ namespace DataBaseRepository
                                 IncomingModel newIncoming = new IncomingModel();
 
                                 newIncoming.Id = sdr.GetInt32("id");
-                                newIncoming.Date = sdr.GetDateTime("date");
+                                newIncoming.Date = sdr.GetDateTime("event_date");
                                 newIncoming.SecCode = sdr.GetString("seccode");
                                 newIncoming.SecBoard = sdr.GetInt32("secboard");
                                 newIncoming.Category= sdr.GetInt32("category");
@@ -231,7 +231,7 @@ namespace DataBaseRepository
                             while (await sdr.ReadAsync(cancellationToken))
                             {
                                 result.Id = sdr.GetInt32("id");
-                                result.Date = sdr.GetDateTime("date");
+                                result.Date = sdr.GetDateTime("event_date");
                                 result.SecCode = sdr.GetString("seccode");
                                 result.SecBoard = sdr.GetInt32("secboard");
                                 result.Category= sdr.GetInt32("category");
@@ -423,7 +423,7 @@ namespace DataBaseRepository
                                 IncomingModel newIncoming = new IncomingModel();
 
                                 newIncoming.Id = sdr.GetInt32("id");
-                                newIncoming.Date = sdr.GetDateTime("date");
+                                newIncoming.Date = sdr.GetDateTime("event_date");
                                 newIncoming.SecCode = sdr.GetString("seccode");
                                 newIncoming.SecBoard = sdr.GetInt32("secboard");
                                 newIncoming.Category= sdr.GetInt32("category");

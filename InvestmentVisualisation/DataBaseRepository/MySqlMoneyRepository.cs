@@ -78,7 +78,7 @@ namespace DataBaseRepository
                             {
                                 MoneyModel newMoney = new MoneyModel();
 
-                                newMoney.Date = sdr.GetDateTime("date_year_month");
+                                newMoney.Date = sdr.GetDateTime("event_date");
 
                                 int checkForNull1 = sdr.GetOrdinal("total_in");
                                 if (!sdr.IsDBNull(checkForNull1))

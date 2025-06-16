@@ -1,5 +1,5 @@
 ﻿UPDATE incoming
-	SET `date` = @date_time, 
+	SET `event_date` = @date_time, 
 		`seccode` = @seccode, 
 		`secboard` = @secboard, 
 		`category` = @category, 

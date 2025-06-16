@@ -62,7 +62,7 @@ namespace DataBaseRepository
 							while (await sdr.ReadAsync(cancellationToken))
 							{
 								MoneySpentAndIncomeModel newChartItem = new MoneySpentAndIncomeModel();
-								newChartItem.Date = sdr.GetDateTimeOffset("date_year_month");
+								newChartItem.Date = sdr.GetDateTimeOffset("event_date");
 								newChartItem.Divident = sdr.GetInt32("div_round");
 								newChartItem.AverageDivident = sdr.GetInt32("avrg_div_round");
 
@@ -146,8 +146,8 @@ namespace DataBaseRepository
 							while (await sdr.ReadAsync(cancellationToken))
 							{
 								MoneySpentByMonthModel newItem = new MoneySpentByMonthModel();
-								newItem.Date = sdr.GetDateTime("date_year_month").ToString("yyyy-MM-dd");
-								//newItem.Date = sdr.GetDateTime("date_year_month");
+								newItem.Date = sdr.GetDateTime("event_date").ToString("yyyy-MM-dd");
+								//newItem.Date = sdr.GetDateTime("event_date");
 
 								int checkForNull = sdr.GetOrdinal("total");
 								if (!sdr.IsDBNull(checkForNull))
@@ -237,8 +237,8 @@ namespace DataBaseRepository
 						{
 							while (await sdr.ReadAsync(cancellationToken))
 							{
-								item.Date = sdr.GetDateTime("date_year_month").ToString("yyyy-MM-dd");
-								//item.Date = sdr.GetDateTime("date_year_month");
+								item.Date = sdr.GetDateTime("event_date").ToString("yyyy-MM-dd");
+								//item.Date = sdr.GetDateTime("event_date");
 
 								int checkForNull = sdr.GetOrdinal("total");
 								if (!sdr.IsDBNull(checkForNull))
@@ -412,25 +412,7 @@ namespace DataBaseRepository
 						{
 							while (await sdr.ReadAsync(cancellationToken))
 							{
-								item.Date = sdr.GetDateTime("date_year_month").ToString("yyyy-MM-dd");
-
-								//int checkForNull = sdr.GetOrdinal("total");
-								//if (!sdr.IsDBNull(checkForNull))
-								//{
-								//	item.Total = sdr.GetDecimal("total").ToString();
-								//}
-
-								//int checkForNulla = sdr.GetOrdinal("appartment");
-								//if (!sdr.IsDBNull(checkForNulla))
-								//{
-								//	item.Appartment = sdr.GetDecimal("appartment").ToString();
-								//}
-
-								//int checkForNulle = sdr.GetOrdinal("electricity");
-								//if (!sdr.IsDBNull(checkForNulle))
-								//{
-								//	item.Electricity = sdr.GetDecimal("electricity").ToString();
-								//}
+								item.Date = sdr.GetDateTime("event_date").ToString("yyyy-MM-dd");
 
 								int checkForNulli = sdr.GetOrdinal("internet");
 								if (!sdr.IsDBNull(checkForNulli))

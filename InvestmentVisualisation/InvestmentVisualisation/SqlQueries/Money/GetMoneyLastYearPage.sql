@@ -1,5 +1,5 @@
 ﻿SELECT * 
 	FROM money_by_month
-        having  `date_year_month` >= adddate(sysdate(), INTERVAL - 1 year)
-			and `date_year_month` <= sysdate()
-	order by `date_year_month` desc;
+        having  `event_date` >= adddate(sysdate(), INTERVAL - 1 year)
+			and `event_date` <= sysdate()
+	order by `event_date` desc;

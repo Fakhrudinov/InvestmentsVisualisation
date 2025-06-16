@@ -134,7 +134,7 @@ namespace DataBaseRepository
 									newBankDepo.IsOpen = false;
 								}
 
-								newBankDepo.DateOpen = sdr.GetDateTime("date_open");
+								newBankDepo.DateOpen = sdr.GetDateTime("event_date");
 								newBankDepo.DateClose = sdr.GetDateTime("date_close");
 
 								newBankDepo.Name = sdr.GetString("name");
@@ -257,7 +257,7 @@ namespace DataBaseRepository
 									result.IsOpen = false;
 								}
 
-								result.DateOpen = sdr.GetDateTime("date_open");
+								result.DateOpen = sdr.GetDateTime("event_date");
 								result.DateClose = sdr.GetDateTime("date_close");
 
 								result.Name = sdr.GetString("name");
@@ -430,7 +430,7 @@ namespace DataBaseRepository
 							{
 								BankDepoDBModel newChartItem = new BankDepoDBModel();
 
-								newChartItem.DateOpen = sdr.GetDateTimeOffset("date_open");
+								newChartItem.DateOpen = sdr.GetDateTimeOffset("event_date");
 								newChartItem.DateClose = sdr.GetDateTimeOffset("date_close");
 								newChartItem.Name = sdr.GetString("name");
 								newChartItem.PlaceName = sdr.GetInt16("placed_name");

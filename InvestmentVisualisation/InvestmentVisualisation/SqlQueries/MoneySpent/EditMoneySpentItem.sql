@@ -5,4 +5,4 @@
 		`electricity` = @electricity, 
 		`internet` = @internet, 
 		`phone` = @phone
-	WHERE (`date_year_month` = @date);
+	WHERE (`event_date` = @date);

@@ -93,7 +93,7 @@ namespace DataBaseRepository
 
                                 cancellationToken.ThrowIfCancellationRequested();
                                 newDeal.Id = sdr.GetInt32("id");
-                                newDeal.Date = sdr.GetDateTime("date");
+                                newDeal.Date = sdr.GetDateTime("event_date");
                                 newDeal.SecCode = sdr.GetString("seccode");
                                 newDeal.SecBoard = sdr.GetInt32("secboard");
 
@@ -309,7 +309,7 @@ namespace DataBaseRepository
                             while (await sdr.ReadAsync(cancellationToken))
                             {
                                 result.Id = sdr.GetInt32("id");
-                                result.Date = sdr.GetDateTime("date");
+                                result.Date = sdr.GetDateTime("event_date");
                                 result.SecCode = sdr.GetString("seccode");
                                 result.SecBoard = sdr.GetInt32("secboard");
                                 result.AvPrice= sdr.GetDecimal("av_price").ToString();
@@ -408,7 +408,7 @@ namespace DataBaseRepository
                                 DealModel newDeal = new DealModel();
 
                                 newDeal.Id = sdr.GetInt32("id");
-                                newDeal.Date = sdr.GetDateTime("date");
+                                newDeal.Date = sdr.GetDateTime("event_date");
                                 newDeal.SecCode = sdr.GetString("seccode");
                                 newDeal.SecBoard = sdr.GetInt32("secboard");
 
