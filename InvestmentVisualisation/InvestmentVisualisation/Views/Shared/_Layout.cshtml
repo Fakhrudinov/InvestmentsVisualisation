@@ -100,37 +100,6 @@
                         </ul>
                     </div>
 
-@*                     @if (signInManager is not null && signInManager.IsSignedIn(User))
-                    {
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-primary dropdown-toggle
-                                    @(ViewContext.RouteData.Values["controller"].ToString() == "Deals" ? "active" : "")"
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Сделки
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a asp-controller="Deals" asp-action="Deals" class="dropdown-item">
-                                        Список сделок
-                                    </a>
-                                </li>
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <li>
-                                        <a asp-controller="Deals" asp-action="Create" class="dropdown-item">
-                                            Добавить сделку
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a asp-controller="Deals" asp-action="CreateNewDeals" class="dropdown-item">
-                                            Добавить сделки
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    } *@
-
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
                                 @(ViewContext.RouteData.Values["controller"].ToString() == "Money" ? "active" : "")"
@@ -210,24 +179,18 @@
                                     График приходов/расходов за последний год
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a asp-controller="Money" asp-action="ExpectedDividentsChart" class="dropdown-item">
-                                    График ожидаемых приходов дивидентов
-                                </a>
-                            </li>
                         </ul>
                     </div>
 
-                    @if (signInManager is not null && signInManager.IsSignedIn(User))
-                    {
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-outline-primary dropdown-toggle
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary dropdown-toggle
                                     @(ViewContext.RouteData.Values["controller"].ToString() == "YearView" ? "active" : "")"
-                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Дивиденды за год
-                            </button>
-                            <ul class="dropdown-menu">
+                                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Дивиденды за год
+                        </button>
+                        <ul class="dropdown-menu">
+                            @if (signInManager is not null && signInManager.IsSignedIn(User))
+                            {
                                 <li>
                                     <a asp-controller="YearView" asp-action="Last12Month" class="dropdown-item">
                                         Последние 12 месяцев
@@ -241,7 +204,7 @@
                                 </li>
                                 <li>
                                     <a asp-controller="YearView" asp-action="Index" class="dropdown-item"
-                                       asp-route-sortedByVolume="true">
+                                        asp-route-sortedByVolume="true">
                                         Этот год с сортировкой по объему
                                     </a>
                                 </li>
@@ -255,9 +218,15 @@
                                         2 года назад
                                     </a>
                                 </li>
-                            </ul>
-                        </div>
-                    }
+                                <li><hr class="dropdown-divider"></li>
+                            }                            
+                            <li>
+                                <a asp-controller="Money" asp-action="ExpectedDividentsChart" class="dropdown-item">
+                                    График ожидаемых приходов дивидентов
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
                     <div class="btn-group" role="group">
                         <button class="btn btn-outline-primary dropdown-toggle 
