@@ -9,6 +9,7 @@ using InvestmentVisualisation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Configuration;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,9 @@ builder.Services.AddTransient<IMySqlMoneySpentRepository, MySqlMoneySpentReposit
 builder.Services.AddTransient<IWebDividents, WebDividents>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
+Console.WriteLine($"Connected to " +
+	$"{builder.Configuration.GetSection("DataBaseConnectionSettings:Server").Value} " +
+	$"{builder.Configuration.GetSection("DataBaseConnectionSettings:Database").Value}");
 builder.Services.Configure<PaginationSettings>(builder.Configuration.GetSection("Pagination"));
 
 builder.Services
