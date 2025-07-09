@@ -9,7 +9,6 @@ using InvestmentVisualisation.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System.Configuration;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

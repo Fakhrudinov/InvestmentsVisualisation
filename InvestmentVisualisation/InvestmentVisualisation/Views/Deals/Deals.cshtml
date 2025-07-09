@@ -25,9 +25,9 @@
         @if (User.IsInRole("Admin"))
         {
             <a asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
-            <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary">Добавить несколько</a>
+            <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary"> Добавить несколько </a>
         }
-
+        <a asp-controller="Incoming" asp-action="HelpPage" class="btn btn-secondary"> Help </a>
         @if (ViewBag.secCode is not null)
         {
             <a asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">

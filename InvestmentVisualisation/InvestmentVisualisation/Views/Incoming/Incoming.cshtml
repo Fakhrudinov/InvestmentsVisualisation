@@ -22,13 +22,14 @@
     <p>
         @if (User.IsInRole("Admin"))
         {
-            <a asp-area="" asp-controller="Incoming" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
+            <a asp-controller="Incoming" asp-action="CreateIncoming" class="btn btn-primary"> Добавить </a>
+            <a asp-controller="Incoming" asp-action="CreateSeveralIncomings" class="btn btn-primary"> Добавить несколько </a>
         }
-        <a asp-area="" asp-controller="Incoming" asp-action="HelpPage" class="btn btn-primary"> Help </a>
+        <a asp-controller="Incoming" asp-action="HelpPage" class="btn btn-secondary"> Help </a>
         @{
             if (ViewBag.secCode is not null)
             {
-                <a asp-area="" asp-controller="Incoming" asp-action="Incoming" class="btn btn-outline-success">
+                <a asp-controller="Incoming" asp-action="Incoming" class="btn btn-outline-success">
                     Назад к списку зачислений
                 </a>
             }
