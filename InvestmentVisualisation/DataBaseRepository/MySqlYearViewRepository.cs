@@ -1,9 +1,11 @@
 ﻿using DataAbstraction.Interfaces;
+using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.YearView;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Threading;
 
 namespace DataBaseRepository
 {
@@ -417,5 +419,117 @@ namespace DataBaseRepository
 
             return result;
         }
-    }
+
+		public async Task<List<SecCodeAndDividentAndDateModel>?> GetBondsDividendsForLastYear(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+				$"GetBondsDividendsForLastYear start");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("YearView", "GetBondsDividendsForLastYear.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+			//int year = DateTime.Now.Year;
+			//query = query.Replace("@year", year.ToString());
+
+			List<SecCodeAndDividentAndDateModel> result = new List<SecCodeAndDividentAndDateModel>();
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								SecCodeAndDividentAndDateModel newLine = new SecCodeAndDividentAndDateModel();
+
+								newLine.SecCode = sdr.GetString("seccode");
+								newLine.EventDate = sdr.GetDateTime("event_date");
+								newLine.Divident = sdr.GetDecimal("value").ToString();
+
+								result.Add(newLine);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+							$"GetBondsDividendsForLastYear Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return result;
+		}
+
+		public async Task<List<NameAndPiecesAndValueModel>?> GetBondsWithNameAndValues(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+				$"GetBondsWithNameAndValues start");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("YearView", "GetBondsWithNameAndValues.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+            int year = DateTime.Now.Year;
+            query = query.Replace("@year", year.ToString());
+
+			List<NameAndPiecesAndValueModel> result = new List<NameAndPiecesAndValueModel>();
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								NameAndPiecesAndValueModel newLine = new NameAndPiecesAndValueModel();
+
+								newLine.SecCode = sdr.GetString("seccode");
+								newLine.Name = sdr.GetString("name");
+								newLine.FullName = sdr.GetString("full_name");
+								newLine.Pieces = sdr.GetInt32("pieces");
+								newLine.Volume = sdr.GetDecimal("volume");
+
+								result.Add(newLine);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlYearViewRepository " +
+							$"GetBondsWithNameAndValues Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return result;
+		}
+	}
 }

@@ -231,6 +231,12 @@
     <None Update="SqlQueries\YearView\DropTableLast12MonthView.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\YearView\GetBondsDividendsForLastYear.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\YearView\GetBondsWithNameAndValues.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\YearView\GetLast12MonthViewPage.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -250,6 +256,10 @@
 
   <ItemGroup>
     <Content Update="Views\Incoming\CreateSeveralIncomings.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\YearView\Last12MonthBonds.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

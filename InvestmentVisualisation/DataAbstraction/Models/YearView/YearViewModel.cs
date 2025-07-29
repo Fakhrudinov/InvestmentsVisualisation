@@ -7,10 +7,8 @@ namespace DataAbstraction.Models.YearView
         public string SecCode { get; set; }
         public string Name { get; set; }
         public string ? ISIN { get; set; }
-        //public int? Pieces { get; set; }
-        //public decimal? AvPrice { get; set; }
 
-        [Display(Name = "Vol")]
+		[Display(Name = "Vol")]
         public decimal Volume { get; set; }
 
         public decimal? Jan { get; set; }
@@ -36,7 +34,6 @@ namespace DataAbstraction.Models.YearView
 
         [Display(Name = "Див%")]
         public decimal? DivPercent { get; set; }
-
-        public string FullName { get; set; }
+		public string FullName { get; set; }
     }
 }
