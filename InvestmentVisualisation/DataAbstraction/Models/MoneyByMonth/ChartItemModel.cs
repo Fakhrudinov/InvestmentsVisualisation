@@ -133,4 +133,26 @@ namespace DataAbstraction.Models.MoneyByMonth
 		[DataMember(Name = "color")]
 		public string ? color;
 	}
+
+	public class RangeDataPointsOfChartItemModel
+	{
+		public RangeDataPointsOfChartItemModel(long x, int[] y, string name)
+		{
+			this.x = x;
+			this.y = y;
+			this.name=name;
+		}
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "x")]
+		public long x = 0;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "y")]
+		public int[] y;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "name")]
+		public string name;
+	}
 }

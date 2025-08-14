@@ -1,0 +1,61 @@
+﻿
+@{
+	ViewData["Title"] = "Expected Bond Divs Chart";
+}
+
+@section scripts
+{
+	@* https://jsfiddle.net/8qu6dr0b/18/ *@
+
+	<script>
+		window.onload = function () {
+
+			function toolTipContent(e) {
+				var str = "";
+				var volume = 0;
+				var str2, str3;
+				for (var i = 0; i < e.entries.length; i++){
+					volume = e.entries[i].dataPoint.y[1] - e.entries[i].dataPoint.y[0];
+					str2 = "<strong> " + CanvasJS.formatDate(e.entries[i].dataPoint.x, "MMM DD") + " </strong><br/>";
+					var  str1 = "<span style = \"font-size: 18px;\">" + e.entries[i].dataPoint.name+"</span><br/>";
+					str = str.concat(str1);
+				}
+				str3 = "<span style = \"color:Tomato\">Объём: </span><strong>"+volume+"</strong> руб.<br/>";
+				return (str2.concat(str)).concat(str3);
+			}
+
+			var chart = new CanvasJS.Chart("chartContainer", {
+				axisX: {
+					valueFormatString: "DD MMM",
+				},
+				axisY: {
+
+				},
+				toolTip: {
+					content: toolTipContent
+				},
+				data: [
+					{
+						type: "rangeColumn",
+						indexLabelFormatter: function(e){
+							if( e.index === 1)
+								return e.dataPoint.name;
+							else
+								return " ";
+						},
+						xValueType: "dateTime",
+						xValueFormatString: "DD MMM",
+						indexLabelPlacement: "inside",
+						dataPoints: @Html.Raw(ViewBag.ChartItemArray)
+					}
+				]
+			});
+			chart.render();
+		}
+	</script>
+}
+
+<div class="container">
+	<h3 style="text-align:center">Примерные ожидаемые даты выплат по облигациям</h3>
+	<div id="chartContainer" style="width: 100%; height: 400px; display: inline-block;"></div>
+</div>

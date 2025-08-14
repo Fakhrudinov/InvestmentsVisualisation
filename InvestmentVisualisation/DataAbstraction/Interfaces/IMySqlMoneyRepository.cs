@@ -9,7 +9,8 @@ namespace DataAbstraction.Interfaces
         Task<List<SecCodeAndNameAndPiecesModel>?> GetActualSecCodeAndNameAndPieces(
             CancellationToken cancellationToken, 
             int year);
-        Task<List<MoneyModel>> GetMoneyLastYearPage(CancellationToken cancellationToken);
+		Task<List<DayAndVolumeAndNameModel>?> GetExpectedMonthBondDividentsChart(CancellationToken cancellationToken);
+		Task<List<MoneyModel>> GetMoneyLastYearPage(CancellationToken cancellationToken);
         Task<List<MoneyModel>> GetMoneyYearPage(CancellationToken cancellationToken, int year);
         Task RecalculateMoney(CancellationToken cancellationToken, string date);
     }

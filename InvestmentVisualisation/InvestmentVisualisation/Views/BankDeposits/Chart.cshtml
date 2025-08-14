@@ -43,7 +43,6 @@
 				},
 				toolTip: {
 					shared: true,
-					//content: "{x}: {y[#index]}",
 					fontColor: "black",
 				},
 				data: @Html.Raw(ViewBag.ChartItemArray)
@@ -78,19 +77,8 @@
 					}]
 				},
 				axisY: {
-					// title: "Доходность выплаты, %",
-					// titleFontSize: 17,
-					// labelFontSize: 14,
-					//suffix: "%",
+
 				},
-				// axisY2: {
-				// 	title: "Сумма выплат",
-				// 	titleFontSize: 17,
-				// 	labelFontSize: 14,
-				// },
-				// toolTip: {
-				// 	shared: true
-				// },
 				data: [
 					{
 						type: "bubble",
@@ -103,15 +91,6 @@
 						toolTipContent: "<b>{name}</b><br/>Дата закрытия: {x}<br/>Выплата: {z} руб.",
 						dataPoints: @Html.Raw(ViewBag.PaymentsChartItemArray)
 					},
-					// {
-					// 	type: "stepLine",
-					// 	color: "#F08080",
-					// 	axisYType: "secondary",
-					// 	toolTipContent: "Накопительный итог: {y}",
-					// 	yValueFormatString: "####.## руб",
-					// 	// indexLabel: "{y}",
-					// 	dataPoints: @Html.Raw(ViewBag.PossibleDivsChartVolumeDataPoints)
-					// }
 				]
 			});
 			chart2.render();

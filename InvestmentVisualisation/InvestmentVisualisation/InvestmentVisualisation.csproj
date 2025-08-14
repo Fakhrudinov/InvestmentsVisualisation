@@ -105,6 +105,9 @@
     <None Update="SqlQueries\BankDeposits\GetBankDepoChartData.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\Money\GetExpectedMonthBondDividentsChart.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Money\GetMoneyValueFromLastYearMonth.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

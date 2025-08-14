@@ -243,5 +243,61 @@ namespace DataBaseRepository
 
             return сhartItems;
         }
-    }
+
+		public async Task<List<DayAndVolumeAndNameModel>?> GetExpectedMonthBondDividentsChart(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+				$"GetExpectedMonthBondDividentsChart start");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetExpectedMonthBondDividentsChart.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+			List<DayAndVolumeAndNameModel> сhartItems = new List<DayAndVolumeAndNameModel>();
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								DayAndVolumeAndNameModel newChartItem = new DayAndVolumeAndNameModel();
+								newChartItem.Day = sdr.GetInt16("expect_day");
+								newChartItem.Name = sdr.GetString("name");
+								newChartItem.Volume = sdr.GetInt32("volume");
+
+								сhartItems.Add(newChartItem);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+							$"GetExpectedMonthBondDividentsChart Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			if (сhartItems.Count == 0)
+			{
+				return null;
+			}
+
+			return сhartItems;
+		}
+	}
 }

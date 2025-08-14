@@ -223,9 +223,14 @@
                                     <a asp-controller="YearView" asp-action="Last12MonthBonds" class="dropdown-item">
                                         Облигации
                                     </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                            }                            
+                                </li>                                
+                            }
+                            <li>
+                                <a asp-controller="Money" asp-action="ExpectedMonthBondDividentsChart" class="dropdown-item">
+                                    Ожидаемые даты выплат по облигациям
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a asp-controller="Money" asp-action="ExpectedDividentsChart" class="dropdown-item">
                                     График ожидаемых приходов дивидентов
