@@ -38,8 +38,9 @@
                             text-align:center;">
                     @DateTime.Now.Year
                 </th>
-                <td colspan="2">
-                </td>
+                <th colspan="2" style="text-align: center;">
+                    Получено за год
+                </th>
                 <th colspan="2" style="text-align: center;">
                     Ожидается за год
                 </th>
@@ -89,10 +90,10 @@
                     @DateTime.Now.ToString("MMM", CultureInfo.InvariantCulture)
                 </th>
                 <th style="text-align: center;">
-                    Факт руб
+                    руб
                 </th>
                 <th style="text-align: center;">
-                    Факт%
+                    %
                 </th>
                 <th style="text-align: center;">
                     руб
@@ -299,7 +300,13 @@
 
                         <td style="font-weight: bold; text-align: right;">
                             @Html.DisplayFor(modelItem => item.Summ)
-                            @{totalFaktDivs = totalFaktDivs + (item.Summ is null ? 0 : (decimal)item.Summ);}
+                            @{
+                                if (item.Summ is null)
+                                {
+                                    <span>0,00</span>
+                                }
+                                totalFaktDivs = totalFaktDivs + (item.Summ is null ? 0 : (decimal)item.Summ);
+                            }
                         </td>
 
                         <td style="text-align: right;">
@@ -307,6 +314,10 @@
                                 if (item.DivPercent != null && item.DivPercent > 0)
                                 {
                                     @Html.DisplayFor(modelItem => item.DivPercent)<span>%</span>
+                                }
+                                else
+                                {
+                                    <span>0,00%</span>
                                 }
                             }
                         </td>
