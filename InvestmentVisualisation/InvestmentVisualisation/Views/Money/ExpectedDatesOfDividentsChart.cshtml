@@ -1,6 +1,6 @@
 ﻿
 @{
-	ViewData["Title"] = "Expected Bond Divs Chart";
+	ViewData["Title"] = "Expected Dates of Divs Chart";
 }
 
 @section scripts
@@ -56,6 +56,13 @@
 }
 
 <div class="container">
-	<h3 style="text-align:center">Примерные ожидаемые даты выплат по облигациям</h3>
-	<div id="chartContainer" style="width: 100%; height: 400px; display: inline-block;"></div>
+	<h3 style="text-align:center">График дат ожидаемых выплат по @ViewData["ExpectedDividentsType"] по данным за прошлые периоды</h3>
+	@if (ViewData["ExpectedDividentsErrors"] is not null)
+	{
+		<p style="color:red;">@ViewData["ExpectedDividentsErrors"]</p>
+	}
+	<div id="chartContainer" style="width: 100%; height: 400px;"></div>
+	<div style="width: 100%;margin-top:20px;">
+		<p>Показаны объемы прошлых периодов, выплаты в будущем в те же даты и в том же объеме не гарантированы.</p>
+	</div>
 </div>

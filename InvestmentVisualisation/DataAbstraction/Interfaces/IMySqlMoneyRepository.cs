@@ -5,7 +5,8 @@ namespace DataAbstraction.Interfaces
 {
     public interface IMySqlMoneyRepository
     {
-        void FillFreeMoney(CancellationToken cancellationToken);
+		Task<List<DateAndVolumeAndNameModel>?> ExpectedFutureStockDividentsChart(CancellationToken cancellationToken);
+		void FillFreeMoney(CancellationToken cancellationToken);
         Task<List<SecCodeAndNameAndPiecesModel>?> GetActualSecCodeAndNameAndPieces(
             CancellationToken cancellationToken, 
             int year);

@@ -258,10 +258,13 @@ namespace InvestmentVisualisation.Controllers
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController " +
                 $"ExpectedMonthBondDividentsChart called");
 
-            List<DayAndVolumeAndNameModel>? daysExpected = await _repository.GetExpectedMonthBondDividentsChart(cancellationToken);
+            ViewData["ExpectedDividentsType"] = "облигациям";
+
+
+			List<DayAndVolumeAndNameModel>? daysExpected = await _repository.GetExpectedMonthBondDividentsChart(cancellationToken);
             if (daysExpected is null)
             {
-                ViewData["MonthBondDividentsErrors"] = "Data from DB not received.";
+                ViewData["ExpectedDividentsErrors"] = "Data from DB not received.";
                 return View();
             }
 
@@ -275,37 +278,10 @@ namespace InvestmentVisualisation.Controllers
 					monthYear = DateTime.Now.AddMonths(1).ToString(" MM yyyy");
 				}
 				DateTime divDate = DateTime.Parse(dividendEvent.Day + monthYear);
-
-
-				// Test current day of week. 
-				DayOfWeek dayOfWeek = divDate.DayOfWeek;
-				if (dayOfWeek == DayOfWeek.Sunday || dayOfWeek == DayOfWeek.Saturday)
-				{
-                    divDate = divDate.AddDays(1);
-				}
-				dayOfWeek = divDate.DayOfWeek;
-				if (dayOfWeek == DayOfWeek.Sunday || dayOfWeek == DayOfWeek.Saturday)
-				{
-					divDate = divDate.AddDays(1);
-				}
-
-
+				divDate = ReturnNewDateNotInHolydays(divDate);
 				long dateOfDiv = new DateTimeOffset(divDate).ToUnixTimeSeconds() * 1000;
-                int[] volume = new int[2];
-
-				int search = dataPoints.FindLastIndex(dp => dp.x == dateOfDiv);
-                if (search > 0)
-                {
-					volume[0] = dataPoints[search].y[1];
-					volume[1] = (int)dividendEvent.Volume + dataPoints[search].y[1];
-				}
-                else
-                {
-                    volume[0] = 0;
-                    volume[1] = (int)dividendEvent.Volume;
-                }
-
-            RangeDataPointsOfChartItemModel dp = new RangeDataPointsOfChartItemModel(dateOfDiv, volume, dividendEvent.Name);
+				int[] volume = ReturnNewArrayOfVolumeStartAndEnd(dataPoints, dividendEvent.Volume, dateOfDiv);
+                RangeDataPointsOfChartItemModel dp = new RangeDataPointsOfChartItemModel(dateOfDiv, volume, dividendEvent.Name);
 				dataPoints.Add(dp);
 			}
 
@@ -313,7 +289,78 @@ namespace InvestmentVisualisation.Controllers
 			ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPoints);
 
 
-			return View();
+			return View("ExpectedDatesOfDividentsChart");
+		}
+		[AllowAnonymous]
+		public async Task<IActionResult> ExpectedFutureStockDividentsChart(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MoneyController " +
+				$"ExpectedFutureStockDividentsChart called");
+
+			ViewData["ExpectedDividentsType"] = "акциям";
+
+			List<DateAndVolumeAndNameModel>? divsExpected = await _repository.ExpectedFutureStockDividentsChart(cancellationToken);
+			if (divsExpected is null)
+			{
+				ViewData["ExpectedDividentsErrors"] = "Data from DB not received.";
+				return View("ExpectedDatesOfDividentsChart");
+			}
+
+			List<RangeDataPointsOfChartItemModel> dataPoints = new List<RangeDataPointsOfChartItemModel>();
+			foreach (DateAndVolumeAndNameModel dividendEvent in divsExpected)
+			{
+                DateTime divDate = dividendEvent.Date.AddYears(1);
+                divDate = ReturnNewDateNotInHolydays(divDate);
+                long dateOfDiv = new DateTimeOffset(divDate).ToUnixTimeSeconds() * 1000;
+                int[] volume = ReturnNewArrayOfVolumeStartAndEnd(dataPoints, dividendEvent.Volume, dateOfDiv);
+
+                RangeDataPointsOfChartItemModel dp = new RangeDataPointsOfChartItemModel(dateOfDiv, volume, dividendEvent.Name);
+                dataPoints.Add(dp);
+            }
+
+			ViewBag.ChartItemsCount = 1;// layout load script: @if (ViewBag.ChartItemsCount is not null)
+			ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPoints);
+
+
+			return View("ExpectedDatesOfDividentsChart");
+		}
+
+		private int[] ReturnNewArrayOfVolumeStartAndEnd(
+            List<RangeDataPointsOfChartItemModel> dataPoints, 
+            decimal dividendEvent,
+			long dateOfDiv)
+		{
+			int[] volume = new int[2];
+
+			int search = dataPoints.FindLastIndex(dp => dp.x == dateOfDiv);
+			if (search > 0)
+			{
+				volume[0] = dataPoints[search].y[1];
+				volume[1] = (int)dividendEvent + dataPoints[search].y[1];
+			}
+			else
+			{
+				volume[0] = 0;
+				volume[1] = (int)dividendEvent;
+			}
+
+            return volume;
+		}
+
+		private DateTime ReturnNewDateNotInHolydays(DateTime divDate)
+		{
+			DayOfWeek dayOfWeek = divDate.DayOfWeek;
+			if (dayOfWeek == DayOfWeek.Sunday || dayOfWeek == DayOfWeek.Saturday)
+			{
+				divDate = divDate.AddDays(1);
+			}
+			dayOfWeek = divDate.DayOfWeek;
+			if (dayOfWeek == DayOfWeek.Sunday || dayOfWeek == DayOfWeek.Saturday)
+			{
+				divDate = divDate.AddDays(1);
+			}
+
+            return divDate;
 		}
 	}
 }

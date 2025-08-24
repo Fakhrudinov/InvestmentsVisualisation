@@ -299,5 +299,61 @@ namespace DataBaseRepository
 
 			return сhartItems;
 		}
+
+		public async Task<List<DateAndVolumeAndNameModel>?> ExpectedFutureStockDividentsChart(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+				$"ExpectedFutureStockDividentsChart start");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Money", "GetExpectedFutureStockDividentsChart.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+			List<DateAndVolumeAndNameModel> сhartItems = new List<DateAndVolumeAndNameModel>();
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								DateAndVolumeAndNameModel newChartItem = new DateAndVolumeAndNameModel();
+								newChartItem.Date = sdr.GetDateTime("event_date");
+								newChartItem.Name = sdr.GetString("seccode");
+								newChartItem.Volume = sdr.GetInt32("value");
+
+								сhartItems.Add(newChartItem);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlMoneyRepository " +
+							$"ExpectedFutureStockDividentsChart Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			if (сhartItems.Count == 0)
+			{
+				return null;
+			}
+
+			return сhartItems;
+		}
 	}
 }
