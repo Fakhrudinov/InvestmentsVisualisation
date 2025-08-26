@@ -5,6 +5,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using System.Reflection;
 using System.Text;
 
 
@@ -326,5 +327,72 @@ namespace DataBaseRepository
 
 			return result;
 		}
-    }
+
+		public async Task<decimal> GetCurrentValueFromStockExchangeByType(CancellationToken cancellationToken, int secBoardType, int year)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+				$"GetCurrentValueFromStockExchangeByType start with secBoardType={secBoardType} year={year}");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecVolume", "GetCurrentValueFromStockExchangeByType.sql");
+			if (query is null)
+			{
+				return decimal.MinusOne;
+			}
+			query = query.Replace("@year", year.ToString());
+			query = query.Replace("@secBoardType", secBoardType.ToString());
+
+			return await GetDecimalByQueryText(cancellationToken, query);
+		}
+
+		public async Task<decimal> GetCurrentValueOfBankDeposits(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+				$"GetCurrentValueOfBankDeposits start");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecVolume", "GetCurrentValueOfBankDeposits.sql");
+			if (query is null)
+			{
+				return decimal.MinusOne;
+			}
+
+            return await GetDecimalByQueryText(cancellationToken, query);
+		}
+
+		private async Task<decimal> GetDecimalByQueryText(CancellationToken cancellationToken, string query)
+		{
+            decimal result = decimal.MinusOne;
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								result = sdr.GetDecimal(0);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+							$"GetDecimalByQueryText Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return result;
+		}
+	}
 }

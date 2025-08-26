@@ -1,0 +1,1 @@
+﻿SELECT sum(summ) FROM bank_deposits WHERE isopen = 1;

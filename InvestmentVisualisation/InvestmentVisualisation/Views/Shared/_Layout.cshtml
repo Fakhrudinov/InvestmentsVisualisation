@@ -307,6 +307,11 @@
                                     График объемов позиций
                                 </a>
                             </li>
+                            <li>
+                                <a asp-controller="SecVolume" asp-action="InstrumentsTypeVolumeChart" class="dropdown-item">
+                                    График сравнения объемов позиций разных типов
+                                </a>
+                            </li>
                             @if (signInManager is not null && signInManager.IsSignedIn(User))
                             {
                                 <li><hr class="dropdown-divider"></li>

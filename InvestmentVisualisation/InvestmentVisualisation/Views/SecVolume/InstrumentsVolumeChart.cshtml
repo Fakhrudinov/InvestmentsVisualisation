@@ -1,0 +1,65 @@
+﻿
+@{
+    ViewData["Title"] = "Instrument Type Volume Chart";
+    // https://jsfiddle.net/L7c5baz0/1/
+}
+
+@section scripts
+{
+    <script>
+        window.onload = function ()
+        {
+			var chart = new CanvasJS.Chart("chartContainer", 
+			{
+				//exportEnabled: true,
+				//animationEnabled: true,
+				//title:{
+					//text: "State Operating Funds"
+				//},
+				legend:{
+					horizontalAlign: "left", // left, center ,right
+					verticalAlign: "center",  // top, center, bottom
+					cursor: "pointer",
+					itemclick: explodePie
+				},
+				data: 
+				[
+					{
+						type: "pie",
+						showInLegend: true,
+						toolTipContent: "{name}: <strong>{y}</strong>",
+						indexLabel: "{name} - {y}  ({percent}%)",
+						yValueFormatString: "# ### ### ##0.00\"\"",
+						dataPoints: @Html.Raw(ViewBag.ChartItemArray)
+					},
+				]
+			});
+            chart.render();
+        }
+
+		function explodePie (e) 
+		{
+			if( typeof (e.dataSeries.dataPoints[e.dataPointIndex].exploded) === "undefined" ||
+				!e.dataSeries.dataPoints[e.dataPointIndex].exploded)
+			{
+				e.dataSeries.dataPoints[e.dataPointIndex].exploded = true;
+			} 
+			else 
+			{
+				e.dataSeries.dataPoints[e.dataPointIndex].exploded = false;
+			}
+			e.chart.render();
+		}
+    </script>
+}
+
+<div class="container">
+    @if (ViewBag.Error is not null)
+    {
+        <h5 style="color:red">Проблема при выполнении!</h5>
+        <p style="color:red">@Html.Raw(ViewBag.Error)</p>
+    }
+
+    <h3 style="text-align:center">Размер всех позиций в процентах.</h3>
+	<div id="chartContainer" style="width: 100%;"></div>
+</div>

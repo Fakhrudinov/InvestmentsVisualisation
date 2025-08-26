@@ -189,6 +189,12 @@
     <None Update="SqlQueries\SecCodes\GetSingleSecCodeBySecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\SecVolume\GetCurrentValueOfBankDeposits.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\SecVolume\GetCurrentValueFromStockExchangeByType.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\SecVolume\GetSecVolumeChartData.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -262,6 +268,10 @@
 
   <ItemGroup>
     <Content Update="Views\Incoming\CreateSeveralIncomings.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Views\SecVolume\InstrumentsVolumeChart.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

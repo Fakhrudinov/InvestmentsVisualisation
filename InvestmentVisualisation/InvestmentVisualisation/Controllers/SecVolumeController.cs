@@ -10,6 +10,7 @@ using DataAbstraction.Models.WishList;
 using UserInputService;
 using Microsoft.AspNetCore.Authorization;
 
+
 namespace InvestmentVisualisation.Controllers
 {
     public class SecVolumeController : Controller
@@ -450,7 +451,83 @@ namespace InvestmentVisualisation.Controllers
             return View();
 		}
 
-        private void CalculateColorDependingByDivsValues(
+		[AllowAnonymous]
+		public async Task<IActionResult> InstrumentsTypeVolumeChart(CancellationToken cancellationToken)
+        {
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController " +
+                $"GET InstrumentsTypeVolumeChart called");
+
+            decimal totalValue = 0;			
+
+			/// get total volume of each type instr
+			// bank
+			//      SELECT sum(summ) FROM bank_deposits WHERE isopen = 1;
+
+			decimal bankDepoValue = await _repository.GetCurrentValueOfBankDeposits(cancellationToken);
+            if (bankDepoValue == -1)
+            {
+                ViewBag.Error = "Не получены данные по банковским вкладам.";
+                bankDepoValue = 0;
+			}
+            else
+            {
+                totalValue = bankDepoValue;
+			}
+
+
+			// bonds and shares
+            // 1=shares
+            // 2=bonds
+			decimal allSharesValue = await _repository.GetCurrentValueFromStockExchangeByType(cancellationToken, 1, DateTime.Now.Year);
+			if (allSharesValue == -1)
+			{
+				ViewBag.Error = ViewBag.Error + "<br>" + "Не получены данные по объему акций.";
+                allSharesValue = 0;
+			}
+            else
+            {
+                totalValue = totalValue + allSharesValue;
+			}
+
+			decimal allBondsValue = await _repository.GetCurrentValueFromStockExchangeByType(cancellationToken, 2, DateTime.Now.Year);
+			if (allBondsValue == -1)
+			{
+				ViewBag.Error = ViewBag.Error + "<br>" + "Не получены данные по объему облигаций.";
+                allBondsValue = 0;
+			}
+            else
+            {
+                totalValue = totalValue + allBondsValue;
+			}
+
+			List<PieChartItemModel> dataPoints = new List<PieChartItemModel>();
+
+			PieChartItemModel share = new PieChartItemModel("Акции", allSharesValue);
+			dataPoints.Add(share);
+			PieChartItemModel bonds = new PieChartItemModel("Облигации", allBondsValue);
+			dataPoints.Add(bonds);
+			PieChartItemModel bank = new PieChartItemModel("Банковские вклады", bankDepoValue);
+			dataPoints.Add(bank);
+
+			if (totalValue > 0)
+            {
+                decimal onePercent = totalValue / 100;
+
+                // set precent
+				foreach (PieChartItemModel item in dataPoints)
+                {
+                    item.percent = Math.Round( item.y / onePercent, 2);
+				}
+
+				ViewBag.ChartItemsCount = 1;// layout load script: @if (ViewBag.ChartItemsCount is not null)
+				ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPoints);
+			}
+
+			return View("InstrumentsVolumeChart");
+		}
+
+
+		private void CalculateColorDependingByDivsValues(
             List<SecVolumeLast2YearsDynamicModel> model,
             List<WishListItemModel> wishValues)
         {
