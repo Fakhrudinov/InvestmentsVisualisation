@@ -1,4 +1,4 @@
-﻿select  min(DAY(i.event_date)) as expect_day, min(i.value) as volume, si.name-- , i.seccode , si.full_name
+﻿select ROUND(avg(DAY(i.event_date))) as expect_day, min(i.value) as volume, si.name-- , i.seccode , si.full_name
 	FROM incoming i 
     right join seccode_info si
     on i.seccode = si.seccode
