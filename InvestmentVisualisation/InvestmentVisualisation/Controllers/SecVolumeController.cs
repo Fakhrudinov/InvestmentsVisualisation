@@ -461,7 +461,6 @@ namespace InvestmentVisualisation.Controllers
 
 			/// get total volume of each type instr
 			// bank
-			//      SELECT sum(summ) FROM bank_deposits WHERE isopen = 1;
 
 			decimal bankDepoValue = await _repository.GetCurrentValueOfBankDeposits(cancellationToken);
             if (bankDepoValue == -1)
@@ -523,9 +522,49 @@ namespace InvestmentVisualisation.Controllers
 				ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPoints);
 			}
 
+			ViewBag.ChartName = "типов инструментов";
 			return View("InstrumentsVolumeChart");
 		}
 
+		[AllowAnonymous]
+		public async Task<IActionResult> SharesVolumeChart(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController " +
+				$"GET SharesVolumeChart called");
+
+			ViewBag.ChartName = "акций";
+
+
+			// get data
+			List<PieChartItemModel>? dataPoints = await _repository.GetSharesVolumeChartData(cancellationToken, DateTime.Now.Year);
+			if (dataPoints is null || dataPoints.Count == 0)
+			{
+				ViewBag.Error = ViewBag.Error + "Не получены данные из базы данных";
+				return View("InstrumentsVolumeChart");
+			}
+
+
+			// calculate full volume
+			decimal totalValue = 0;
+            foreach (PieChartItemModel item in dataPoints)
+            {
+				totalValue = totalValue + item.y;
+			}
+
+
+			// set precent
+			decimal onePercent = totalValue / 100;
+			foreach (PieChartItemModel item in dataPoints)
+			{
+				item.percent = Math.Round(item.y / onePercent, 2);
+			}
+
+            ViewBag.ChartName = "акций";
+			ViewBag.ChartItemsCount = 1;// layout load script: @if (ViewBag.ChartItemsCount is not null)
+			ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPoints);
+            ViewBag.Height = "height:800px;";
+			return View("InstrumentsVolumeChart");
+		}
 
 		private void CalculateColorDependingByDivsValues(
             List<SecVolumeLast2YearsDynamicModel> model,

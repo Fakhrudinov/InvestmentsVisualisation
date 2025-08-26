@@ -304,12 +304,17 @@
                         <ul class="dropdown-menu">
                             <li>
                                 <a asp-controller="SecVolume" asp-action="VolumeChart" class="dropdown-item">
-                                    График объемов позиций
+                                    График объемов позиций и размера требуемой докупки
                                 </a>
                             </li>
                             <li>
                                 <a asp-controller="SecVolume" asp-action="InstrumentsTypeVolumeChart" class="dropdown-item">
                                     График сравнения объемов позиций разных типов
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="SecVolume" asp-action="SharesVolumeChart" class="dropdown-item">
+                                    График объемов акций
                                 </a>
                             </li>
                             @if (signInManager is not null && signInManager.IsSignedIn(User))

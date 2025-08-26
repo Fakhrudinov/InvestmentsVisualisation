@@ -5,7 +5,6 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
-using System.Reflection;
 using System.Text;
 
 
@@ -393,6 +392,57 @@ namespace DataBaseRepository
 			}
 
 			return result;
+		}
+
+		public async Task<List<PieChartItemModel>?> GetSharesVolumeChartData(CancellationToken cancellationToken, int year)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+				$"GetCurrentValueOfBankDeposits start");
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecVolume", "GetSharesVolumeChartData.sql");
+			if (query is null)
+			{
+				return null;
+			}
+			query = query.Replace("@year", year.ToString());
+
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+
+							List<PieChartItemModel> result = new List<PieChartItemModel>();
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+                                string name = sdr.GetString("seccode");
+                                decimal volume = sdr.GetDecimal("volume_" + year);
+
+								result.Add(new PieChartItemModel(name, volume));
+							}
+                            return result;
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+							$"GetDecimalByQueryText Exception!\r\n{ex.Message}");
+                        return null;
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
 		}
 	}
 }

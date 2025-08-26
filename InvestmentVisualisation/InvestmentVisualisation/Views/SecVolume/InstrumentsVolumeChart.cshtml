@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "Instrument Type Volume Chart";
+    ViewData["Title"] = "Instruments Volume Chart";
     // https://jsfiddle.net/L7c5baz0/1/
 }
 
@@ -20,6 +20,7 @@
 					horizontalAlign: "left", // left, center ,right
 					verticalAlign: "center",  // top, center, bottom
 					cursor: "pointer",
+					fontSize: 14,
 					itemclick: explodePie
 				},
 				data: 
@@ -27,8 +28,9 @@
 					{
 						type: "pie",
 						showInLegend: true,
-						toolTipContent: "{name}: <strong>{y}</strong>",
+						toolTipContent: "{name}: <strong>{y}</strong> ({percent}%)",
 						indexLabel: "{name} - {y}  ({percent}%)",
+						indexLabelFontSize: 14,
 						yValueFormatString: "# ### ### ##0.00\"\"",
 						dataPoints: @Html.Raw(ViewBag.ChartItemArray)
 					},
@@ -60,6 +62,6 @@
         <p style="color:red">@Html.Raw(ViewBag.Error)</p>
     }
 
-    <h3 style="text-align:center">Размер всех позиций в процентах.</h3>
-	<div id="chartContainer" style="width: 100%;"></div>
+	<h3 style="text-align:center">Размер @ViewBag.ChartName в процентах.</h3>
+	<div id="chartContainer" style="width: 100%; @ViewBag.Height"></div>
 </div>
