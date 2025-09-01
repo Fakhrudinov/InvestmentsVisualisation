@@ -536,17 +536,63 @@ namespace InvestmentVisualisation.Controllers
 
 
 			// get data
-			List<PieChartItemModel>? dataPoints = await _repository.GetSharesVolumeChartData(cancellationToken, DateTime.Now.Year);
+			List<PieChartItemModel>? dataPoints = await _repository.GetSharesVolumeChartData(
+                cancellationToken, 
+                DateTime.Now.Year);
 			if (dataPoints is null || dataPoints.Count == 0)
 			{
 				ViewBag.Error = ViewBag.Error + "Не получены данные из базы данных";
 				return View("InstrumentsVolumeChart");
 			}
 
+			/// logic get from string 238 (public async Task<IActionResult> VolumeChart)
+			/// Remove ****P at separate list
+			/// search **** similar to ****P
+			///     if exist = add P to similar
+			///     else add P
+			/// Sort list
+
+			// Remove ****P at separate list
+			List<PieChartItemModel> dataPointsPref = new List<PieChartItemModel>();
+            for(int i = dataPoints.Count - 1; i >= 0; i--)
+            {
+				if (dataPoints[i].name.Length == 5 && dataPoints[i].name.EndsWith("P"))
+                {
+					dataPointsPref.Add(dataPoints[i]);
+					dataPoints.RemoveAt(i);
+				}
+			}
+            // search **** similar to ****P
+            foreach (PieChartItemModel pref in dataPointsPref)
+            {
+                bool isExist = false;
+
+                foreach (PieChartItemModel ao in dataPoints)
+                {
+					//if exist = add P to similar
+					if (ao.name.Length == 4 && pref.name.Substring(0, 4).Equals(ao.name))
+                    {
+						ao.name = ao.name + "+" + pref.name;
+                        ao.y = ao.y + pref.y;
+
+						isExist = true;
+						break;
+					}
+                }
+
+				// else add P
+				if (!isExist)
+				{
+					dataPoints.Add(pref);
+				}
+			}
+			// Sort list
+			IOrderedEnumerable<PieChartItemModel> dataPointsSorted = dataPoints.OrderByDescending(t=>t.y);
+
 
 			// calculate full volume
 			decimal totalValue = 0;
-            foreach (PieChartItemModel item in dataPoints)
+            foreach (PieChartItemModel item in dataPointsSorted)
             {
 				totalValue = totalValue + item.y;
 			}
@@ -554,15 +600,15 @@ namespace InvestmentVisualisation.Controllers
 
 			// set precent
 			decimal onePercent = totalValue / 100;
-			foreach (PieChartItemModel item in dataPoints)
+			foreach (PieChartItemModel item in dataPointsSorted)
 			{
 				item.percent = Math.Round(item.y / onePercent, 2);
 			}
 
             ViewBag.ChartName = "акций";
 			ViewBag.ChartItemsCount = 1;// layout load script: @if (ViewBag.ChartItemsCount is not null)
-			ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPoints);
-            ViewBag.Height = "height:800px;";
+			ViewBag.ChartItemArray = JsonConvert.SerializeObject(dataPointsSorted);
+            ViewBag.Height = "height:850px;";
 			return View("InstrumentsVolumeChart");
 		}
 
