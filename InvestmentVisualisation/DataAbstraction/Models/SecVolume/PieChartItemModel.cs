@@ -26,5 +26,9 @@ namespace DataAbstraction.Models.SecVolume
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "percent")]
 		public decimal percent = 0;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "description")]
+		public string description;
 	}
 }

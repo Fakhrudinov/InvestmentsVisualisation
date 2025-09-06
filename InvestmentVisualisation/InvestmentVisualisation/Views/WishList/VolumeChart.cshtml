@@ -1,0 +1,101 @@
+﻿
+@{
+    ViewData["Title"] = "Wish Volume Chart";
+    // https://jsfiddle.net/L7c5baz0/1/
+}
+
+@section scripts
+{
+    <script>
+        window.onload = function ()
+        {
+			var chart = new CanvasJS.Chart("chartContainerReal", 
+			{
+				//exportEnabled: true,
+				//animationEnabled: true,
+				title:{
+					text: "Размер реальных уровней Wish"
+				},
+				legend:{
+					horizontalAlign: "left", // left, center ,right
+					verticalAlign: "center",  // top, center, bottom
+					cursor: "pointer",
+					fontSize: 14,
+					itemclick: explodePie
+				},
+				data: 
+				[
+					{
+						type: "pie",
+						//startAngle:  -90,
+						showInLegend: true,
+						toolTipContent: "<span style=\"font-size:20px;\">{name}:  <strong>{y}</strong></span>  ({percent}%){description})",
+						indexLabel: "{name} - {y}  ({percent}%)",
+						indexLabelFontSize: 14,
+						yValueFormatString: "# ### ### ##0.00\"\"",
+						dataPoints: @Html.Raw(ViewBag.ChartItemArrayReal)
+					},
+				]
+			});
+            chart.render();
+
+			var chart2 = new CanvasJS.Chart("chartContainerWish",
+			{
+				//exportEnabled: true,
+				//animationEnabled: true,
+				title:{
+					text: "Размер желаемых уровней Wish"
+				},
+				legend:{
+					horizontalAlign: "left", // left, center ,right
+					verticalAlign: "center",  // top, center, bottom
+					cursor: "pointer",
+					fontSize: 14,
+					itemclick: explodePie
+				},
+				data:
+				[
+					{
+						type: "pie",
+						//startAngle:  -90,
+						showInLegend: true,
+						toolTipContent: "<span style=\"font-size:20px;\">{name}:  <strong>{y}</strong></span>  ({percent}%){description})",
+						indexLabel: "{name} - {y}  ({percent}%)",
+						indexLabelFontSize: 14,
+						yValueFormatString: "# ### ### ##0.00\"\"",
+						dataPoints: @Html.Raw(ViewBag.ChartItemArrayWish)
+					},
+				]
+			});
+			chart2.render();
+        }
+
+		function explodePie (e) 
+		{
+			if( typeof (e.dataSeries.dataPoints[e.dataPointIndex].exploded) === "undefined" ||
+				!e.dataSeries.dataPoints[e.dataPointIndex].exploded)
+			{
+				e.dataSeries.dataPoints[e.dataPointIndex].exploded = true;
+			} 
+			else 
+			{
+				e.dataSeries.dataPoints[e.dataPointIndex].exploded = false;
+			}
+			e.chart.render();
+		}
+    </script>
+}
+
+<div class="container">
+    @if (ViewBag.Error is not null)
+    {
+        <h5 style="color:red">Проблема при выполнении!</h5>
+        <p style="color:red">@Html.Raw(ViewBag.Error)</p>
+    }
+
+@* 	<h3 style="text-align:center">Размер реальных уровней Wish</h3> *@
+	<div id="chartContainerReal" style="width: 100%; height: 400px; display: inline-block;"></div>
+
+@* 	<h3 style="text-align:center">Размер желаемых уровней Wish</h3> *@
+	<div id="chartContainerWish" style="width: 100%; height: 400px; display: inline-block;margin-top:30px;"></div>
+</div>

@@ -238,5 +238,71 @@ namespace DataBaseRepository
 
             return null;
 		}
+
+		public async Task<List<WishListVolumeChartData>?> GetVolumeChartData(CancellationToken cancellationToken, int year)
+		{
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("WishList", "GetVolumeChartData.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+			query = query.Replace("@year", year.ToString());
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						List<WishListVolumeChartData> wishList = new List<WishListVolumeChartData>();
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								WishListVolumeChartData newItem = new WishListVolumeChartData();
+
+								newItem.SecCode = sdr.GetString("seccode");
+
+								if (!sdr.IsDBNull(sdr.GetOrdinal("level")))
+								{
+									newItem.Level = sdr.GetInt16("level");
+								}
+
+								if (!sdr.IsDBNull(sdr.GetOrdinal("wish_volume")))
+								{
+									newItem.WishVolume = sdr.GetInt32("wish_volume");
+								}
+
+								if (!sdr.IsDBNull(sdr.GetOrdinal("volume")))
+								{
+									newItem.RealVolume = sdr.GetDecimal("volume");
+								}
+
+								wishList.Add(newItem);
+							}
+						}
+
+						return wishList;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlWishListRepository " +
+							$"GetVolumeChartData Exception!\r\n{ex.Message}");
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return null;
+		}
 	}
 }

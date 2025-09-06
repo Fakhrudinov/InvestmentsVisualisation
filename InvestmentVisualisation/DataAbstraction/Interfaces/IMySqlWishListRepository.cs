@@ -9,6 +9,7 @@ namespace DataAbstraction.Interfaces
         Task EditWishLevel(CancellationToken cancellationToken, string seccode, int level, string description);
 		Task<string?> EditWishLevelWeight(int level, int weight, CancellationToken cancellationToken);
 		Task<List<WishListItemModel>> GetFullWishList(CancellationToken cancellationToken, string sqlFileName);
+		Task<List<WishListVolumeChartData>?> GetVolumeChartData(CancellationToken cancellationToken, int year);
 		Task<int[]?> GetWishLevelsWeight(CancellationToken cancellationToken);
 	}
 }

@@ -231,6 +231,9 @@
     <None Update="SqlQueries\WishList\EditWishLevelWeight.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\WishList\GetVolumeChartData.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\WishList\GetFullWishList.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
