@@ -6,5 +6,6 @@ namespace DataAbstraction.Models.YearView
 	{
 		public string FullName { get; set; }
 		public decimal Volume { get; set; }
+		public int ? PaysPerYear { get; set; }
 	}
 }

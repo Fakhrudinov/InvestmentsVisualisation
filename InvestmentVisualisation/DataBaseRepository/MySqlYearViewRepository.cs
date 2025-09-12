@@ -513,6 +513,11 @@ namespace DataBaseRepository
 								newLine.Pieces = sdr.GetInt32("pieces");
 								newLine.Volume = sdr.GetDecimal("volume");
 
+								if (!sdr.IsDBNull(sdr.GetOrdinal("payments_per_year")))
+								{
+									newLine.PaysPerYear = sdr.GetInt16("payments_per_year");
+								}
+
 								result.Add(newLine);
 							}
 						}

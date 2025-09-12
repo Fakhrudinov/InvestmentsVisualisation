@@ -162,6 +162,11 @@ namespace InvestmentVisualisation.Controllers
                 newBond.ISIN = bond.SecCode;
 				newBond.SecCode = bond.SecCode;
 
+				if (bond.PaysPerYear is not null && bond.PaysPerYear > 0)
+				{
+					newBond.PaymentCountInYear = (int)bond.PaysPerYear;
+				}
+
 				foreach (SecCodeAndDividentAndDateModel bondDiv in bondDivs)
 				{
                     if (bondDiv.SecCode == bond.SecCode)
