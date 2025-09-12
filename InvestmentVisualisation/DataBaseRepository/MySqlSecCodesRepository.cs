@@ -109,6 +109,12 @@ namespace DataBaseRepository
 									secCode.ExpiredDate = sdr.GetDateTime("expired_date");
 								}
 
+								int checkForNull2 = sdr.GetOrdinal("payments_per_year");
+								if (!sdr.IsDBNull(checkForNull2))
+								{
+									secCode.PaysPerYear = sdr.GetInt16("payments_per_year");
+								}
+
 								result.Add(secCode);
 							}
 						}
@@ -167,7 +173,13 @@ namespace DataBaseRepository
                 query = query.Replace(", @expired_date", "");
             }
 
-            _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
+			if (model.PaysPerYear is null)
+			{
+				query = query.Replace(", `payments_per_year`", "");
+				query = query.Replace(", @payments_per_year", "");
+			}
+
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
                 $"CreateNewSecCode execute query \r\n{query}");
 
             using (MySqlConnection con = new MySqlConnection(_connectionString))
@@ -183,12 +195,17 @@ namespace DataBaseRepository
                     cmd.Parameters.AddWithValue("@full_name", model.FullName);
                     cmd.Parameters.AddWithValue("@isin", model.ISIN);
 
-                    if (model.ExpiredDate is not null)
+					if (model.ExpiredDate is not null)
                     {
                         cmd.Parameters.AddWithValue("@expired_date", model.ExpiredDate);
                     }
 
-                    try
+					if (model.PaysPerYear is not null)
+					{
+						cmd.Parameters.AddWithValue("@payments_per_year", model.PaysPerYear);
+					}
+
+					try
                     {
                         await con.OpenAsync(cancellationToken);
 
@@ -212,13 +229,13 @@ namespace DataBaseRepository
                     }
                 }
             }
-            //INSERT INTO `seccode_info`
-            //  (`seccode`, `secboard`, `name`, `full_name`, `isin`, `expired_date`)
-            //VALUES
-            //  (@seccode, @secboard, @name, @full_name, @isin, @expired_date);
-        }
+			//INSERT INTO `seccode_info`
+			//  (`seccode`, `secboard`, `name`, `full_name`, `isin`, `expired_date`, `payments_per_year`)
+			//VALUES
+			//  (@seccode, @secboard, @name, @full_name, @isin, @expired_date, @payments_per_year);
+		}
 
-        public async Task<string> EditSingleSecCode(CancellationToken cancellationToken, SecCodeInfo model)
+		public async Task<string> EditSingleSecCode(CancellationToken cancellationToken, SecCodeInfo model)
         {
             _logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecCodesRepository " +
                 $"EditSingleSecCode start, newModel is\r\n{model.SecCode} {model.Name} SecBoard={model.SecBoard} " +
@@ -252,7 +269,16 @@ namespace DataBaseRepository
                         cmd.Parameters.AddWithValue("@expired_date", null);
                     }
 
-                    try
+					if (model.PaysPerYear is not null)
+					{
+						cmd.Parameters.AddWithValue("@payments_per_year", model.PaysPerYear);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@payments_per_year", null);
+					}
+
+					try
                     {
                         await con.OpenAsync(cancellationToken);
 
@@ -316,7 +342,13 @@ namespace DataBaseRepository
                                 {
                                     result.ExpiredDate = sdr.GetDateTime("expired_date");
                                 }
-                            }
+
+								int checkForNull2 = sdr.GetOrdinal("payments_per_year");
+								if (!sdr.IsDBNull(checkForNull2))
+								{
+									result.PaysPerYear = sdr.GetInt16("payments_per_year");
+								}
+							}
                         }
                     }
                     catch (Exception ex)

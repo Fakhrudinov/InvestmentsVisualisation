@@ -35,6 +35,9 @@
                 <th>
                     @Html.DisplayNameFor(model => model.SecCodes.ElementAt(0).ExpiredDate)
                 </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SecCodes.ElementAt(0).PaysPerYear)
+                </th>
                 @if (User.IsInRole("Admin"))
                 {
                     <th>@* button *@</th>
@@ -64,6 +67,9 @@
                         {
                             @Convert.ToDateTime(item.ExpiredDate).ToString("yyyy-MM-dd")
                         }                    
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PaysPerYear)
                     </td>
                     @if (User.IsInRole("Admin"))
                     {

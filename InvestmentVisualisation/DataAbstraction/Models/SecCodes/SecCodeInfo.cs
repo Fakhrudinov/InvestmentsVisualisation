@@ -8,5 +8,6 @@ namespace DataAbstraction.Models.SecCodes
         public string FullName { get; set; }
         public string ISIN { get; set; }
         public DateTime ? ExpiredDate { get; set; }
-    }
+		public int? PaysPerYear { get; set; }
+	}
 }
