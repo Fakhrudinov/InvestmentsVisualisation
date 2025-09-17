@@ -16,12 +16,12 @@ namespace InvestmentVisualisation.Controllers
         private readonly ILogger<MoneyController> _logger;
         private IMySqlMoneyRepository _repository;
         private int _minimumYear;
-        private IWebDividents _webRepository;
+        private IWebData _webRepository;
 
         public MoneyController(
             ILogger<MoneyController> logger,
             IMySqlMoneyRepository repository,
-            IWebDividents webRepository,
+            IWebData webRepository,
             IOptions<PaginationSettings> paginationSettings)
         {
             _logger = logger;
@@ -131,7 +131,7 @@ namespace InvestmentVisualisation.Controllers
                 $"ExpectedDividentsFromDohodChart called");
 
             // get web site data
-            List<ExpectedDividentsFromWebModel>? dohodDivs = _webRepository.GetFutureDividentsTableFromDohod(cancellationToken);
+            List<ExpectedDividentsFromWebModel>? dohodDivs = await _webRepository.GetFutureDividentsTableFromDohod(cancellationToken);
             if (dohodDivs is null ||
                 dohodDivs.Count ==  0)
             {

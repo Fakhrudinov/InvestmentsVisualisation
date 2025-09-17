@@ -25,7 +25,7 @@ builder.Services.AddTransient<IMySqlWishListRepository, MySqlWishListRepository>
 builder.Services.AddTransient<IMySqlBankDepositsRepository, MySqlBankDepositsRepository>();
 builder.Services.AddTransient<IMySqlMoneySpentRepository, MySqlMoneySpentRepository>();
 
-builder.Services.AddTransient<IWebDividents, WebDividents>();
+builder.Services.AddTransient<IWebData, WebData>();
 
 builder.Services.Configure<DataBaseConnectionSettings>(builder.Configuration.GetSection("DataBaseConnectionSettings"));
 Console.WriteLine($"Connected to " +

@@ -18,14 +18,16 @@ namespace InvestmentVisualisation.Controllers
         private IMySqlSecCodesRepository _secCodesRepo;
         private InputHelper _helper;
         private IInMemoryRepository _inMemoryRepository;
+		private IWebData _webRepository;
 
-        public DealsController(
+		public DealsController(
             ILogger<DealsController> logger, 
             IMySqlDealsRepository repository, 
             IOptions<PaginationSettings> paginationSettings,
             IMySqlSecCodesRepository secCodesRepo,
             InputHelper helper,
-            IInMemoryRepository inMemoryRepository)
+            IInMemoryRepository inMemoryRepository,
+			IWebData webRepository)
         {
             _logger = logger;
             _repository = repository;
@@ -33,6 +35,7 @@ namespace InvestmentVisualisation.Controllers
             _secCodesRepo = secCodesRepo;
             _helper = helper;
             _inMemoryRepository = inMemoryRepository;
+            _webRepository = webRepository;
         }
 
 		[Authorize]
@@ -633,19 +636,39 @@ namespace InvestmentVisualisation.Controllers
             }
 
 
-            // тикер
-            string rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
+            // tiker
+            string ? rawSecCode = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
             _logger.LogDebug($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController получили из " +
                 $"репозитория={rawSecCode}");
-            //проверить, что нам прислали действительно seccode а не ошибку
-            if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// если нет
-            {
+            // check is really tiker, not some error text
+            if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCode))// if some error text
+			{
                 _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
                     $"TryParseStringToDeaL ISIN not recognized from {textSplitted[startPointer + 3]}");
 
-                //отправим найденное в ошибки
-                stringBuilderErrors.Append("ISIN не распознан! Не отправляйте сделки в базу данных!");
-                model.SecCode = "0";//сбросим присвоенную ошибку
+                /// send new data to WebData
+                /// request secCode again
+                /// if not = error
+                bool createSuccess = await _webRepository.CreateNewSecCode(cancellationToken, textSplitted[startPointer + 3]);
+                if (createSuccess)
+                {
+					string? rawSecCodeAfterAdd = await _secCodesRepo.GetSecCodeByISIN(cancellationToken, textSplitted[startPointer + 3]);
+					if (!StaticData.SecCodes.Any(x => x.SecCode == rawSecCodeAfterAdd))// if some error text
+                    {
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController HttpPost " +
+                            $"TryParseStringToDeaL ISIN not recognized (second attempt) from {textSplitted[startPointer + 3]}");
+					}
+					else
+					{
+						model.SecCode = rawSecCodeAfterAdd;
+					}
+				}
+                else
+                {
+					// send as error and tiker = money
+					stringBuilderErrors.Append("ISIN не распознан! Не отправляйте сделки в базу данных!");
+					model.SecCode = "0";//сбросим присвоенную ошибку
+				}
             }
             else
             {
@@ -655,14 +678,28 @@ namespace InvestmentVisualisation.Controllers
                 $"TryParseStringToDeaL set SecCode={model.SecCode}");
 
             // secBord
-            model.SecBoard = StaticData.SecCodes[StaticData.SecCodes.FindIndex(x => x.SecCode == model.SecCode)].SecBoard;
-            if (model.SecCode.Equals("0"))
+            int secCodeindex = StaticData.SecCodes.FindIndex(x => x.SecCode == model.SecCode);
+            if (secCodeindex == -1)
             {
-                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController TryParseStringToDeaL error " +
-                    $"- deals SecBoard not recognized - now it is '0' !!! Possible problem in database table Deals");
-                stringBuilderErrors.Append($"Secbord(0=деньги) не найден или найден некорректно! " +
-                    $"Не отправляйте сделки в базу данных!");
-            }
+                secCodeindex = 0;
+
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController TryParseStringToDeaL error " +
+					$"- deals SecBoard not recognized - now it is '0' !!! Possible problem in database table Deals");
+				stringBuilderErrors.Append($"Secbord(0=деньги) не найден или найден некорректно! " +
+					$"Не отправляйте сделки в базу данных!");
+			}
+            else
+            {
+				model.SecBoard = StaticData.SecCodes[secCodeindex].SecBoard;
+			}
+                
+            //if (model.SecCode.Equals("0"))
+            //{
+            //    _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} DealsController TryParseStringToDeaL error " +
+            //        $"- deals SecBoard not recognized - now it is '0' !!! Possible problem in database table Deals");
+            //    stringBuilderErrors.Append($"Secbord(0=деньги) не найден или найден некорректно! " +
+            //        $"Не отправляйте сделки в базу данных!");
+            //}
 
             ViewData["Message"] = stringBuilderErrors.ToString();
 

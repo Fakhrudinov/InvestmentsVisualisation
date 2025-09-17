@@ -19,7 +19,7 @@ namespace InvestmentVisualisation.Controllers
         private IMySqlSecVolumeRepository _repository;
         private int _itemsAtPage;
         private int _minimumYear;
-        private IWebDividents _webRepository;
+        private IWebData _webRepository;
         private IMySqlWishListRepository _wishListRepository;
         private InputHelper _helper;
 
@@ -34,7 +34,7 @@ namespace InvestmentVisualisation.Controllers
             ILogger<SecVolumeController> logger,
             IMySqlSecVolumeRepository repository,
             IOptions<PaginationSettings> paginationSettings,
-            IWebDividents webRepository,
+            IWebData webRepository,
             IMySqlWishListRepository wishListRepository,
             InputHelper helper
             )
@@ -139,7 +139,7 @@ namespace InvestmentVisualisation.Controllers
             ViewBag.WishList = wishValues;
 
             // get web site data
-            DohodDivsAndDatesModel? dohodDivs = _webRepository.GetDividentsTableFromDohod(cancellationToken);
+            DohodDivsAndDatesModel? dohodDivs = await _webRepository.GetDividentsTableFromDohod(cancellationToken);
             if (dohodDivs is not null && dohodDivs.DohodDivs is not null && dohodDivs.DohodDivs.Count > 0)
             {
                 SetDividentsToModel(dohodDivs.DohodDivs, model, WebSites.Dohod);
@@ -147,14 +147,14 @@ namespace InvestmentVisualisation.Controllers
                 ViewBag.DohodDivs = true;
             }
 
-            List<SecCodeAndDividentModel>? smartLabDivs = _webRepository.GetDividentsTableFromSmartLab(cancellationToken);
+            List<SecCodeAndDividentModel>? smartLabDivs = await _webRepository.GetDividentsTableFromSmartLab(cancellationToken);
             SetDividentsToModel(smartLabDivs, model, WebSites.SmartLab);
             if (smartLabDivs is not null && smartLabDivs.Count > 0)
             {
                 ViewBag.SmartLab = true;
             }
 
-            List<SecCodeAndDividentModel>? vsdelkeDivs = _webRepository.GetDividentsTableFromVsdelke(cancellationToken);
+            List<SecCodeAndDividentModel>? vsdelkeDivs = await _webRepository.GetDividentsTableFromVsdelke(cancellationToken);
             SetDividentsToModel(vsdelkeDivs, model, WebSites.Vsdelke);
             if (vsdelkeDivs is not null && vsdelkeDivs.Count > 0)
             {
