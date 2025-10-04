@@ -270,70 +270,20 @@ namespace InvestmentVisualisation.Controllers
                 // ExpectedForYearDivPercent = calculate (last value)*PaymentCountInYear / 1%
                 decimal? lastValue = null;
 
-                while (lastValue is null)
-                {
-                    if (last12MonthView[i].Dec is not null)
-                    {
-						lastValue = last12MonthView[i].Dec;
-						break;
-                    }
-                    else if (last12MonthView[i].Nov is not null)
-                    {
-						lastValue = last12MonthView[i].Nov;
-                        break;
-					}
-					else if (last12MonthView[i].Okt is not null)
-					{
-						lastValue = last12MonthView[i].Okt;
-						break;
-					}
-					else if (last12MonthView[i].Sep is not null)
-					{
-						lastValue = last12MonthView[i].Sep;
-						break;
-					}
-					else if (last12MonthView[i].Aug is not null)
-					{
-						lastValue = last12MonthView[i].Aug;
-						break;
-					}
-					else if (last12MonthView[i].Jul is not null)
-					{
-						lastValue = last12MonthView[i].Jul;
-						break;
-					}
-					else if (last12MonthView[i].Jun is not null)
-					{
-						lastValue = last12MonthView[i].Jun;
-						break;
-					}
-					else if (last12MonthView[i].May is not null)
-					{
-						lastValue = last12MonthView[i].May;
-						break;
-					}
-					else if (last12MonthView[i].Apr is not null)
-					{
-						lastValue = last12MonthView[i].Apr;
-						break;
-					}
-					else if (last12MonthView[i].Mar is not null)
-					{
-						lastValue = last12MonthView[i].Mar;
-						break;
-					}
-					else if (last12MonthView[i].Feb is not null)
-					{
-						lastValue = last12MonthView[i].Feb;
-						break;
-					}
-					else if (last12MonthView[i].Jan is not null)
-					{
-						lastValue = last12MonthView[i].Jan;
-						break;
-					}
+				List<SecCodeAndDividentAndDateModel>? divsListBySpecificSecCode = bondDivs
+					.FindAll(b => b.SecCode.Equals(last12MonthView[i].SecCode));
+				if (divsListBySpecificSecCode is not null)
+				{
+					DateTime findedMaxDate = DateTime.MinValue;
 
-					break;
+					for (int j = divsListBySpecificSecCode.Count - 1; j>=0; j--)
+					{						
+						if (divsListBySpecificSecCode[j].EventDate > findedMaxDate)
+						{
+							lastValue = _helper.GetDecimalFromString(divsListBySpecificSecCode[j].Divident);
+							findedMaxDate = divsListBySpecificSecCode[j].EventDate;
+						}
+					}
 				}
 
 				if (lastValue is not null)
