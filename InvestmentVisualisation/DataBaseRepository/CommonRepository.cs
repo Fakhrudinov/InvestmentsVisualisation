@@ -1,10 +1,12 @@
 ﻿using DataAbstraction.Interfaces;
-using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models;
+using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using MySqlConnector;
+using System.Text;
 
 namespace DataBaseRepository
 {
@@ -272,6 +274,19 @@ namespace DataBaseRepository
 				$"GetQueryTextByFolderAndFilename query {queryFileName} text is:\r\n{query}");
 
             return query;
+		}
+
+		public string GetQueryParamsFromListOfStrigs(List<string> listOfSeccodes)
+		{
+			StringBuilder sb = new StringBuilder();
+            foreach (string seccode in listOfSeccodes)
+            {
+                sb.Append(", '" + seccode + "'");
+            }
+
+            sb.Remove(0,2);
+
+            return sb.ToString();
 		}
 	}
 }

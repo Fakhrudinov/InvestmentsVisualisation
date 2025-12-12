@@ -1,14 +1,15 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models;
+using DataAbstraction.Models.BaseModels;
+using DataAbstraction.Models.Deals;
+using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.Settings;
+using DataAbstraction.Models.WishList;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using DataAbstraction.Models.SecVolume;
-using DataAbstraction.Models.BaseModels;
 using Newtonsoft.Json;
-using DataAbstraction.Models.WishList;
 using UserInputService;
-using Microsoft.AspNetCore.Authorization;
 
 
 namespace InvestmentVisualisation.Controllers
@@ -611,6 +612,211 @@ namespace InvestmentVisualisation.Controllers
             ViewBag.Height = "height:850px;";
 			return View("InstrumentsVolumeChart");
 		}
+
+
+
+
+
+
+		[AllowAnonymous]
+		public async Task<IActionResult> NextBuyList(CancellationToken cancellationToken)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} SecVolumeController " +
+                $"GET NextBuyList called");
+
+			/// plan
+			/// get wish level num and wish level weight
+			/// get seccode and volume !! not a seccodes == short name!!!!!!!!!!!!!!!!!
+			/// get wish level num and seccode and wish description
+			///     prepare list of seccodes for deals request
+			/// 
+			/// Create list of all
+			/// unite AO and AP == create list of AP
+			///     remove all with wish levels null or less than 1
+			///     remove all with wolume > wish
+			///     AP remove to separate list for next iteration
+			///     
+			/// if AP list not empty
+			///     find same AO in result
+			///         if not - just add
+			///         else result wish buy MINUS real volume
+			///             if > 0 == in result
+			///             else remove this result item
+			/// 
+			/// get last deals
+			///     insert date and deal volume
+			/// sort result list
+
+			// wish level num and wish level weight
+			int[]? wishListSettings = await _wishListRepository.GetWishLevelsWeight(cancellationToken);
+
+			// short name and volume
+            // !! not a seccodes!! if bonds in wish - need to correction !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			List<ChartItemModel> seccodesAndVolumes = await _repository.GetVolumeChartData(cancellationToken);
+
+			// wish level num and seccode and wish description
+			List<WishListItemModel> wishValues = await _wishListRepository.GetFullWishList(
+				cancellationToken,
+				"GetFullWishList.sql");
+
+			// Create list of all
+			// unite AO and AP == create list of AP
+			//     remove all with wish levels null or less than 1
+			//     remove all with wolume > wish
+			//     AP remove to separate list for next iteration
+			List<NextBuyModel> result = new List<NextBuyModel>();//     Create list of all
+			List<NextBuyModel> listOfAP = new List<NextBuyModel>();//   create list of AP
+            List<string> listOfSeccodes = new List<string>();//         prepare list of seccodes for deals request
+
+			foreach (WishListItemModel item in wishValues)
+            {
+                if (item.Level < 1)
+                {
+                    continue;
+                }
+
+                // find it in actual positions
+                foreach (ChartItemModel actualVol in seccodesAndVolumes)
+                {
+                    if (actualVol.Label.Equals(item.SecCode))
+                    {
+						// get wish level weight
+						int wishLevelWeight = wishListSettings[item.Level];
+
+						if (wishLevelWeight < actualVol.Y)
+						{
+							break;
+						}
+
+
+                        ///     prepare list of seccodes for deals request
+                        listOfSeccodes.Add(item.SecCode);
+
+
+						// create model
+						NextBuyModel newResult = new NextBuyModel();
+						newResult.SecCode = item.SecCode;
+						newResult.WishVolume = wishLevelWeight;
+						newResult.RealVolume = actualVol.Y;
+						newResult.Description = item.Description;
+						newResult.Level = item.Level;
+						newResult.BuyVolume = wishLevelWeight - actualVol.Y;
+
+
+						// AP remove to separate list for next iteration
+						if (actualVol.Label.Length == 5 && actualVol.Label.EndsWith("P")) // for AP list
+						{
+                            listOfAP.Add(newResult);
+							break;
+						}
+
+						result.Add(newResult);
+						break;
+                    }
+                }
+            }
+
+
+			/// if AP list not empty
+			///     find same AO in result
+			///         if not - just add
+            ///         IF wish level < THEN (result real volume PLUS ap real volume)
+			///             remove this result item
+            ///         ELSE add as united position
+
+			if (listOfAP.Count > 0)
+            {
+                foreach (NextBuyModel apItem in listOfAP)
+                {
+                    bool isFinded = false;
+                    foreach (NextBuyModel resultItem in result)
+                    {
+						if (resultItem.SecCode.Length == 4 && apItem.SecCode.Substring(0, 4).Equals(resultItem.SecCode))
+                        {
+                            isFinded = true;
+
+                            if (wishListSettings[resultItem.Level] - (resultItem.RealVolume + apItem.RealVolume) < 0)
+                            {
+								// remove from result
+                                result.Remove(resultItem);
+								break;
+							}
+
+							resultItem.SecCode = resultItem.SecCode + "+" + apItem.SecCode;
+							resultItem.BuyVolume = resultItem.BuyVolume - apItem.RealVolume;
+							resultItem.Description = resultItem.Description + "; " + apItem.Description;
+
+							break;
+                        }
+
+					}
+
+                    if (!isFinded)
+                    {
+						result.Add(apItem);
+					}
+                }
+            }
+
+
+			// sorting by deals in past
+			if(listOfSeccodes.Count > 0)
+            {
+                //     get last deals
+                List<LatestDealsModel>? latestDeals = await _repository.GetLatestDealsBySecCodeList(cancellationToken, listOfSeccodes);
+
+                if (latestDeals is null && latestDeals.Count <= 0)
+                {
+					return View(result);
+				}
+
+                foreach (LatestDealsModel deal in latestDeals)
+                {
+                    // find and add volume to result
+                    foreach (NextBuyModel resultItem in result)
+                    {
+                        string first = "";
+                        string second = "";
+                        if (resultItem.SecCode.Contains('+'))
+                        {
+                            string[] split = resultItem.SecCode.Split('+');
+                            first = split[0];
+                            second = split[1];
+                        }
+
+                        if (deal.SecCode.Equals(resultItem.SecCode) ||
+                            deal.SecCode.Equals(first) ||
+							deal.SecCode.Equals(second))
+                        {
+                            if (resultItem.LastDealDate is null || resultItem.LastDealDate < deal.DealDate)
+                            {
+								resultItem.LastDealDate = deal.DealDate;
+							}
+
+                            decimal dealVolume = deal.Pieces * deal.AvPrice;
+							if (resultItem.LatestDealsVolume is null)
+                            {
+                                resultItem.LatestDealsVolume = dealVolume;
+							}
+                            else
+                            {
+								resultItem.LatestDealsVolume = resultItem.LatestDealsVolume + dealVolume;
+							}
+
+                            break;
+                        }
+                    }
+
+                }
+
+				// sort
+				result = result.OrderBy(e => e.LastDealDate).ToList();
+			}
+
+
+			return View(result);
+		}
+
 
 		private void CalculateColorDependingByDivsValues(
             List<SecVolumeLast2YearsDynamicModel> model,

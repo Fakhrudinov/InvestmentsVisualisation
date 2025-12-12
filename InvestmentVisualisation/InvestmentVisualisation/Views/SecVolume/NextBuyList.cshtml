@@ -1,0 +1,79 @@
+﻿@using DataAbstraction.Models.SecVolume
+@using System.Text
+
+@{
+    ViewData["Title"] = "Buy list";
+}
+
+<div class="container">
+
+    <div class="row justify-content-md-center">
+        <h3 style="display:inline;">Список плановой докупки до уровней wish</h3>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>SecCode</th>
+                <th>wish</th>
+                <th>Описание</th>
+                <th>Wish level</th>
+                <th>Real level</th>
+                <th>Докупить</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                decimal summToBuy = 0;
+                foreach (NextBuyModel item in Model)
+                {   
+                    <tr>
+                        <th>@item.SecCode</th>
+                        <td>
+                            @{
+                                StringBuilder level = new StringBuilder(5);
+
+                                @for (int i = 0; i < Math.Abs(item.Level); i++)
+                                {
+                                    level.Append("▉");
+                                }
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" style="color:darkgreen">
+                                    @level
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @item.Description
+                            
+                            @if (item.LatestDealsVolume is not null)
+                            {
+                                decimal decimalNotNull = (decimal)item.LatestDealsVolume;
+                                <br />
+                                <span style="color:darkgray">
+                                    За последние 2 месяца куплено на сумму @decimalNotNull.ToString("# ##0.00"),
+                                    последняя сделка @item.LastDealDate</span>
+                            }
+                            
+                        </td>
+                        <td align="right">@item.WishVolume</td>
+                        <td align="right">@item.RealVolume</td>
+                        <td align="right"><strong>@item.BuyVolume</strong></td>
+                    </tr>
+                    summToBuy = summToBuy + item.BuyVolume;
+                }
+
+                <tr>
+                    <th>Итого:</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <td align="right"><strong>@summToBuy</strong></td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+
+    <p>Сортировка по дате последней сделки. Для облигаций в wish работать не будет - запрашивается шортНайм вместо секкоде.</p>
+</div>
