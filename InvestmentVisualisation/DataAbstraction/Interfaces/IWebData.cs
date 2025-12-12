@@ -10,5 +10,6 @@ namespace DataAbstraction.Interfaces
         Task<List<SecCodeAndDividentModel>?> GetDividentsTableFromSmartLab(CancellationToken cancellationToken);
 		Task<List<SecCodeAndDividentModel>?> GetDividentsTableFromVsdelke(CancellationToken cancellationToken);
 		Task<List<ExpectedDividentsFromWebModel>?> GetFutureDividentsTableFromDohod(CancellationToken cancellationToken);
+		Task GetMoexApiCouponDatesForList(List<DayAndVolumeAndNameModel> daysExpected, CancellationToken cancellationToken);
 	}
 }

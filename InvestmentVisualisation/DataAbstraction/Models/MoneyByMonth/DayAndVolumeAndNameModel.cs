@@ -2,6 +2,7 @@
 {
 	public class DayAndVolumeAndNameModel : DecimalVolumeAndNameModel
 	{
-		public int Day {  get; set; }
+		public DateTime ? CouponDate {  get; set; }
+		public string SecCode { get; set; }
 	}
 }
