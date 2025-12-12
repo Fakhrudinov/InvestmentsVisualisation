@@ -216,7 +216,7 @@ namespace InvestmentVisualisation.Controllers
 								newBond.Sep = isnull9 + divValue;
 								break;
 							case 10:
-								decimal? isnull10 = newBond.Okt == null ? 0 : newBond.Jun;
+								decimal? isnull10 = newBond.Okt == null ? 0 : newBond.Okt;
 								newBond.Okt = isnull10 + divValue;
 								break;
 							case 11:

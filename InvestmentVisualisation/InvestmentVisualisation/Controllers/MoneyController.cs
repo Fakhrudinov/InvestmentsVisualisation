@@ -268,18 +268,21 @@ namespace InvestmentVisualisation.Controllers
                 return View();
             }
 
-            List<RangeDataPointsOfChartItemModel> dataPoints = new List<RangeDataPointsOfChartItemModel>();
+
+            // get coupondate from moex api
+            await _webRepository.GetMoexApiCouponDatesForList(daysExpected, cancellationToken);
+
+
+
+			List<RangeDataPointsOfChartItemModel> dataPoints = new List<RangeDataPointsOfChartItemModel>();
             foreach (DayAndVolumeAndNameModel dividendEvent in daysExpected)
             {
-				int todayDay = DateTime.Now.Day;
-                string monthYear = DateTime.Now.ToString(" MM yyyy");				
-                if (dividendEvent.Day < todayDay)
+                if (dividendEvent.CouponDate is null)
                 {
-					monthYear = DateTime.Now.AddMonths(1).ToString(" MM yyyy");
-				}
-				DateTime divDate = DateTime.Parse(dividendEvent.Day + monthYear);
-				divDate = ReturnNewDateNotInHolydays(divDate);
-				long dateOfDiv = new DateTimeOffset(divDate).ToUnixTimeSeconds() * 1000;
+                    continue;
+                }
+
+                long dateOfDiv = ReturnDateAsLongWithBackofficeLag((DateTime)dividendEvent.CouponDate);
 				int[] volume = ReturnNewArrayOfVolumeStartAndEnd(dataPoints, dividendEvent.Volume, dateOfDiv);
                 RangeDataPointsOfChartItemModel dp = new RangeDataPointsOfChartItemModel(dateOfDiv, volume, dividendEvent.Name);
 				dataPoints.Add(dp);
@@ -291,6 +294,7 @@ namespace InvestmentVisualisation.Controllers
 
 			return View("ExpectedDatesOfDividentsChart");
 		}
+
 		[AllowAnonymous]
 		public async Task<IActionResult> ExpectedFutureStockDividentsChart(CancellationToken cancellationToken)
 		{
@@ -347,15 +351,34 @@ namespace InvestmentVisualisation.Controllers
             return volume;
 		}
 
+		private long ReturnDateAsLongWithBackofficeLag(DateTime couponDate)
+		{
+			/// check is it holidays?
+			///     yes = add days till monday
+			/// add day (1) as backoffice lag
+			/// check is it holidays?
+			///     yes = add days till monday
+            /// 
+			/// return date as long
+
+			DateTime newDate = ReturnNewDateNotInHolydays(couponDate);
+			newDate = couponDate.AddDays(1);
+			newDate = ReturnNewDateNotInHolydays(newDate);
+
+			long result = new DateTimeOffset(newDate).ToUnixTimeSeconds() * 1000;
+
+            return result;
+        }
+
 		private DateTime ReturnNewDateNotInHolydays(DateTime divDate)
 		{
 			DayOfWeek dayOfWeek = divDate.DayOfWeek;
-			if (dayOfWeek == DayOfWeek.Sunday || dayOfWeek == DayOfWeek.Saturday)
+			if (dayOfWeek == DayOfWeek.Saturday)
 			{
-				divDate = divDate.AddDays(1);
+				return divDate.AddDays(2);
 			}
-			dayOfWeek = divDate.DayOfWeek;
-			if (dayOfWeek == DayOfWeek.Sunday || dayOfWeek == DayOfWeek.Saturday)
+
+			if (dayOfWeek == DayOfWeek.Sunday)
 			{
 				divDate = divDate.AddDays(1);
 			}

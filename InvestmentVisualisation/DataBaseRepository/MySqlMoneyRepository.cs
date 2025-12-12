@@ -272,9 +272,9 @@ namespace DataBaseRepository
 							while (await sdr.ReadAsync(cancellationToken))
 							{
 								DayAndVolumeAndNameModel newChartItem = new DayAndVolumeAndNameModel();
-								newChartItem.Day = sdr.GetInt16("expect_day");
 								newChartItem.Name = sdr.GetString("name");
 								newChartItem.Volume = sdr.GetInt32("volume");
+								newChartItem.SecCode = sdr.GetString("seccode");
 
 								сhartItems.Add(newChartItem);
 							}

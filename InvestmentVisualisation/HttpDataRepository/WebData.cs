@@ -6,6 +6,7 @@ using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
+using System.Threading;
 using System.Xml;
 using UserInputService;
 
@@ -563,143 +564,196 @@ namespace HttpDataRepository
 			return true;
 		}
 
+		public async Task GetMoexApiCouponDatesForList(List<DayAndVolumeAndNameModel> seccodes, CancellationToken cancellationToken)
+		{
+            /// foreach seccode
+			///     GET xml with instrument parametres by request like https://iss.moex.com/iss/securities/{secCode}?primary_board=1
+            ///         if ok - get coupondate
+
+            foreach (DayAndVolumeAndNameModel seccodeData in seccodes)
+            {
+				seccodeData.CouponDate = await GetCouponDateForSecCode(seccodeData.SecCode, cancellationToken);
+			}
+		}
+
+		private async Task<DateTime?> GetCouponDateForSecCode(string secCode, CancellationToken cancellationToken)
+		{
+            ///     GET xml with instrument parametres by request like https://iss.moex.com/iss/securities/{secCode}?primary_board=1
+            ///         if ok - get coupondate
+            ///        
+            string? rawHtmlSource = await GetFullHtmlPage(
+                            cancellationToken,
+                            $"https://iss.moex.com/iss/securities/{secCode}?primary_board=1");
+            if (rawHtmlSource is null || rawHtmlSource.Equals(String.Empty) ||rawHtmlSource.Equals(""))
+            {
+                _logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetCouponDataForSecCode " +
+                                $"action GetFullHtmlPage for 'https://iss.moex.com/iss/securities/{secCode}?primary_board=1' " +
+                                $"return null result.");
+                return null;
+            }
+
+            return GetGetCouponDateByXmlText(rawHtmlSource);
+		}
+
+		private XmlNodeList? GetXmlNodeListRowFromRows(string rawHtmlSource)
+        {
+            XmlDocument moexXml = new XmlDocument();
+            moexXml.LoadXml(rawHtmlSource);
+
+            XmlElement? xRoot = moexXml.DocumentElement;
+            if (xRoot is not null)
+            {
+                foreach (XmlElement xnode in xRoot)
+                {
+                    foreach (XmlNode childNode in xnode.ChildNodes)
+                    {
+                        if (childNode.Name == "rows")
+                        {
+							XmlNodeList? rowslist = childNode.SelectNodes("row");
+                            if (rowslist is null)
+                            {
+								_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
+									$"GetXmlNodeListRowFromRows error: some error of XML recognized - SelectNodes 'row' is null");
+							}
+
+							return rowslist;
+                        }
+                    }
+                }
+            }
+
+			_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
+				$"GetXmlNodeListRowFromRows error: some error of XML recognized - point 1");
+			return null;
+        }
+
 		private SecCodeInfo? GetSecCodeInfoModelByXmlText(string rawHtmlSource)
 		{
-			XmlDocument moexXml = new XmlDocument();
-			moexXml.LoadXml(rawHtmlSource);
+			XmlNodeList? rowslist = GetXmlNodeListRowFromRows(rawHtmlSource);
+            if (rowslist is null)
+            {
+                return null;
+            }
 
-			XmlElement? xRoot = moexXml.DocumentElement;
-			if (xRoot is not null)
+			SecCodeInfo secCodeInfo = new SecCodeInfo();
+			foreach (XmlNode rowsChildNode in rowslist)
 			{
-				SecCodeInfo secCodeInfo = new SecCodeInfo();
-				foreach (XmlElement xnode in xRoot)
+				if (rowsChildNode.Attributes is not null)
 				{
-					foreach (XmlNode childNode in xnode.ChildNodes)
+					XmlAttribute? attributeName = rowsChildNode.Attributes["name"];
+
+
+					if (attributeName is not null)
 					{
-						if (childNode.Name == "rows")
+						if (attributeName.Value.Equals("SECID"))
 						{
-							foreach (XmlNode rowsChildNode in childNode.ChildNodes)
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
 							{
-								if (rowsChildNode.Name == "row" && rowsChildNode.Attributes is not null)
+								secCodeInfo.SecCode = attributeValue.Value;
+							}
+						}
+
+
+						if (attributeName.Value.Equals("NAME"))
+						{
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
+							{
+								secCodeInfo.FullName = attributeValue.Value;
+							}
+						}
+
+
+						if (attributeName.Value.Equals("SHORTNAME"))
+						{
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
+							{
+								secCodeInfo.Name = attributeValue.Value;
+							}
+						}
+
+
+						if (attributeName.Value.Equals("ISIN"))
+						{
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
+							{
+								secCodeInfo.ISIN = attributeValue.Value;
+							}
+						}
+
+
+						if (attributeName.Value.Equals("COUPONFREQUENCY"))
+						{
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+
+							if (attributeValue is not null && !attributeValue.Value.Equals("12"))
+							{
+								int paymentRepYear;
+								if (Int32.TryParse(attributeValue.Value, out paymentRepYear))
 								{
-									XmlAttribute? attributeName = rowsChildNode.Attributes["name"];
+									secCodeInfo.PaysPerYear = paymentRepYear;
+								}
+							}
+						}
 
 
-									if (attributeName is not null)
+						//FACEVALUE остаток объема после частичного погашения
+
+
+						if (attributeName.Value.Equals("GROUP"))
+						{
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
+							{
+								if (attributeValue.Value.Equals("stock_bonds"))
+								{
+									secCodeInfo.SecBoard = 2;
+								}
+								else if (attributeValue.Value.Equals("stock_shares"))
+								{
+									secCodeInfo.SecBoard = 1;
+								}
+								else
+								{
+									_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
+										$"GetSecCodeInfoModelByXmlText error: Type not recognized!");
+									return null;
+								}
+
+							}
+						}
+
+
+						if (attributeName.Value.Equals("MATDATE"))
+						{
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
+							{
+								DateTime dateValue;
+								if (DateTime.TryParse(attributeValue.Value, out dateValue))
+								{
+									if (dateValue < DateTime.Now)
 									{
-										if (attributeName.Value.Equals("SECID"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-											if (attributeValue is not null)
-											{
-												secCodeInfo.SecCode = attributeValue.Value;
-											}
-										}
-
-
-										if (attributeName.Value.Equals("NAME"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-											if (attributeValue is not null)
-											{
-												secCodeInfo.FullName = attributeValue.Value;
-											}
-										}
-
-
-										if (attributeName.Value.Equals("SHORTNAME"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-											if (attributeValue is not null)
-											{
-												secCodeInfo.Name = attributeValue.Value;
-											}
-										}
-
-
-										if (attributeName.Value.Equals("ISIN"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-											if (attributeValue is not null)
-											{
-												secCodeInfo.ISIN = attributeValue.Value;
-											}
-										}
-
-
-										if (attributeName.Value.Equals("COUPONFREQUENCY"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-
-											if (attributeValue is not null && !attributeValue.Value.Equals("12"))
-											{
-												int paymentRepYear;
-												if (Int32.TryParse(attributeValue.Value, out paymentRepYear))
-												{
-													secCodeInfo.PaysPerYear = paymentRepYear;
-												}
-											}
-										}
-
-
-										//FACEVALUE остаток объема после частичного погашения
-
-
-										if (attributeName.Value.Equals("GROUP"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-											if (attributeValue is not null)
-											{
-												if (attributeValue.Value.Equals("stock_bonds"))
-												{
-													secCodeInfo.SecBoard = 2;
-												}
-												else if (attributeValue.Value.Equals("stock_shares"))
-												{
-													secCodeInfo.SecBoard = 1;
-												}
-												else
-												{
-													_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
-                                                        $"GetSecCodeInfoModelByXmlText error: Type not recognized!");
-													return null;
-												}
-
-											}
-										}
-
-
-										if (attributeName.Value.Equals("MATDATE"))
-										{
-											XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
-											if (attributeValue is not null)
-											{
-												DateTime dateValue;
-												if (DateTime.TryParse(attributeValue.Value, out dateValue))
-												{
-													if (dateValue < DateTime.Now)
-													{
-														secCodeInfo.ExpiredDate = dateValue;
-													}
-												}
-												else
-												{
-													_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
-														$"GetSecCodeInfoModelByXmlText error: Expired date not recognized!");
-													return null;
-												}
-											}
-										}
+										secCodeInfo.ExpiredDate = dateValue;
 									}
+								}
+								else
+								{
+									_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
+										$"GetSecCodeInfoModelByXmlText error: Expired date not recognized!");
+									return null;
 								}
 							}
 						}
 					}
 				}
+			}
 
-
-				// check result has data
-				if (secCodeInfo.SecCode is null ||
+			// check result has data
+			if (secCodeInfo.SecCode is null ||
 					secCodeInfo.Name is null ||
 					secCodeInfo.FullName is null ||
 					secCodeInfo.ISIN is null)
@@ -716,48 +770,76 @@ namespace HttpDataRepository
 				}
 
 				return secCodeInfo;
+		}
+
+		private string? GetSecCodeByXmlText(string rawHtmlSource)
+		{
+			XmlNodeList? rowslist = GetXmlNodeListRowFromRows(rawHtmlSource);
+			if (rowslist is null)
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetSecCodeByXmlText " +
+					$"XML doc has no items 'row'.");
+				return null;
+			}
+			if (rowslist.Count != 1)
+			{
+				_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetSecCodeByXmlText " +
+					$"XML doc has too many items 'row'");
+				return null;
 			}
 
-			_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
-				$"GetSecCodeInfoModelByXmlText error: some error of XML recognized");
+			if (rowslist[0].Name == "row" && rowslist[0].Attributes is not null)
+			{
+				XmlAttribute? attribute = rowslist[0].Attributes["secid"];
+
+				if (attribute is not null)
+				{
+					return attribute.Value;
+				}
+			}
+
+			_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetSecCodeByXmlText " +
+                $"can't recognize seccode from XML doc");
 			return null;
 		}
 
-		private string? GetSecCodeByXmlText(string xmlWithSecCode)
+		private DateTime? GetGetCouponDateByXmlText(string rawHtmlSource)
 		{
-			XmlDocument moexXml = new XmlDocument();
-			moexXml.LoadXml(xmlWithSecCode);
+			XmlNodeList? rowslist = GetXmlNodeListRowFromRows(rawHtmlSource);
 
-			XmlElement? xRoot = moexXml.DocumentElement;
-			if (xRoot is not null)
+			foreach (XmlNode rowsChildNode in rowslist)
 			{
-				foreach (XmlElement xnode in xRoot)
+				if (rowsChildNode.Attributes is not null)
 				{
-					foreach (XmlNode childNode in xnode.ChildNodes)
+					XmlAttribute? attributeName = rowsChildNode.Attributes["name"];
+
+
+					if (attributeName is not null)
 					{
-						if (childNode.Name == "rows")
+						if (attributeName.Value.Equals("COUPONDATE"))
 						{
-							XmlNodeList? listOfRow = childNode.SelectNodes("row");
-							if (listOfRow is null)
+							XmlAttribute? attributeValue = rowsChildNode.Attributes["value"];
+							if (attributeValue is not null)
 							{
-								_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetSecCodeByXmlText " +
-                                    $"XML doc has no items 'row'.");
-								return null;
-							}
-							if (listOfRow.Count != 1)
-							{
-								_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetSecCodeByXmlText " +
-                                    $"XML doc has too many items 'row'");
-								return null;
-							}
-
-							if (listOfRow[0].Name == "row" && listOfRow[0].Attributes is not null)
-							{
-								XmlAttribute? attribute = listOfRow[0].Attributes["secid"];
-
-								if (attribute is not null)
+								DateTime dateValue;
+								if (DateTime.TryParse(attributeValue.Value, out dateValue))
 								{
-									return attribute.Value;
+									if (dateValue > DateTime.Now)// remove old bonds
+									{                                        
+                                        if (dateValue > DateTime.Now.AddDays(31))//remove bonds with payment not in next month
+										{
+											return null;
+										}
+
+										DateTime result = dateValue;
+                                        return result;
+									}
+								}
+								else
+								{
+									_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData " +
+										$"GetGetCouponDateByXmlText error: COUPONDATE date not recognized!");
+									return null;
 								}
 							}
 						}
@@ -765,8 +847,8 @@ namespace HttpDataRepository
 				}
 			}
 
-			_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetSecCodeByXmlText " +
-                $"can't recognize seccode from XML doc");
+			_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} WebData GetGetCouponDateByXmlText " +
+                $"can't recognize COUPONDATE from XML doc");
 			return null;
 		}
 	}
