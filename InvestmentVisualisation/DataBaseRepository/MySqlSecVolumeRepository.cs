@@ -1,5 +1,6 @@
 ﻿using DataAbstraction.Interfaces;
 using DataAbstraction.Models;
+using DataAbstraction.Models.Deals;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.Settings;
 using Microsoft.Extensions.Logging;
@@ -443,6 +444,68 @@ namespace DataBaseRepository
 					}
 				}
 			}
+		}
+
+		public async Task<List<LatestDealsModel>?> GetLatestDealsBySecCodeList(
+            CancellationToken cancellationToken, 
+            List<string> listOfSeccodes)
+		{
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+						$"GetLatestDealsBySecCodeList start with listOfSeccodes.Count={listOfSeccodes.Count}");
+
+			List<LatestDealsModel> result = new List<LatestDealsModel>();
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Deals", "GetLatestDealsBySecCodeList.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+			string queryParamsFromList = _commonRepo.GetQueryParamsFromListOfStrigs(listOfSeccodes);
+			query = query.Replace("@seccodes", queryParamsFromList);
+
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+						$"GetLatestDealsBySecCodeList query after insert list of seccodes: {query}");
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;		
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								LatestDealsModel model = new LatestDealsModel();
+
+								model.SecCode = sdr.GetString("seccode");								
+								model.Pieces = sdr.GetInt32("pieces");
+								model.AvPrice = sdr.GetDecimal("av_price");
+								model.DealDate = sdr.GetDateOnly("event_date");
+
+								result.Add(model);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+							$"GetLatestDealsBySecCodeList Exception!\r\n{ex.Message}");
+						return null;
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return result;
 		}
 	}
 }

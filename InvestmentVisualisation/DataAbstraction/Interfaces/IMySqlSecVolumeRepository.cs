@@ -1,4 +1,5 @@
-﻿using DataAbstraction.Models.SecVolume;
+﻿using DataAbstraction.Models.Deals;
+using DataAbstraction.Models.SecVolume;
 
 namespace DataAbstraction.Interfaces
 {
@@ -6,6 +7,7 @@ namespace DataAbstraction.Interfaces
     {
 		Task<decimal> GetCurrentValueFromStockExchangeByType(CancellationToken cancellationToken, int secBoardType, int year);
 		Task<decimal> GetCurrentValueOfBankDeposits(CancellationToken cancellationToken);
+		Task<List<LatestDealsModel>?> GetLatestDealsBySecCodeList(CancellationToken cancellationToken, List<string> listOfSeccodes);
 		Task<int> GetSecVolumeCountForYear(CancellationToken cancellationToken, int year);
         Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamic(CancellationToken cancellationToken, int year);
         Task<List<SecVolumeLast2YearsDynamicModel>> GetSecVolumeLast3YearsDynamicSortedByVolume(CancellationToken cancellationToken, int year);
