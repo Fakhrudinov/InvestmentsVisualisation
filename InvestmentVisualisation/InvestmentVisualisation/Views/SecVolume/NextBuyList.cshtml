@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Buy list";
+    decimal[]? recomendation = ViewBag.Recomendation;
 }
 
 <div class="container">
@@ -57,7 +58,15 @@
                         </td>
                         <td align="right">@item.WishVolume</td>
                         <td align="right">@item.RealVolume</td>
-                        <td align="right"><strong>@item.BuyVolume</strong></td>
+                        <td align="right">
+                            Всего:&nbsp;<strong>@item.BuyVolume</strong>
+                            @if (recomendation is not null)
+                            {
+                                decimal recomendForItem = recomendation[item.Level] - item.RealVolume;
+                                <br />
+                                <span>Сейчас:&nbsp;<strong>@recomendForItem</strong></span>
+                            }
+                        </td>
                     </tr>
                     summToBuy = summToBuy + item.BuyVolume;
                 }

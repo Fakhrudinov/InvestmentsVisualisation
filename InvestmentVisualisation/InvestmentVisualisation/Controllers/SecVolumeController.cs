@@ -745,6 +745,7 @@ namespace InvestmentVisualisation.Controllers
 							resultItem.SecCode = resultItem.SecCode + "+" + apItem.SecCode;
 							resultItem.BuyVolume = resultItem.BuyVolume - apItem.RealVolume;
 							resultItem.Description = resultItem.Description + "; " + apItem.Description;
+                            resultItem.RealVolume = resultItem.RealVolume + apItem.RealVolume;
 
 							break;
                         }
@@ -806,7 +807,6 @@ namespace InvestmentVisualisation.Controllers
                             break;
                         }
                     }
-
                 }
 
 				// sort
@@ -814,8 +814,70 @@ namespace InvestmentVisualisation.Controllers
 			}
 
 
+			/// calculate current buy recomendations
+			/// XX==usual buy value, 12000 now
+			/// first get MIN and MAX for every wish level
+			/// case 1
+			///     MAX minus MIN more than XX
+			///         RECOMENDATON==MAX+(XX/4)
+			/// default
+			///         RECOMENDATON==MAX+XX
+			/// Set RECOMENDATON for view
+
+			decimal[,] minMax = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
+            decimal[] recomendation = new decimal[6];
+			int recomendedBuy = 12000;
+
+
+            // first get MIN and MAX for every wish level
+            foreach (NextBuyModel item in result)
+            {
+                if (minMax[item.Level, 0] == 0)
+                {
+                    // add item to both
+                    minMax[item.Level, 0] = item.RealVolume;
+                    minMax[item.Level, 1] = item.RealVolume;
+                    continue;
+                }
+
+                if (minMax[item.Level, 0] > item.RealVolume)
+                {
+					minMax[item.Level, 0] = item.RealVolume;
+				}
+
+				if (minMax[item.Level, 1] < item.RealVolume)
+				{
+					minMax[item.Level, 1] = item.RealVolume;
+				}
+			}
+
+            for (int i = 1; i < 6; i++)
+            {
+                if (minMax[i, 0] == 0)
+                {
+                    continue;
+                }
+
+                decimal differ = minMax[i, 1] - minMax[i, 0];
+
+				/// case 1
+				///     MAX minus MIN more than XX
+				///         RECOMENDATON==MAX+(XX/4)
+				if (differ > recomendedBuy)
+                {
+					recomendation[i] = minMax[i, 1] + (recomendedBuy / 4);
+					continue;
+                }
+				/// default
+				///         RECOMENDATON==MAX+XX
+				recomendation[i] = minMax[i, 1] + recomendedBuy;
+			}
+
+
+			ViewBag.Recomendation = recomendation;
 			return View(result);
 		}
+
 
 
 		private void CalculateColorDependingByDivsValues(
