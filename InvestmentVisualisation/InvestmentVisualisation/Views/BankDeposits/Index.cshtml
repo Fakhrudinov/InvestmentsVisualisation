@@ -7,34 +7,37 @@
 
 <div class="container">
 
-    @if (ViewBag.ShowOnlyActive)
-    {
-        <h2>Активные банковские вклады</h2>
-    }
-    else
-    {
-        <h2>Банковские вклады</h2>
-    }
-
-    <p>
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-controller="BankDeposits" asp-action="Create" class="btn btn-primary"> Добавить вклад</a>
-        }
-        @if (ViewBag.ShowOnlyActive)
-        {
-            <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary"
-               asp-route-showOnlyActive="false">
-                Показать все вклады, включая закрытые
-            </a>
-        }
-        else
-        {
-            <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary">
-                Показать только активные вклады
-            </a>
-        }
-    </p>
+    <div class="row">
+        <div class="col">
+            @if (ViewBag.ShowOnlyActive)
+            {
+                <h2>Активные банковские вклады</h2>
+            }
+            else
+            {
+                <h2>Банковские вклады</h2>
+            }
+        </div>
+        <div class="col" style="text-align: right;">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="BankDeposits" asp-action="Create" class="btn btn-primary"> Добавить вклад</a>
+            }
+            @if (ViewBag.ShowOnlyActive)
+            {
+                <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary"
+                   asp-route-showOnlyActive="false">
+                    Показать все вклады, включая закрытые
+                </a>
+            }
+            else
+            {
+                <a asp-controller="BankDeposits" asp-action="index" class="btn btn-outline-secondary">
+                    Показать только активные вклады
+                </a>
+            }
+        </div>
+    </div>
 
     @if (TempData["Error"] is not null)
     {

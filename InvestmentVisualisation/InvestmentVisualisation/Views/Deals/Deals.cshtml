@@ -21,20 +21,31 @@
         }
     }
 
-    <p>
-        @if (User.IsInRole("Admin"))
-        {
-            <a asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
-            <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary"> Добавить несколько </a>
-        }
-        <a asp-controller="Incoming" asp-action="HelpPage" class="btn btn-secondary"> Help </a>
-        @if (ViewBag.secCode is not null)
-        {
-            <a asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">
-                Назад к списку всех сделок
-            </a>
-        }
-    </p>
+    <div class="row">
+        <div class="col">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-controller="Deals" asp-action="Create" class="btn btn-primary"> Добавить </a>
+                <a asp-controller="Deals" asp-action="CreateNewDeals" class="btn btn-primary"> Добавить несколько </a>
+            }
+            <a asp-controller="Incoming" asp-action="HelpPage" class="btn btn-secondary"> Help </a>
+            @if (ViewBag.secCode is not null)
+            {
+                <a asp-controller="Deals" asp-action="Deals" class="btn btn-outline-success">
+                    Назад к списку всех сделок
+                </a>
+            }
+        </div>
+        <div class="col" style="text-align: right; ">
+            @Html.ActionLink(
+                        "Пересчитать позиции за " + DateTime.Now.Year,
+                        "Recalculate",
+                        "SecVolume",
+                        new { year = DateTime.Now.Year },
+                        new { @class = "btn btn-outline-danger" })
+        </div>
+    </div>
+
     <table class="table table-hover">
         <thead>
             <tr>

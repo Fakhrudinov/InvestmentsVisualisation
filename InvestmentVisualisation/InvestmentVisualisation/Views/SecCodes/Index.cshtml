@@ -8,12 +8,26 @@
 }
 
 <div class="container">
-    @if (User.IsInRole("Admin"))
-    {
-        <p>
-            <a asp-area="" asp-controller="SecCodes" asp-action="Create" class="btn btn-primary">Добавить</a>
-        </p>
-    }
+
+    <div class="row">
+        <div class="col">
+            @if (ViewBag.Active)
+            {
+                <h2>Список только активных инструментов</h2>
+            }
+            else
+            {
+                <h2>Список инструментов</h2>
+            }            
+        </div>
+        <div class="col" style="text-align: right;">
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-area="" asp-controller="SecCodes" asp-action="Create" class="btn btn-success">Добавить</a>
+            }
+        </div>
+    </div>
+
     <table class="table table-hover">
         <thead>
             <tr>

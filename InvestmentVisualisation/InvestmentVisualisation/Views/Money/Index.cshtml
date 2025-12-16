@@ -3,8 +3,8 @@
 
 <div class="container">
 
-    <div class="row justify-content-md-center">
-        <div class="col-sm-6">
+    <div class="row">
+        <div class="col">
             @{
                 if(ViewBag.year == 0)
                 {
@@ -18,21 +18,22 @@
                 prev = prev.AddMonths(-1);
             }
         </div>
-        @if (User.IsInRole("Admin"))
-        {
-            <div class="col-sm-5 align-right">
+        <div class="col" style="text-align: right;">
+            @if (User.IsInRole("Admin"))
+            {
                 @Html.ActionLink(
-                    "Recalculate previous month", 
+                    "Пересчитать предыдущий месяц", 
                     "Recalculate", 
                     new {  year = prev.Year, month = prev.Month }, 
-                    new { @class = "btn btn-block btn-danger" })
+                    new { @class = "btn btn-outline-danger" })
+                <span>&nbsp;</span>
                 @Html.ActionLink(
-                    "Recalculate current month", 
+                    "Пересчитать этот месяц", 
                     "Recalculate", 
                     new {  year = DateTime.Now.Year, month = DateTime.Now.Month }, 
-                    new { @class = "btn btn-block btn-danger" })
-            </div>
-        }
+                    new { @class = "btn btn-outline-danger" })
+            }
+        </div>
     </div>
 
     <table class="table table-hover">
