@@ -46,7 +46,7 @@
                 <th>
                     @Html.DisplayNameFor(model => model.SecCodes.ElementAt(0).ISIN)
                 </th>
-                <th>
+                <th style="text-align:center;">
                     @Html.DisplayNameFor(model => model.SecCodes.ElementAt(0).ExpiredDate)
                 </th>
                 <th>
@@ -76,13 +76,13 @@
                     <td>
                         @Html.DisplayFor(modelItem => item.ISIN)
                     </td>
-                    <td>
+                    <td align="center">
                         @if (item.ExpiredDate is not null)
                         {
                             @Convert.ToDateTime(item.ExpiredDate).ToString("yyyy-MM-dd")
                         }                    
                     </td>
-                    <td>
+                    <td align="center">
                         @Html.DisplayFor(modelItem => item.PaysPerYear)
                     </td>
                     @if (User.IsInRole("Admin"))
