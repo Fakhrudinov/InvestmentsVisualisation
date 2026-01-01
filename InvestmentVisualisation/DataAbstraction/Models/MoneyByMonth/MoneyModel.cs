@@ -13,7 +13,7 @@ namespace DataAbstraction.Models.MoneyByMonth
         [Display(Name = "За месяц зачислил")]
         public decimal ? MonthIn { get; set; }
 
-        [Display(Name = "Получено дивидентов")]
+        [Display(Name = "Получено дивидендов")]
         public decimal ? Divident { get; set; }
 
         [Display(Name = "Получено по досрочному погашению")]
