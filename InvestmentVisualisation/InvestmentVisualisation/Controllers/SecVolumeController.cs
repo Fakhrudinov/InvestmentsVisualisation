@@ -646,6 +646,19 @@ namespace InvestmentVisualisation.Controllers
 			/// get last deals
 			///     insert date and deal volume
 			/// sort result list
+            /// 
+			/// calculate current buy recomendations
+			/// XX==usual buy value, 12000 now --> PUT IT ON appsettings.json later <--------------------------------------------
+			///     get differense(DD) between wish volume and real volume
+			///     calulate count(CC) of XX in DD
+			///     if CC more than 5
+			///         RecommendBuyVolume=XX*1.8
+			///     if CC more less than 1.2
+			///         RecommendBuyVolume=DD
+			///     if CC more less than 2.4
+			///         RecommendBuyVolume=DD/2
+			///     else
+			///         RecommendBuyVolume=DD/(int)CC
 
 			// wish level num and wish level weight
 			int[]? wishListSettings = await _wishListRepository.GetWishLevelsWeight(cancellationToken);
@@ -813,68 +826,41 @@ namespace InvestmentVisualisation.Controllers
 				result = result.OrderBy(e => e.LastDealDate).ToList();
 			}
 
-
 			/// calculate current buy recomendations
-			/// XX==usual buy value, 12000 now
-			/// first get MIN and MAX for every wish level
-			/// case 1
-			///     MAX minus MIN more than XX
-			///         RECOMENDATON==MAX+(XX/4)
-			/// default
-			///         RECOMENDATON==MAX+XX
-			/// Set RECOMENDATON for view
-
-			decimal[,] minMax = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
-            decimal[] recomendation = new decimal[6];
+			/// XX==usual buy value, 12000 now --> PUT IT ON appsettings.json later <--------------------------------------------
+			///     get differense(DD) between wish volume and real volume
+			///     calulate count(CC) of XX in DD
+			///     if CC more than 5
+			///         RecommendBuyVolume=XX*1.8
+			///     if CC more less than 1.2
+			///         RecommendBuyVolume=DD
+			///     if CC more less than 2.4
+			///         RecommendBuyVolume=DD/2
+			///     else
+			///         RecommendBuyVolume=DD/(int)CC
 			int recomendedBuy = 12000;
-
-
-            // first get MIN and MAX for every wish level
             foreach (NextBuyModel item in result)
             {
-                if (minMax[item.Level, 0] == 0)
+                decimal diffDD = item.WishVolume - item.RealVolume;
+                decimal countCC = diffDD / recomendedBuy;
+                if (countCC > 5)
                 {
-                    // add item to both
-                    minMax[item.Level, 0] = item.RealVolume;
-                    minMax[item.Level, 1] = item.RealVolume;
-                    continue;
-                }
-
-                if (minMax[item.Level, 0] > item.RealVolume)
-                {
-					minMax[item.Level, 0] = item.RealVolume;
+                    item.RecommendBuyVolume = (recomendedBuy*1.8).ToString("# ##0");
 				}
-
-				if (minMax[item.Level, 1] < item.RealVolume)
+                else if (countCC < 1.2M)
+                {
+					item.RecommendBuyVolume = diffDD.ToString("# ##0");
+				}
+				else if (countCC < 2.4M)
 				{
-					minMax[item.Level, 1] = item.RealVolume;
+					item.RecommendBuyVolume = (diffDD/2).ToString("# ##0");
+				}
+                else
+                {
+					item.RecommendBuyVolume = (diffDD/(int)countCC).ToString("# ##0");
 				}
 			}
 
-            for (int i = 1; i < 6; i++)
-            {
-                if (minMax[i, 0] == 0)
-                {
-                    continue;
-                }
-
-                decimal differ = minMax[i, 1] - minMax[i, 0];
-
-				/// case 1
-				///     MAX minus MIN more than XX
-				///         RECOMENDATON==MAX+(XX/4)
-				if (differ > recomendedBuy)
-                {
-					recomendation[i] = minMax[i, 1] + (recomendedBuy / 4);
-					continue;
-                }
-				/// default
-				///         RECOMENDATON==MAX+XX
-				recomendation[i] = minMax[i, 1] + recomendedBuy;
-			}
-
-
-			ViewBag.Recomendation = recomendation;
 			return View(result);
 		}
 

@@ -8,6 +8,7 @@ namespace DataAbstraction.Models.SecVolume
 		public int WishVolume { get; set; }
 		public decimal RealVolume { get; set; }
 		public decimal BuyVolume { get; set; }
+		public string RecommendBuyVolume { get; set; }
 
 
 		// for deals in last period
