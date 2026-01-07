@@ -53,6 +53,15 @@
                     <th style="text-align:right;">
                         @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Phone)
                     </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).Transport)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).SuperMarkets)
+                    </th>
+                    <th style="text-align:right;">
+                        @Html.DisplayNameFor(model => model.DataByMonths.ElementAt(0).MarketPlaces)
+                    </th>
                     <th>@* buttons *@</th>
                 </tr>
             </thead>
@@ -81,7 +90,15 @@
                         <td style="text-align:right;">
                             @Html.DisplayFor(modelItem => item.Phone)
                         </td>
-
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.Transport)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.SuperMarkets)
+                        </td>
+                        <td style="text-align:right;">
+                            @Html.DisplayFor(modelItem => item.MarketPlaces)
+                        </td>
                         <td style="text-align:right;">
                             @if (User.IsInRole("Admin"))
                             {

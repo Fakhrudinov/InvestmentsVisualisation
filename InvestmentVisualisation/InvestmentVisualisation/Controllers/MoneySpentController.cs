@@ -110,6 +110,18 @@ namespace InvestmentVisualisation.Controllers
 			{
 				model.Internet = model.Internet.Replace(',', '.');
 			}
+			if (model.Transport is not null)
+			{
+				model.Transport = model.Transport.Replace(',', '.');
+			}
+			if (model.SuperMarkets is not null)
+			{
+				model.SuperMarkets = model.SuperMarkets.Replace(',', '.');
+			}
+			if (model.MarketPlaces is not null)
+			{
+				model.MarketPlaces = model.MarketPlaces.Replace(',', '.');
+			}
 
 			return model;
 		}

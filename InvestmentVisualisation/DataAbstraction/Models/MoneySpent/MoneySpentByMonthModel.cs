@@ -35,5 +35,20 @@ namespace DataAbstraction.Models.MoneySpent
 			RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$",
 			ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
 		public string? Phone { get; set; }
+
+		[Display(Name = "Транспорт"),
+			RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$",
+			ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
+		public string? Transport { get; set; }
+
+		[Display(Name = "Супермаркеты"),
+			RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$",
+			ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
+		public string? SuperMarkets { get; set; }
+
+		[Display(Name = "Маркетплейсы"),
+			RegularExpression("^-?(0|[1-9]\\d{0,7})([.|,]\\d{1,6})?$",
+			ErrorMessage = "Только цифры. Разделитель - точка или запятая.")]
+		public string? MarketPlaces { get; set; }
 	}
 }

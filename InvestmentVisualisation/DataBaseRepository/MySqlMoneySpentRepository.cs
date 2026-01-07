@@ -147,8 +147,7 @@ namespace DataBaseRepository
 							{
 								MoneySpentByMonthModel newItem = new MoneySpentByMonthModel();
 								newItem.Date = sdr.GetDateTime("event_date").ToString("yyyy-MM-dd");
-								//newItem.Date = sdr.GetDateTime("event_date");
-
+								
 								int checkForNull = sdr.GetOrdinal("total");
 								if (!sdr.IsDBNull(checkForNull))
 								{
@@ -178,6 +177,25 @@ namespace DataBaseRepository
 								{
 									newItem.Phone = sdr.GetDecimal("phone").ToString();
 								}
+
+								int checkForNullt = sdr.GetOrdinal("transport");
+								if (!sdr.IsDBNull(checkForNullt))
+								{
+									newItem.Transport = sdr.GetDecimal("transport").ToString();
+								}
+
+								int checkForNulls = sdr.GetOrdinal("supermarket");
+								if (!sdr.IsDBNull(checkForNulls))
+								{
+									newItem.SuperMarkets = sdr.GetDecimal("supermarket").ToString();
+								}
+
+								int checkForNullm = sdr.GetOrdinal("marketplaces");
+								if (!sdr.IsDBNull(checkForNullm))
+								{
+									newItem.MarketPlaces = sdr.GetDecimal("marketplaces").ToString();
+								}
+
 
 								items.Add(newItem);
 							}
@@ -238,7 +256,6 @@ namespace DataBaseRepository
 							while (await sdr.ReadAsync(cancellationToken))
 							{
 								item.Date = sdr.GetDateTime("event_date").ToString("yyyy-MM-dd");
-								//item.Date = sdr.GetDateTime("event_date");
 
 								int checkForNull = sdr.GetOrdinal("total");
 								if (!sdr.IsDBNull(checkForNull))
@@ -268,6 +285,24 @@ namespace DataBaseRepository
 								if (!sdr.IsDBNull(checkForNullp))
 								{
 									item.Phone = sdr.GetDecimal("phone").ToString();
+								}
+
+								int checkForNullt = sdr.GetOrdinal("transport");
+								if (!sdr.IsDBNull(checkForNullt))
+								{
+									item.Transport = sdr.GetDecimal("transport").ToString();
+								}
+
+								int checkForNulls = sdr.GetOrdinal("supermarket");
+								if (!sdr.IsDBNull(checkForNulls))
+								{
+									item.SuperMarkets = sdr.GetDecimal("supermarket").ToString();
+								}
+
+								int checkForNullm = sdr.GetOrdinal("marketplaces");
+								if (!sdr.IsDBNull(checkForNullm))
+								{
+									item.MarketPlaces = sdr.GetDecimal("marketplaces").ToString();
 								}
 							}
 						}
@@ -354,6 +389,34 @@ namespace DataBaseRepository
 					{
 						cmd.Parameters.AddWithValue("@phone", null);
 					}
+
+					if (model.Transport is not null)
+					{
+						cmd.Parameters.AddWithValue("@transport", model.Transport);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@transport", null);
+					}
+					
+					if (model.SuperMarkets is not null)
+					{
+						cmd.Parameters.AddWithValue("@supermarket", model.SuperMarkets);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@supermarket", null);
+					}
+					
+					if (model.MarketPlaces is not null)
+					{
+						cmd.Parameters.AddWithValue("@marketplaces", model.MarketPlaces);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@marketplaces", null);
+					}
+
 
 					try
 					{
@@ -510,6 +573,35 @@ namespace DataBaseRepository
 					{
 						cmd.Parameters.AddWithValue("@phone", null);
 					}
+
+					if (model.Transport is not null)
+					{
+						cmd.Parameters.AddWithValue("@transport", model.Transport);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@transport", null);
+					}
+
+					if (model.SuperMarkets is not null)
+					{
+						cmd.Parameters.AddWithValue("@supermarket", model.SuperMarkets);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@supermarket", null);
+					}
+
+					if (model.MarketPlaces is not null)
+					{
+						cmd.Parameters.AddWithValue("@marketplaces", model.MarketPlaces);
+					}
+					else
+					{
+						cmd.Parameters.AddWithValue("@marketplaces", null);
+					}
+
+
 
 					try
 					{
