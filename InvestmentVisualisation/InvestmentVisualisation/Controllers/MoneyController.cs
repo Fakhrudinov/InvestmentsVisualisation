@@ -337,7 +337,7 @@ namespace InvestmentVisualisation.Controllers
 			int[] volume = new int[2];
 
 			int search = dataPoints.FindLastIndex(dp => dp.x == dateOfDiv);
-			if (search > 0)
+			if (search >= 0)
 			{
 				volume[0] = dataPoints[search].y[1];
 				volume[1] = (int)dividendEvent + dataPoints[search].y[1];
