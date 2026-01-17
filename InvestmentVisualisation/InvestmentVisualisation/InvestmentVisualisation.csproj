@@ -63,6 +63,21 @@
     <None Update="SqlQueries\Deals\GetPageFromDealsSpecificSecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\ExtraordinaryBuy\CreateNew.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\ExtraordinaryBuy\Delete.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\ExtraordinaryBuy\Edit.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\ExtraordinaryBuy\GetExtraordinaryBuyCount.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SqlQueries\ExtraordinaryBuy\GetPageFromExtraordinaryBuy.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\Incoming\CreateNewIncomingsFromList.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

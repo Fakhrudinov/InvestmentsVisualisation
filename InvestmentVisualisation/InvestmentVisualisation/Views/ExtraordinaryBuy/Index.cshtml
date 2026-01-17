@@ -1,0 +1,100 @@
+﻿@using DataAbstraction.Models.ExtraordinaryBuy
+@model ExtraordinaryBuyListWithPaginations
+
+
+
+<div class="container">
+    <h3>Внеочередные закупки</h3>
+
+    <div>
+        @{
+            if (Model is not null && Model.ExtraordinaryBuy is not null && Model.ExtraordinaryBuy.Count > 0)
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                SecCode
+                            </th>
+                            <th>
+                                Описание
+                            </th>
+                            <th>
+                                Размер докупки
+                            </th>
+                            <th>
+                                @* edit button *@
+                            </th>
+                            <th>
+                                @* del button *@
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ExtraordinaryBuy)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.SecCode)
+                                </td>
+
+                                <form method="post" action="/ExtraordinaryBuy/Edit">
+                                <td>
+                                    <textarea name="description" rows="1"
+                                          style=" min-width:500px; max-width:100%;width:100%;"
+                                          placeholder="Введите описание">@item.Description</textarea>
+                                </td>
+                                <td>
+                                    <input name="seccode" value="@item.SecCode" hidden>
+                                    <input type="number" style="width: 100px; border: 1px solid lightgray"
+                                           class="form-control form-control-sm" name="volume" min="500" max="500000" value="@item.Volume">
+                                </td>
+                                <td>
+                                    <input type="submit" class="btn btn-outline-secondary btn-sm"
+                                           style="width: 100%;" value="Сохранить" />
+                                </td>
+                                </form>
+                                <td>
+                                    @Html.ActionLink(
+                                                "Удалить",
+                                                "Delete",
+                                                new { seccode = item.SecCode },
+                                                new
+                                                {
+                                                    @class = "btn btn-outline-danger btn-sm",
+                                                    @style = "width: 100%;"
+                                                })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>Записей не найдено.</p>
+            }
+
+        }
+
+    </div>
+
+    <div>
+        <h5 style="text-align:center">Добавление в список</h5>
+
+        <form method="post" action="/ExtraordinaryBuy/CreateNew">
+            <div class="input-group">
+                <input class="form-control form-control-sm" style="width:7%;"
+                       placeholder="SecCode" aria-label="SecCode" name="seccode" required>
+                @* <span class="input-group-text"> </span> *@
+                <input type="number" style="width:3%; text-align:right;" 
+                       class="form-control form-control-sm" name="volume" min="500" max="500000" value="15000" />
+                @* <span class="input-group-text"> </span> *@
+                <textarea class="form-control" name="description" rows="1" style="width:60%;"
+                          placeholder="Введите описание, длинна не более 300"></textarea>
+                <input type="submit" class="btn btn-primary btn-sm" value="Добавить" />
+            </div>
+        </form>
+    </div>
+
+</div>
