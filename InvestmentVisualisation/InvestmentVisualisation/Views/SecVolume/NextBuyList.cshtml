@@ -14,7 +14,7 @@
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>SecCode</th>
+                <th>@* SecCode *@</th>
                 <th>wish</th>
                 <th>Описание</th>
                 <td align="right"><strong>Wish level</strong></td>
@@ -26,8 +26,13 @@
             @{
                 decimal summToBuy = 0;
                 foreach (NextBuyModel item in Model)
-                {   
-                    <tr>
+                {
+                    string textColor = "black";
+                    if (item.WishVolume == 0)
+                    {
+                        textColor = "darkgray";
+                    }
+                    <tr style="color:@textColor;">
                         <th>@item.SecCode</th>
                         <td>
                             @{
@@ -55,10 +60,24 @@
                             }
                             
                         </td>
-                        <td align="right">@item.WishVolume.ToString("### ### ##0")</td>
-                        <td align="right">@item.RealVolume.ToString("### ### ##0")</td>
-                        <td align="right" style="color:darkgrey;">Всего:&nbsp;<strong>@item.BuyVolume.ToString("### ### ##0")</strong>
-                            <br />
+                        <td align="right">
+                            @if (item.WishVolume > 0)
+                            {
+                                @item.WishVolume.ToString("### ### ##0")
+                            }                            
+                        </td>
+                        <td align="right">
+                            @if (item.RealVolume > 0)
+                            {
+                                @item.RealVolume.ToString("### ### ##0")
+                            }                            
+                        </td>
+                        <td align="right" style="color:darkgrey;">
+                            @if (item.WishVolume != 0)
+                            {
+                                <span>Всего:&nbsp;<strong>@item.BuyVolume.ToString("### ### ##0")</strong></span>                                
+                                <br />
+                            }                        
                             <span style="color:darkgreen;">Сейчас:&nbsp;<strong>@item.RecommendBuyVolume</strong></span>
                         </td>
                     </tr>
