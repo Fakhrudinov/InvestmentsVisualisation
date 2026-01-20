@@ -207,6 +207,9 @@
     <None Update="SqlQueries\SecCodes\GetSingleSecCodeBySecCode.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SqlQueries\SecVolume\GetRealVolumeForSecCodesList.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SqlQueries\SecVolume\GetSharesVolumeChartData.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

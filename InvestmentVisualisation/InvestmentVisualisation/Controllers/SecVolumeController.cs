@@ -2,11 +2,13 @@
 using DataAbstraction.Models;
 using DataAbstraction.Models.BaseModels;
 using DataAbstraction.Models.Deals;
+using DataAbstraction.Models.ExtraordinaryBuy;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.Settings;
 using DataAbstraction.Models.WishList;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UserInputService;
@@ -18,7 +20,8 @@ namespace InvestmentVisualisation.Controllers
     {
         private readonly ILogger<SecVolumeController> _logger;
         private IMySqlSecVolumeRepository _repository;
-        private int _itemsAtPage;
+		private IMySqlExtraordinaryBuyRepository _extraordynaryBuyRepository;
+		private int _itemsAtPage;
         private int _minimumYear;
         private IWebData _webRepository;
         private IMySqlWishListRepository _wishListRepository;
@@ -34,7 +37,8 @@ namespace InvestmentVisualisation.Controllers
         public SecVolumeController(
             ILogger<SecVolumeController> logger,
             IMySqlSecVolumeRepository repository,
-            IOptions<PaginationSettings> paginationSettings,
+			IMySqlExtraordinaryBuyRepository extraordinaryBuyRepository,
+			IOptions<PaginationSettings> paginationSettings,
             IWebData webRepository,
             IMySqlWishListRepository wishListRepository,
             InputHelper helper
@@ -42,7 +46,8 @@ namespace InvestmentVisualisation.Controllers
         {
             _logger = logger;
             _repository = repository;
-            _itemsAtPage = paginationSettings.Value.PageItemsCount;
+			_extraordynaryBuyRepository = extraordinaryBuyRepository;
+			_itemsAtPage = paginationSettings.Value.PageItemsCount;
             _minimumYear = paginationSettings.Value.SecVolumeMinimumYear;
             _webRepository = webRepository;
             _wishListRepository = wishListRepository;
@@ -859,6 +864,48 @@ namespace InvestmentVisualisation.Controllers
                 {
 					item.RecommendBuyVolume = (diffDD/(int)countCC).ToString("# ##0");
 				}
+			}
+
+
+			/// get extraordynary byu list
+			/// if not null
+			///     get real level for list
+			/// 
+			/// insert list in result
+			/// 
+			List<ExtraordinaryBuyModel>? extraBuy = await _extraordynaryBuyRepository
+                .GetPageFromExtraordinaryBuy(cancellationToken, 100, 0);
+            if (extraBuy is null || extraBuy.Count == 0)
+            {
+				return View(result);
+			}
+
+            List<string> extraBuySecCodes = new List<string>();
+            foreach(ExtraordinaryBuyModel item in extraBuy)
+            {
+                extraBuySecCodes.Add(item.SecCode);
+			}
+			List<SecCodeAndRealVolume>? realVolForExtraBuy = await _repository
+                .GetRealVolumeForSecCodesList(cancellationToken, extraBuySecCodes);
+
+			foreach (ExtraordinaryBuyModel item in extraBuy)
+            {
+				NextBuyModel newExtra = new NextBuyModel();
+				newExtra.SecCode = item.SecCode;
+                newExtra.RecommendBuyVolume = item.Volume.ToString();
+				newExtra.Description = item.Description;
+
+                // search realVolume
+                if (realVolForExtraBuy is not null && realVolForExtraBuy.Count > 0)
+                {
+                    SecCodeAndRealVolume? real = realVolForExtraBuy.Find(v => v.SecCode == item.SecCode);
+                    if (real is not null && real.RealVolume is not null)
+                    {
+						newExtra.RealVolume = (decimal)real.RealVolume;
+					}
+				}
+
+				result.Insert(0, newExtra);
 			}
 
 			return View(result);

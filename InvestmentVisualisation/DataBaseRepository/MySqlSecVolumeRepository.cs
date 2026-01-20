@@ -3,6 +3,7 @@ using DataAbstraction.Models;
 using DataAbstraction.Models.Deals;
 using DataAbstraction.Models.SecVolume;
 using DataAbstraction.Models.Settings;
+using DataAbstraction.Models.WishList;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
@@ -453,8 +454,6 @@ namespace DataBaseRepository
 			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
 						$"GetLatestDealsBySecCodeList start with listOfSeccodes.Count={listOfSeccodes.Count}");
 
-			List<LatestDealsModel> result = new List<LatestDealsModel>();
-
 			string? query = _commonRepo.GetQueryTextByFolderAndFilename("Deals", "GetLatestDealsBySecCodeList.sql");
 			if (query is null)
 			{
@@ -463,9 +462,10 @@ namespace DataBaseRepository
 
 			string queryParamsFromList = _commonRepo.GetQueryParamsFromListOfStrigs(listOfSeccodes);
 			query = query.Replace("@seccodes", queryParamsFromList);
-
 			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
 						$"GetLatestDealsBySecCodeList query after insert list of seccodes: {query}");
+
+			List<LatestDealsModel> result = new List<LatestDealsModel>();
 
 			using (MySqlConnection con = new MySqlConnection(_connectionString))
 			{
@@ -496,6 +496,69 @@ namespace DataBaseRepository
 					{
 						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
 							$"GetLatestDealsBySecCodeList Exception!\r\n{ex.Message}");
+						return null;
+					}
+					finally
+					{
+						await con.CloseAsync();
+					}
+				}
+			}
+
+			return result;
+		}
+
+		public async Task<List<SecCodeAndRealVolume>?> GetRealVolumeForSecCodesList(
+			CancellationToken cancellationToken, 
+			List<string> listOfSeccodes)
+		{
+			int year = DateTime.Now.Year;
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+				$"GetRealVolumeForSecCodesList start with listOfSeccodes.Count={listOfSeccodes.Count} on year={year}");			
+
+			string? query = _commonRepo.GetQueryTextByFolderAndFilename("SecVolume", "GetRealVolumeForSecCodesList.sql");
+			if (query is null)
+			{
+				return null;
+			}
+
+
+			string queryParamsFromList = _commonRepo.GetQueryParamsFromListOfStrigs(listOfSeccodes);
+			query = query.Replace("@seccodes", queryParamsFromList);
+			query = query.Replace("@year", year.ToString());
+			_logger.LogInformation($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+						$"GetRealVolumeForSecCodesList query after insert list of seccodes: {query}");
+
+
+			List<SecCodeAndRealVolume> result = new List<SecCodeAndRealVolume>();
+
+			using (MySqlConnection con = new MySqlConnection(_connectionString))
+			{
+				using (MySqlCommand cmd = new MySqlCommand(query))
+				{
+					cmd.Connection = con;
+
+					try
+					{
+						await con.OpenAsync(cancellationToken);
+
+						using (MySqlDataReader sdr = await cmd.ExecuteReaderAsync(cancellationToken))
+						{
+							while (await sdr.ReadAsync(cancellationToken))
+							{
+								SecCodeAndRealVolume model = new SecCodeAndRealVolume();
+
+								model.SecCode = sdr.GetString("seccode");
+								model.RealVolume = sdr.GetDecimal("real_volume");
+
+								result.Add(model);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						_logger.LogWarning($"{DateTime.Now.ToString("HH:mm:ss:fffff")} MySqlSecVolumeRepository " +
+							$"GetRealVolumeForSecCodesList Exception!\r\n{ex.Message}");
 						return null;
 					}
 					finally

@@ -14,6 +14,5 @@ namespace DataAbstraction.Models.SecVolume
 		// for deals in last period
 		public DateOnly ? LastDealDate { get; set; }
 		public decimal ? LatestDealsVolume { get; set; }
-
 	}
 }
