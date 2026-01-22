@@ -154,5 +154,9 @@ namespace DataAbstraction.Models.MoneyByMonth
 		//Explicitly setting the name to be used while serializing to JSON.
 		[DataMember(Name = "name")]
 		public string name;
+
+		//Explicitly setting the name to be used while serializing to JSON.
+		[DataMember(Name = "isin")]
+		public string ? isin;
 	}
 }

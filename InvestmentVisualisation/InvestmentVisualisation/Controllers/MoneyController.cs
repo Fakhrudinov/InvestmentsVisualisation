@@ -285,6 +285,7 @@ namespace InvestmentVisualisation.Controllers
                 long dateOfDiv = ReturnDateAsLongWithBackofficeLag((DateTime)dividendEvent.CouponDate);
 				int[] volume = ReturnNewArrayOfVolumeStartAndEnd(dataPoints, dividendEvent.Volume, dateOfDiv);
                 RangeDataPointsOfChartItemModel dp = new RangeDataPointsOfChartItemModel(dateOfDiv, volume, dividendEvent.Name);
+                dp.isin = dividendEvent.SecCode;
 				dataPoints.Add(dp);
 			}
 

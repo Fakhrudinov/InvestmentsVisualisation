@@ -13,15 +13,22 @@
 			function toolTipContent(e) {
 				var str = "";
 				var volume = 0;
-				var str2, str3;
+				var str2, str3, str4;
 				for (var i = 0; i < e.entries.length; i++){
 					volume = e.entries[i].dataPoint.y[1] - e.entries[i].dataPoint.y[0];
 					str2 = "<strong> " + CanvasJS.formatDate(e.entries[i].dataPoint.x, "MMM DD") + " </strong><br/>";
 					var  str1 = "<span style = \"font-size: 18px;\">" + e.entries[i].dataPoint.name+"</span><br/>";
 					str = str.concat(str1);
+					str4 = e.entries[i].dataPoint.isin;
 				}
 				str3 = "<span style = \"color:Tomato\">Объём: </span><strong>"+volume+"</strong> руб.<br/>";
-				return (str2.concat(str)).concat(str3);
+				
+				if(str4===null)
+				{
+					return (str2.concat(str)).concat(str3)
+				}
+
+				return (str2.concat(str)).concat(str3).concat(str4);
 			}
 
 			var chart = new CanvasJS.Chart("chartContainer", {
